@@ -1,0 +1,393 @@
+---
+title: "Synergy analysis"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Synergy analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+We first load the necessary packages and set some pre-defined values needed to replicate the analysis.
+
+```{r init, message = FALSE}
+library(BIGL)
+library(knitr)
+library(rgl)
+library(ggplot2)
+set.seed(12345)
+```
+
+```{r settings}
+nExp <- 4             # Dataset has 11 experiments, we consider only 4
+cutoff <- 0.95        # Cutoff for p-values to use in plot.maxR() function
+```
+
+## Process and clean the data
+
+The data for the analysis must come in a data-frame with required columns `d1`, `d2` and `effect` for doses of two compounds and observed cell counts respectively. The `effect` column may represent also a type of normalized data and subsequent transformation functions should be adjusted.
+
+We will use sample data included in the package - `directAntivirals`.
+
+```{r data}
+data("directAntivirals", package = "BIGL")
+head(directAntivirals)
+```
+
+This data consists of 11 experiments that can be processed separately. For initial illustration purposes we choose just one experiment and retain only the columns of interest. We define a simple function to do just that.
+
+```{r}
+subsetData <- function(data, i) {
+  ## Subset data to a single experiment and, optionaly, select the necessary
+  ## columns only
+  subset(data, experiment == i)[, c("effect", "d1", "d2")]
+}
+```
+
+Now let us only pick `Experiment 1` to illustrate the functionality of the package.
+
+```{r subset, out.width="100%"}
+i <- 1
+data <- subsetData(directAntivirals, i)
+```
+
+Dose-response data for `Experiment 1` will be used for a large share of the analysis presented here, therefore this subset is stored in a dataframe called `data`. Later, we will run the analysis for some other experiments as well.
+
+## Data transformation
+
+If raw data is measured in cell counts, data transformation might be of interest to improve accuracy and interpretation of the model. Of course, this will depend on the model specification. For example, if a generalized Loewe model is assumed on the growth rate of the cell count, the appropriate conversion should be made from the observed cell counts. The formula used would be
+$$y = N_0\exp\left(kt\right)$$
+where $k$ is a growth rate, $t$ is time (fixed) and $y$ is the observed cell count. If such a transformation is specified, it is referred to as the biological transformation.
+
+In certain cases, variance-stabilizing transformations (Box-Cox) can also be useful. We refer to these transformations as power transformations. In many cases, a simple logarithmic transformation can be sufficient but, if desired, a helper function `optim.boxcox` is available to automate the selection of Box-Cox transformation parameters.
+
+In addition to specifying biological and power transformations, users are also asked to specify their inverses. These are later used in the bootstrapping procedure and plotting methods.
+
+As an example, we might define a `transforms` list that will be passed to the fitting functions. It contains both biological growth rate and power transformations along with their inverses.
+
+```{r transformations}
+## Define forward and reverse transform functions
+transforms <- list(
+  "BiolT" = function(y, args) with(args, N0*exp(y*time.hours)),
+  "InvBiolT" = function(T, args) with(args, 1/time.hours*log(T/N0)),
+  "PowerT" = function(y, args) with(args, log(y)),
+  "InvPowerT" = function(T, args) with(args, exp(T)),
+  "compositeArgs" = list(N0 = 1,
+                         time.hours = 72)
+)
+```
+`compositeArgs` contains the initial cell counts (`N0`) and incubation time (`time.hours`). In certain cases, the `getTransformations` wrapper function can be employed to automatically obtain a prepared list with biological growth rate and power transformations based on results from `optim.boxcox`. Its output will also contain the inverses of these transforms.
+
+```{r autotransform, eval=FALSE}
+transforms_auto <- getTransformations(data)
+fitMarginals(data, transforms = transforms_auto)
+
+## In the case of 1-parameter Box-Cox transformation, it is easy
+## to retrieve the power parameter by evaluating the function at 0.
+## If parameter is 0, then it is a log-transformation.
+with(transforms_auto, -1 / PowerT(0, compositeArgs))
+```
+
+# Analysis
+
+Once dose-response dataframe is correctly set up, we may proceed onto synergy analysis. We will use `transforms` as defined above with a logarithmic transformation. If not desired, `transforms` can be set to `NULL` and would be ignored.
+
+Synergy analysis is quite modular and is divided into 3 parts:
+
+1. Determine marginal curves for each of the compounds. These curves are computed based on monotherapy data, i.e. those observations where one of the compounds is dosed at 0.
+2. Compute expected effects for a chosen null model given the previously determined marginal curves at various dose combinations.
+3. Compare the expected response with the observed effect using statistical testing procedures.
+
+
+## Fitting marginal (on-axis) data
+
+The first step of the fitting procedure will consist in treating marginal data only, i.e. those observations within the experiment where one of the compounds is dosed at zero. For each compound the corresponding marginal doses are modelled using a 4-parameter logistic model.
+
+The marginal models will be estimated together using non-linear least squares estimation procedure. Estimation of both marginal models needs to be simultaneous since it is assumed they share a common baseline that also needs to be estimated. The `fitMarginals` function and other marginal estimation routines will automatically extract marginal data from the dose-response data frame.
+
+Before proceeding onto the estimation, we get a rough guess of the parameters to use as starting values in optimization and then we fit the model. `marginalFit`, returned by the `fitMarginals` routine, is an object of class `MarginalFit` which is essentially a list containing the main information about the marginal models, in particular the estimated coeffcients.
+
+```{r marginalFit}
+## Fitting marginal models
+marginalFit <- fitMarginals(data, transforms = transforms, method = "nls")
+summary(marginalFit)
+```
+
+`marginalFit` object retains the data that was supplied and the transformation functions used in the fitting procedure. It also has a `plot` method which allows for a quick visualization of the fitting results.
+
+```{r marginalPlot, fig.align="center", fig.height = 4, fig.width = 6}
+## Plotting marginal models
+plot(marginalFit) + ggtitle(paste("Direct-acting antivirals - Experiment" , i))
+```
+
+Note as well that the `fitMarginals` function allows specifying linear constraints on parameters. This provides an easy way for the user to impose asymptote equality, specific baseline value and other linear constraints that might be useful. See `help(constructFormula)` for more details.
+
+```{r marginalFitC, eval = FALSE}
+## Parameter ordering: h1, h2, b, m1, m2, e1, e2
+## Constraint 1: m1 = m2. Constraint 2: b = 10.
+constraints <- list("matrix" = rbind(c(0, 0, 0, -1, 1, 0, 0),
+                                     c(0, 0, 1, 0, 0, 0, 0)),
+                    "vector" = c(0, 10))
+
+## Parameter estimates will now satisfy equality:
+##   constraints$matrix %*% pars == constraints$vector
+fitMarginals(data, transforms = transforms,
+             constraints = constraints)
+```
+
+The `fitMarginals` function allows an alternative user-friendly way to specify one or more fixed-value constraints using a named vector passed to the function via `fixed` argument.
+
+```{r marginalFitFixed, eval = FALSE}
+## Set baseline at 1 and maximal responses at 0.
+fitMarginals(data, transforms = transforms,
+             fixed = c("m1" = 0, "m2" = 0, "b" = 1))
+```
+
+By default, no constraints are set, thus asymptotes are not shared and so a generalized Loewe model will be estimated.
+
+### Optimization algorithms
+
+We advise the user to employ the `method = "nlslm"` argument which is set as the default in monotherapy curve estimation. It is based on `minpack.lm::nlsLM` function with an underlying Levenberg-Marquardt algorithm for non-linear least squares estimation. This algorithm is known to be more robust than `method = "nls"` and its Gauss-Newton algorithm. In cases with nice sigmoid-shaped data, both methods should however lead to similar results.
+
+`method = "optim"` is a simple sum-of-squared-residuals minimization driven by a default Nelder-Mead algorithm from `optim` minimizer. It is typically slower than non-linear least squares based estimation and can lead to a significant increase in computational time for larger datasets and bootstrapped statistics. In nice cases, Nelder-Mead algorithm and non-linear least squares can lead to rather similar estimates but this is not always the case as these algorithms are based on different techniques.
+
+In general, we advise that in automated batch processing whenever `method = "nlslm"` does not converge fast enough and/or emits a warning, user should implement a fallback to `method = "optim"` and re-do the estimation. If none of these suggestions work, it might be useful to fiddle around and slightly perturb starting values for the algorithms as well. By default, these are obtained from the `initialMarginal` function.
+
+```{r fallback, eval = FALSE}
+nlslmFit <- tryCatch({
+  fitMarginals(data, transforms = transforms,
+               method = "nlslm")
+}, warning = function(w) w, error = function(e) e)
+
+if (inherits(nlslmFit, c("warning", "error")))
+  optimFit <- tryCatch({
+    fitMarginals(data, transforms = transforms,
+                 method = "optim")
+  })
+```
+
+Note as well that additional arguments to `fitMarginals` passed via `...` ellipsis argument will be passed on to the respective solver function, i.e. `minpack.lm::nlsLM`, `nls` or `optim`.
+
+### Custom marginal fit
+
+While `BIGL` package provides several routines to fit 4-parameter log-logistic dose-response models, some users may prefer to use their own optimizers to estimate the relevant parameters. It is rather easy to integrate this into the workflow by constructing a custom `MarginalFit` object. It is in practice a simple list with
+
+* `coef`: named vector with coefficient estimates
+* `sigma`: standard deviation of residuals
+* `df`: degrees of freedom from monotherapy curve estimates
+* `model`: model of the marginal estimation which allows imposing linear constraints on parameters. If no constraints are necessary, it can be left out or assigned the output of `constructFormula` function with no inputs.
+* `shared_asymptote`: whether estimation is constrained to share the asymptote. During the estimation, this is deduced from `model` object.
+* `method`: method used in dose-response curve estimation which will be re-used in bootstrapping
+* `transforms`: power and biological transformation functions (and their inverses) used in monotherapy curve estimation. This should be a list in a format described above. If `transforms` is unspecified or `NULL`, no transformations will be used in statistical bootstrapping unless the user asks for it explicitly via one of the arguments to `fitSurface`.
+
+Other elements in the `MarginalFit` are currently unused for evaluating synergy and can be disregarded. These elements, however, might be necessary to ensure proper working of available methods for the `MarginalFit` object.
+
+As an example, the following code generates a custom `MarginalFit` object that can be passed further to estimate a response surface under the null hypothesis.
+
+```{r eval=FALSE}
+marginalFit <- list("coef" = c("h1" = 1, "h2" = 2, "b" = 0,
+                               "m1" = 1.2, "m2" = 1, "e1" = 0.5, "e2" = 0.5),
+                    "sigma" = 0.1,
+                    "df" = 123,
+                    "model" = constructFormula(),
+                    "shared_asymptote" = FALSE,
+                    "method" = "nlslm",
+                    "transforms" = transforms)
+class(marginalFit) <- append(class(marginalFit), "MarginalFit")
+```
+
+Note that during bootstrapping this would use `minpack.lm::nlsLM` function to re-estimate parameters from data following the null. A custom optimizer for bootstrapping is currently not implemented.
+
+
+## Compute expected response for off-axis data
+
+Three types of null models are available for calculating expected response surfaces.
+
+* Generalized Loewe model is used if maximal responses are not constrained to be equal, i.e. `shared_asymptote = FALSE`, in the marginal fitting procedure and `null_model = "loewe"` in response calculation
+* Classical Loewe model is used if constraints are such that `shared_asymptote = TRUE` in the marginal fitting procedure and `null_model = "loewe"` in response calculation
+* Highest Single Agent is used if `null_model = "hsa"` irrespectively of the value of `shared_asymptote`.
+
+
+### (Generalized) Loewe model
+
+If transformation functions were estimated using `fitMarginals`, these will be automatically recycled from the `marginalFit` object when doing calculations for the response surface fit. Alternatively, transformation functions can be passed by a separate argument. Since the `marginalFit` object was estimated without the shared asymptote constraint, the following will compute the response surface based on the generalized Loewe model.
+
+```{r analysis, message=FALSE, comment = NA}
+rs <- fitSurface(data, marginalFit,
+##               transforms = transforms,
+                 null_model = "loewe",
+                 B.CP = 50, statistic = "none", parallel = FALSE)
+summary(rs)
+```
+
+The occcupancy matrix used in the expected response calculation for the Loewe models can be accessed with `rs$occupancy`.
+
+For off-axis data and a fixed dose combination, the Z-score for that dose combination is defined to be the standardized difference between the observed effect and the effect predicted by a generalized Loewe model. If the observed effect differs significantly from the prediction, it might be due to the presence of synergy or antagonism. If multiple observations refer to the same combination of doses, then a mean is taken over these multiple standardized differences.
+
+The plot below illustrates the above considerations in a 3-dimensional setting. In this plot, points refer to the observed effects whereas the surface is the model-predicted response. The surface is colored according to the median Z-scores where blue coloring indicates possible synergistic effects (red coloring would indicate possible antagonism).
+
+```{r plot3d, warning=FALSE, fig.align="center", fig.height=7, fig.width=7}
+plot(rs, legend = FALSE, main = "")
+view3d(0, -75)
+rglwidget()
+```
+
+### Highest Single Agent
+
+For the Highest Single Agent null model to work properly, it is expected that both marginal curves are either decreasing or increasing. Equivalent `summary` and `plot` methods are also available for this type of null model.
+
+```{r analysis_hsa, message=FALSE, comment = NA}
+rsh <- fitSurface(data, marginalFit,
+                  null_model = "hsa",
+                  B.CP = 50, statistic = "both", parallel = FALSE)
+summary(rsh)
+```
+
+Occupancy estimates provided with HSA response surface still rely on the (generalized) Loewe model.
+
+
+## Statistical testing
+
+Presence of synergistic or antagonistic effects can be formalized by means of statistical tests. Two types of tests are considered here and are discussed in more details in the [methodology vignette](methodology.html) as well as the [accompanying paper](../papers/newStatistics.pdf).
+
+* `meanR` test evaluates how the predicted response surface based on a specified null model differs from the observed one. If the null hypothesis is rejected, this test suggests that at least some dose combinations may exhibit synergistic or antagonistic behaviour. The `meanR` test is not designed to pinpoint which combinations produce these effects nor what type of deviating effect is present.
+
+* `maxR` test allows to evaluate presence of synergistic/antagonistic effects for each dose combination and as such provides a point-by-point classification.
+
+Both of the above test statistics have a well specified null distribution under a set of assumptions, namely normality of Z-scores. If this assumption is not satisfied, distribution of these statistics can be estimated using bootstrap. Normal approximation is significantly faster whereas bootstrapped distribution of critical values is likely to be more accurate in many practical cases.
+
+### meanR
+
+Here we will use the previously computed `CP` covariance matrix to speed up the process.
+
+* normal errors
+
+```{r meanrnorm, message = FALSE}
+meanR_N <- fitSurface(data, marginalFit,
+                      statistic = "meanR", CP = rs$CP, B.B = NULL,
+                      parallel = FALSE)
+```
+
+* non-normal errors
+
+The previous piece of code assumes normal errors. If we drop this assumption, we can use bootstrap methods to resample from the observed errors. Other parameters for bootstrapping, such as additional distribution for errors, wild bootstrapping to account for heteroskedasticity, are also available. See `help(fitSurface)`.
+
+```{r meanrnonnorm, message = FALSE}
+meanR_B <- fitSurface(data, marginalFit,
+                      statistic = "meanR", CP = rs$CP, B.B = 20,
+                      parallel = FALSE)
+```
+
+Both tests use the same calculated F-statistic but compare it to different null distributions. In this particular case, both tests lead to identical results.
+
+```{r meanresults, echo=FALSE}
+MeanR_both <- rbind("Normal errors" = c(meanR_N$meanR$FStat, meanR_N$meanR$p.value),
+                    "Bootstrapped errors" = c(meanR_B$meanR$FStat, meanR_B$meanR$p.value))
+colnames(MeanR_both) <- c("F-statistic", "p-value")
+kable(MeanR_both)
+```
+
+### maxR
+
+The `meanR` statistic can be complemented by the `maxR` statistic for each of available dose combinations. We will do this once again by assuming both normal and non-normal errors similar to the computation of the `meanR` statistic.
+
+```{r maxboth, message = FALSE}
+maxR_N <- fitSurface(data, marginalFit,
+                     statistic = "maxR", CP = rs$CP, B.B = NULL,
+                     parallel = FALSE)
+maxR_B <- fitSurface(data, marginalFit,
+                     statistic = "maxR", CP = rs$CP, B.B = 20,
+                     parallel = FALSE)
+maxR_both <- rbind(summary(maxR_N$maxR)$totals,
+                   summary(maxR_B$maxR)$totals)
+```
+
+Here is the summary of `maxR` statistics. It lists the total number of dose combinations listed as synergistic or antagonistic for Experiment `r i` given the above calculations.
+
+```{r printmax, echo = FALSE}
+rownames(maxR_both) <- c("Normal errors", "Bootstrapped errors")
+kable(maxR_both)
+```
+
+By using the `outsidePoints` function, we can obtain a quick summary indicating which dose combinations in Experiment `r i` appear to deviate significantly from the null model according to the `maxR` statistic.
+
+
+```{r maxoutside, results="asis"}
+outPts <- outsidePoints(maxR_B$maxR$Ymean)
+kable(outPts, caption = paste0("Non-additive points for Experiment ", i))
+```
+
+Synergistic effects of drug combinations can be depicted in a bi-dimensional contour plot where the `x-axis` and `y-axis` represent doses of `Compound 1` and `Compound 2` respectively and each point is colored based on the *p*-value and sign of the respective `maxR` statistic.
+
+```{r maxcontour, fig.align="center", fig.width=6, fig.height=5}
+contour(maxR_B,
+         ## colorPalette = c("blue", "black", "black", "red"),
+        main = paste0(" Experiment ", i, " contour plot for maxR"),
+        scientific = TRUE, digits = 3, cutoff = cutoff)
+```
+
+Previously, we had colored the 3-dimensional predicted response surface plot based on its Z-score, i.e. deviation of the predicted versus the observed effect. We can also easily color it based on the computed `maxR` statistic to account for additional statistical variation.
+
+```{r plot3dmax, warning=FALSE, fig.height=7, fig.width=7}
+plot(maxR_B, color = "maxR", legend = FALSE, main = "")
+view3d(0, -75)
+rglwidget()
+```
+
+# Analysis of multiple experiments
+
+In order to proceed with multiple experiments, we repeat the same procedure as previously. We collect all the necessary objects for which estimations do not have to be repeated to generate `meanR` and `maxR` statistics in a simple list.
+
+```{r fullanalysis, message=FALSE}
+marginalFits <- list()
+datasets <- list()
+respSurfaces <- list()
+maxR.summary <- list()
+for (i in seq_len(nExp)) {
+  ## Select experiment
+  data <- subsetData(directAntivirals, i)
+  ## Fit joint marginal model
+  marginalFit <- fitMarginals(data, transforms = transforms,
+                              method = "nlslm")
+  ## Predict response surface based on generalized Loewe model
+  respSurface <- fitSurface(data, marginalFit,
+                            statistic = "maxR", B.CP = 20,
+                            parallel = FALSE)
+
+  datasets[[i]] <- data
+  marginalFits[[i]] <- marginalFit
+  respSurfaces[[i]] <- respSurface
+  maxR.summary[[i]] <- summary(respSurface$maxR)$totals
+}
+```
+
+We use the `maxR` procedure with a chosen p-value cutoff of `r cutoff`. If `maxR` statistic falls outside the `r cutoff*100`th percentile of its distribution (either bootstrapped or not), the respective off-axis dose combination is said to deviate significantly from the generalized Loewe model and the algorithm determines whether it deviates in a synergistic or antagonistic way.
+
+Below is the summary of overall calls and number of deviating points for each experiment.
+
+```{r maxrfull, echo=FALSE}
+allMaxR <- do.call(rbind, maxR.summary)
+rownames(allMaxR) <- paste("Experiment", 1:nrow(allMaxR))
+kable(allMaxR, row.names = TRUE)
+```
+
+Previous summarizing and visual analysis can be repeated on each of the newly defined experiments. For example, `Experiment 4` indicates a total of 15 combinations that were called synergistic according to the `maxR` test.
+
+```{r tabs, echo = FALSE, results = "asis"}
+i <- 4
+genCaption <- function(k) paste("Non-additive points for Experiment", k)
+outPts <- outsidePoints(respSurfaces[[i]]$maxR$Ymean)
+print(kable(outPts, caption = genCaption(i)))
+```
+
+Consequently, above table for `Experiment 4` can be illustrated in a contour plot.
+
+```{r fullcontour, echo=FALSE, fig.align = "center", fig.width = 6, fig.height = 5}
+i <- 4
+contour(respSurfaces[[i]],
+        main = paste("Experiment", i),
+        scientific = TRUE, digits = 3, cutoff = cutoff)
+```

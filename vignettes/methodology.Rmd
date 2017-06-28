@@ -1,0 +1,114 @@
+---
+title: "Methodology"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Methodology}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Methodology described in this vignette is adapted from the article *"BIGL: Biochemically Intuitive Generalized Loewe null model for prediction of the expected combined effect compatible with partial agonism and antagonism"* (2017) by K. Van der Borght, A. Tourny, R. Bagdziunas, O. Thas, M. Nazarov, H. Turner, B. Verbist and H. Ceulemans as well as its technical supplement. We advise the reader to consult it for a deeper understanding of the procedure described next.
+
+## Marginal monotherapy curves
+
+First, a monotherapy model is described by the following equation.
+
+$$ y\left(d\right) = b + \dfrac{m - b}{1 + \left(\frac{d}{\operatorname{EC50}}\right)^{|h|}} $$
+
+where $y$ is the response (or effect), $d$ is the dose (or concentration) of the compound, $h$ is the Hill's coefficient and $b$ and $m$ are respectively baseline and maximum response for that compound. Lastly, $\textrm{EC50}$ stands for the dose level of the compound needed to attain the midpoint effect, i.e.
+$$y\left(\textrm{EC50}\right) = b + \frac{m - b}{2}$$
+
+Note that $m > b$ if and only if the response is increasing with the dose of the compound. If the response is decreasing, then $m < b$.
+
+This monotherapy equation is estimated for both compounds with the constraint that $b$, the baseline level, is shared across compounds. This baseline level is denoted by `b` in the parameter vector. Additionally, `m1` and `m2` in the parameter vector stand for estimates of maximal responses $m_{1}$ and $m_{2}$, respectively, whereas `h1` and `h2` are Hill's coefficients (slope) of the monotherapy curve for each compound. Lastly, `e1` and `e2` are log-transformed inflection points, i.e. `e1` $= \log\left(\textrm{EC50}_{1}\right)$ and `e2` $= \log\left(\textrm{EC50}_{2}\right)$.
+
+
+## Null models of no synergy
+
+### Occupancy
+
+Define the occupancy level $\textrm{occup}$, i.e. the fractional (enzymatic) effect or observed effect relative to maximal effect, for both compounds at given dose levels as
+$$
+\textrm{occup}_{1}\left(d_{1}\right) = \frac{1}{1 + \left(\frac{\operatorname{EC50}_{1}}{d_{1}}\right)^{h_{1}}}
+$$
+$$
+\textrm{occup}_{2}\left(d_{2}\right) = \frac{1}{1 + \left(\frac{\operatorname{EC50}_{2}}{d_{2}}\right)^{h_{2}}}
+$$
+Alternatively, the above equations can be rearranged to express dose in terms of occupancy so that
+$$
+d_{1} = \operatorname{EC50}_{1} \left(\frac{1}{\operatorname{occup_{1}}} - 1 \right)^{-1/h_{1}}
+$$
+$$
+d_{2} = \operatorname{EC50}_{2} \left(\frac{1}{\operatorname{occup_{2}}} - 1 \right)^{-1/h_{2}}
+$$
+Although the occupancy was considered here in the marginal case, it is equally well-defined when compounds are combined and is understood as the fraction of enzyme bound to any compound. It can thus be used to re-express classical Loewe additivity equations.
+
+### Classical Loewe model
+
+In the classical Loewe model where both marginal models share upper $(m)$ and lower $(b)$ asymptotes, occupancy is defined as the solution to this additivity equation for each dose combination $(d_{1}, d_{2})$, namely
+$$\frac{d_1\left(\textrm{occup}^{-1} - 1\right)^{1/h_{1}}}{\textrm{EC50}_{1}}+ 
+\frac{d_2\left(\textrm{occup}^{-1} - 1\right)^{1/h_{2}}}{\textrm{EC50}_{2}} = 1$$
+
+Once occupancy is computed, in the classical Loewe model the predicted response at dose combination $(d_{1}, d_{2})$ can be calculated to be
+$$ y = b + \left(m - b\right) \times \textrm{occup} \times \left[\frac{d_{1}\left(\textrm{occup}^{-1} - 1\right)^{1/h_{1}}}{\textrm{EC50}_{1}} + \frac{d_{2}\left(\textrm{occup}^{-1} - 1\right)^{1/h_{2}}}{\textrm{EC50}_{2}}\right]$$
+
+
+### Generalized Loewe model
+
+Generalized Loewe model extends the classical Loewe model by allowing compounds to have different upper asymptotes so that when adjusted, the above predicted response is written instead as
+$$ y = b + \textrm{occup} \times \left[\frac{\left(m_{1} - b\right) d_{1}\left(\textrm{occup}^{-1} - 1\right)^{1/h_{1}}}{\textrm{EC50}_{1}} + \frac{\left(m_{2} - b\right) d_{2}\left(\textrm{occup}^{-1} - 1\right)^{1/h_{2}}}{\textrm{EC50}_{2}}\right]$$
+
+In particular, if $m_{1} = m_{2}$, then generalized Loewe is equivalent to the classical Loewe.
+
+### Highest Single Agent
+
+A null model based on the Highest Single Agent (HSA) model does not attempt to model interaction effects at all and the predicted effect of a combination is either the minimum (if marginal curves are decreasing) or the maximum (if marginal curves are increasing) of both monotherapy curves.
+
+
+### Calculation procedure
+
+In order to evaluate any of the null models described above, the `fitSurface` function will use the monotherapy parameter estimates from the previous step. The idea is if there are synergistic or antagonistic effects, then administration of both compounds will lead to important deviations from what combined monotherapy data would suggest according to the null model. Routines within `fitSurface` function do essentially the following.
+
+1. Find occupancy for each combination of doses by solving the additivity equation of the classical Loewe model. This step does not require knowledge of the baseline or maximal response for either of the compounds. Occupancy solution is also reported in the HSA model case although occupancy plays no role in such a model.
+2. Compute the predicted response based on the above described response equations and the previously computed occupancy rate for each dose combination.
+3. If desired, the function will then calculate the selected statistic to evaluate the deviation of the predictions from the desired null model.
+
+
+## Synergy evaluation
+
+Synergy is evaluated for all off-axis dose combinations, i.e. dose combinations that are not used in the monotherapy curve estimation. Synergy evaluation depends on the underlying null model and any of the above models, i.e. generalized or classical Loewe or Highest Single Agent, can be used for this purpose. We provide here a brief summary of both statistical tests. Technical derivations and further details are available in the article cited at the beginning of the document.
+
+To define test statistics, the following notations are used.
+
+* Let $y_{ij}$ be the observed effect for replicate $j$ of dose combination $i$, so that $y_{11}, y_{12}, y_{13}, y_{21}, ..., y_{kn_{k}}$ is a set of observed effects. We assume $k$ different dose combinations and $n_{k}$ replicates for each combination. The number of different off-axis dose combinations is denoted as $n_{1}$.
+* $p_{1}, ..., p_{k}$ are the predicted responses for the $k$ off-axis dose combinations.
+* $\sigma^{2}$ is the variance of the replicate observations, assumed to be constant over all dose combinations. $\operatorname{df}_{0}$ is the number of degrees of freedom from the marginal model estimation.
+
+We construct a vector $R = (r_{1}, ..., r_{k})$ which represents mean deviation from the predicted effect. In particular,
+$$
+r_{k} = \frac{1}{n_{k}} \sum_{i = 1}^{n_{k}} y_{ki} - p_{k}
+$$
+
+With the help of bootstrapping, the covariance matrix of $R$ can be estimated under the null hypothesis of no synergy so that $\operatorname{Var}\left(R\right) = \sigma^{2}\left(D + C_{p}\right)$ where $D$ is a diagonal matrix with $1 / n_{i}$ in the $i$-th position and $C_{p}$ is the covariance matrix obtained from bootstrap.
+
+### `meanR`
+
+The `meanR` test will evaluate whether the null model globally fits well the observed data. It is derived using a lack-of-fit sum of squares technique. In particular, the test statistic is given by
+$$
+\operatorname{TestStat} = \frac{R^{T}\left(D + C_{p}\right)^{-1}R}{n_{1}\sigma^{2}}
+$$
+Assuming that residuals from the generalized Loewe model are normally distributed, it can be shown that this statistic follows an $F_{n_{1}, \operatorname{df}_{0}}$ distribution under the null. If these assumptions are not satisfied, the null distribution can be approximated by bootstrapping.
+
+### `maxR`
+
+The `maxR` test evaluates whether the null model locally fits the observed data. In particular, it provides a test score for each off-axis combination. Based on the sign of this score, it can be determined whether synergy or antagonism is more likely and a formal test can be constructed. Under the null hypothesis of no lack-of-fit and normally distributed effects,
+$$
+\max \left| R^{T}\left(D + C_{p}\right)^{-1/2} \right| / \sigma \sim \max \left| Z_{1}, \dots, Z_{k} \right|
+$$
+where $Z_{j} \sim N\left(0,1\right)$. More particularly, the test statistic for the $k$-th off-axis dose combination $(d_{1}, d_{2})$ is computed as
+$$
+\operatorname{TestStat}\left(d_{1}, d_{2}\right) = \left[\left| R^{T}\left(D + C_{p}\right)^{-1/2} \right| / \sigma\right]_{k}
+$$
+where $\left[\cdot\right]_{k}$ indicates the $k$-th coordinate. This test statistic is then compared either to the null distribution based on normal approximation or a bootstrapped approximation.
+

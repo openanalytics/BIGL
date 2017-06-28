@@ -1,0 +1,7 @@
+vignettes/.*_cache$
+vignettes/.*_files$
+vignettes/analysis.html
+vignettes/methodology.html
+LICENSE
+README.md
+.travis.yml

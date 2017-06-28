@@ -1,0 +1,32 @@
+Package: BIGL
+Type: Package
+Title: Biochemically Intuitive Generalized Loewe Model
+Version: 1.0
+Date: 2017-06-28
+Author: Heather Turner, Annelies Tourny, Olivier Thas, Maxim Nazarov, Rytis Bagdziunas
+Maintainer: Rytis Bagdziunas <rytis.bagdziunas@openanalytics.eu>
+Description: Response surface methods for drug synergy analysis. Available
+    methods include generalized and classical Loewe formulations as well as Highest
+    Single Agent methodology. Response surfaces can be plotted in an interactive
+    3-D plot and formal statistical tests for synergistic effects y are available.
+License: GPL-3
+Depends: R (>= 2.10)
+Imports:
+    ggplot2,
+    MASS,
+    methods,
+    minpack.lm,
+    numDeriv,
+    parallel,
+    progress,
+    rgl,
+    robustbase,
+    scales
+Suggests:
+    knitr,
+    testthat,
+    shiny,
+    DT
+VignetteBuilder: knitr
+LazyData: true
+RoxygenNote: 6.0.1
