@@ -22,6 +22,9 @@ test_that('marginals', {
   expect_equal(fitted(fit1), fitted(fit2))
   expect_equal(residuals(fit1), residuals(fit2))
 
+  expect_equal(fitted(fit1), predict(fit1, newdata = dataM))
+  expect_equal(fitted(fit2), predict(fit2, newdata = dataM))
+
   ## Give some leeway for this to pass
   expect_that(all(abs(vcov(fit1) - vcov(fit2)) < 1e-1),
               is_true())
@@ -168,6 +171,9 @@ test_that('marginals-transforms', {
   expect_that(all(abs(fit1$coef - fit2$coef) < 1e-4), is_true())
   expect_that(all(abs(fitted(fit1) - fitted(fit2)) < 1e-4), is_true())
   expect_that(all(abs(residuals(fit1) - residuals(fit2)) < 1e-4), is_true())
+
+  expect_equal(fitted(fit1), predict(fit1, newdata = dataM))
+  expect_equal(fitted(fit2), predict(fit2, newdata = dataM))
 
   expect_that(all(abs(vcov(fit1) - vcov(fit2)) < 3e-2), is_true())
 

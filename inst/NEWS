@@ -1,2 +1,4 @@
+1.0.1 (2017-06-29)
+  o `predict` method added for the MarginalFit objects
 1.0 (2017-06-28)
   o Initial public release

@@ -54,28 +54,52 @@ coef.MarginalFit <- function(object, ...) {
   object$coef
 }
 
+#' Predict values on the dose-response curve
+#'
+#' @inheritParams summary.MarginalFit
+#' @param newdata An optional data frame in which to look for \code{d1} and
+#'   \code{d2} variables with which to predict. If omitted, the fitted values
+#'   are used. Doses that are passed to this function must correspond to
+#'   marginal data, i.e. at least one of the doses must be zero.
+#' @export
+predict.MarginalFit <- function(object, newdata, ...) {
+
+  if (missing(newdata)) {
+
+    fitted(object)
+
+  } else {
+
+    dose1 <- newdata[,"d1"]
+    dose2 <- newdata[,"d2"]
+    response <- rep(NA, nrow(newdata))
+
+    ## If combination data is passed, throw an error
+    if (any(dose1 > 1e-12 & dose2 > 1e-12))
+      stop("Predictions are only available for marginal data.")
+
+    resp <- with(as.list(object$coef), {
+      response[dose2 == 0] <- L4(dose1[dose2 == 0], h1, b, m1, e1)
+      response[dose1 == 0] <- L4(dose2[dose1 == 0], h2, b, m2, e2)
+      response
+    })
+
+    if (!is.null(object$transforms$BiolT))
+      resp <- with(object$transforms, BiolT(resp, compositeArgs))
+    if (!is.null(object$transforms$PowerT))
+      resp <- with(object$transforms, PowerT(resp, compositeArgs))
+
+    resp
+  }
+
+}
+
 #' Compute fitted values from monotherapy estimation
 #'
 #' @inheritParams summary.MarginalFit
 #' @export
 fitted.MarginalFit <- function(object, ...) {
-
-  dose1 <- object$data[,"d1"]
-  dose2 <- object$data[,"d2"]
-  response <- rep(NA, nrow(object$data))
-
-  resp <- with(as.list(object$coef), {
-    response[dose2 == 0] <- L4(dose1[dose2 == 0], h1, b, m1, e1)
-    response[dose1 == 0] <- L4(dose2[dose1 == 0], h2, b, m2, e2)
-    response
-  })
-
-  if (!is.null(object$transforms$BiolT))
-    resp <- with(object$transforms, BiolT(resp, compositeArgs))
-  if (!is.null(object$transforms$PowerT))
-    resp <- with(object$transforms, PowerT(resp, compositeArgs))
-
-  resp
+  predict(object, newdata = object$data)
 }
 
 #' Estimate of coefficient variance-covariance matrix
