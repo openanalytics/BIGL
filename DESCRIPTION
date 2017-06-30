@@ -8,7 +8,8 @@ Maintainer: Rytis Bagdziunas <rytis.bagdziunas@openanalytics.eu>
 Description: Response surface methods for drug synergy analysis. Available
     methods include generalized and classical Loewe formulations as well as Highest
     Single Agent methodology. Response surfaces can be plotted in an interactive
-    3-D plot and formal statistical tests for synergistic effects y are available.
+    3-D plot and formal statistical tests for presence of synergistic effects are
+    available.
 License: GPL-3
 Depends: R (>= 2.10)
 Imports:
