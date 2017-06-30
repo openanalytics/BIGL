@@ -29,4 +29,6 @@ Suggests:
     DT
 VignetteBuilder: knitr
 LazyData: true
+URL: https://github.com/openanalytics/BIGL
+BugReports: https://github.com/openanalytics/BIGL/issues
 RoxygenNote: 6.0.1
