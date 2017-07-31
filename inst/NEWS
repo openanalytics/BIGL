@@ -1,3 +1,5 @@
+1.0.2 (2017-07-31)
+  o extra arguments in fitMarginals are now passed to the optimizer functions
 1.0.1 (2017-06-29)
   o `predict` method added for the MarginalFit objects
 1.0 (2017-06-28)

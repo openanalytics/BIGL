@@ -42,7 +42,9 @@ optimization based on Nelder-Mean algorithm in \code{\link[stats]{optim}}.
 This method can be noticeably slower than the non-linear least squares
 methods.}
 
-\item{...}{Further arguments that are not used at present}
+\item{...}{Further arguments that are passed to the optimizer function, 
+such as \code{lower} or \code{upper} (for the "nlslm" method), or 
+\code{control}.}
 }
 \value{
 This function returns a \code{MarginalFit} object with monotherapy

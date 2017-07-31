@@ -24,7 +24,9 @@ obtained from \code{\link{initialMarginal}}.}
 
 \item{nlsfn}{Non-linear least-squares optimizer function}
 
-\item{...}{Further arguments that are not used at present}
+\item{...}{Further arguments that are passed to the optimizer function, 
+such as \code{lower} or \code{upper} (for the "nlslm" method), or 
+\code{control}.}
 }
 \description{
 This function does not automatically extract marginal data and requires
