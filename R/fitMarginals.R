@@ -36,11 +36,14 @@
 #'   optimization based on Nelder-Mean algorithm in \code{\link[stats]{optim}}.
 #'   This method can be noticeably slower than the non-linear least squares
 #'   methods.
-#' @param ... Further arguments that are not used at present
+#' @param ... Further arguments that are passed to the optimizer function, 
+#' such as \code{lower} or \code{upper} (for the "nlslm" method), or 
+#' \code{control}.
 #' @inheritParams fitSurface
 #' @importFrom methods hasArg
 #' @importFrom minpack.lm nlsLM
 #' @importFrom stats nls
+#' @importFrom utils modifyList
 #' @return This function returns a \code{MarginalFit} object with monotherapy
 #'   coefficient estimates and diverse information regarding monotherapy
 #'   estimation. \code{MarginalFit} object is essentially a list with
@@ -119,6 +122,12 @@ fitMarginals <- function(data, transforms = NULL, start = NULL,
     fitArgs$model <- list(...)$model
   }
 
+  ## Pass ... along, except for 'model' :-/ 
+  ## FIXME by renaming 'model' argument here and in marginalNLS
+  extraArgs <- list(...)
+  extraArgs <- extraArgs[names(extraArgs) != "model"]
+  fitArgs <- modifyList(fitArgs, extraArgs, keep.null = TRUE)
+  
   ## Subset only free parameters
   fitArgs$start <- start[fitArgs$model$free]
 
@@ -290,7 +299,8 @@ marginalNLS <- function(data, transforms = NULL, start, model,
        "transforms" = transforms,
        "vcov" = vcov(fit),
        "model" = model,
-       "shared_asymptote" = as.logical(coefs["m1"] == coefs["m2"]))
+       "shared_asymptote" = as.logical(coefs["m1"] == coefs["m2"]),
+       "extraArgs" = extraArgs)
 }
 
 #' Fit two 4-parameter log-logistic functions with common baseline
@@ -387,5 +397,7 @@ marginalOptim <- function(data, transforms = NULL, start, model, ...) {
        "transforms" = transforms,
        "vcov" = vcov,
        "model" = model,
-       "shared_asymptote" = as.logical(coefs["m1"] == coefs["m2"]))
+       "shared_asymptote" = as.logical(coefs["m1"] == coefs["m2"]),
+       "extraArgs" = as.list(substitute(list(...)))[-1L]   
+   )
 }

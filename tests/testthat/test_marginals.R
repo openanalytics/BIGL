@@ -226,3 +226,21 @@ test_that('marginals-transforms', {
 
 
 })
+
+test_that('marginals-extraArgs', {
+  ## Make sure extra arguments (lower, upper) are passed to the nls optimizers
+  lowerBounds <- rep(0, 7)
+  upperBounds <- c(1, rep(Inf, 6))
+  
+  fit1 <- fitMarginals(data, method = "nls", algorithm = "port", 
+      lower = lowerBounds, upper = upperBounds)
+  fit2 <- fitMarginals(data, method = "nlslm", 
+      lower = lowerBounds, upper = upperBounds)
+  
+  expect_that(all(coef(fit1) >= 0), is_true())
+  expect_that(all(coef(fit2) >= 0), is_true())
+  
+  expect_equal(coef(fit1)[[1]], 1)
+  expect_equal(coef(fit2)[[1]], 1)
+  
+})

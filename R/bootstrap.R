@@ -259,12 +259,17 @@ simulateNull <- function(data, fitResult,
     ## be quite small.
     simData$effect <- abs(simData$effect)
 
+    ## construct a list of arguments, including ... passed to original 
+    ## `fitMarginals` call (saved as `extraArgs`)
+    paramsMarginal <- list("data" = simData, "method" = method, 
+        "start" = initPars, "model" = model, "transforms" = transforms,
+        "control" = control)
+    if (!is.null(fitResult$extraArgs) && is.list(fitResult$extraArgs))
+      # use `modifyList` here, since `control` could be user-defined
+      paramsMarginal <- modifyList(paramsMarginal, fitResult$extraArgs)
+    
     simFit <- try({
-      fitMarginals(data = simData, method = method,
-                   start = initPars,
-                   control = control,
-                   model = model,
-                   transforms = transforms)
+      do.call(fitMarginals, paramsMarginal)
     }, silent = TRUE)
 
     counter <- counter + 1
