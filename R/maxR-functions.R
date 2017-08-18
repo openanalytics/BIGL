@@ -120,10 +120,10 @@ plot.maxR <- function(x,
                     "\n\n \n\n",
                     "\u2193",
                     if (colorPalette[1] == "blue") "Synergy" else "Antagonism"),
-             paste0("\u2265", cutoff),
-             rev(plevels[plevels < cutoff]),
-             plevels[plevels < cutoff],
-             paste0("\u2265", cutoff))
+             paste0("\u2264", 1 - cutoff),
+             1 - rev(plevels[plevels < cutoff]),
+             1 - plevels[plevels < cutoff],
+             paste0("\u2264", 1 - cutoff))
            )
     },
     key.title = title(main = "p-values", line = 1, cex.main = 1),

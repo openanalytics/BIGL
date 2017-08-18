@@ -1,3 +1,6 @@
+1.0.3 (2017-08-18)
+  o Contour plot for maxR now has correct p-value labels
+  o Summary for marginal fits does not fail if Hessian computation failed
 1.0.2 (2017-07-31)
   o extra arguments in fitMarginals are now passed to the optimizer functions
 1.0.1 (2017-06-29)
