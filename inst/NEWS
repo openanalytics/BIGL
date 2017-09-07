@@ -1,3 +1,6 @@
+1.1.0 (2017-09-07)
+  o isobologram() plot is now available for ResponseSurface objects
+  o summary.ResponseSurface does not fail if marginal fits have constraints
 1.0.3 (2017-08-18)
   o Contour plot for maxR now has correct p-value labels
   o Summary for marginal fits does not fail if Hessian computation failed
