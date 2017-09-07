@@ -227,7 +227,14 @@ The occcupancy matrix used in the expected response calculation for the Loewe mo
 
 For off-axis data and a fixed dose combination, the Z-score for that dose combination is defined to be the standardized difference between the observed effect and the effect predicted by a generalized Loewe model. If the observed effect differs significantly from the prediction, it might be due to the presence of synergy or antagonism. If multiple observations refer to the same combination of doses, then a mean is taken over these multiple standardized differences.
 
+The following plot illustrates the isobologram of the chosen null model. Coloring and contour lines within the plot should help the user distinguish areas and dose combinations that generate similar response according to the null model. Note that the isobologram is plotted by default on a logarithmically scaled grid of doses.
+
+```{r image, warning=FALSE, comment = NA, fig.width = 6, fig.height = 4, fig.align = "center"}
+isobologram(rs)
+```
+
 The plot below illustrates the above considerations in a 3-dimensional setting. In this plot, points refer to the observed effects whereas the surface is the model-predicted response. The surface is colored according to the median Z-scores where blue coloring indicates possible synergistic effects (red coloring would indicate possible antagonism).
+
 
 ```{r plot3d, warning=FALSE, fig.align="center", fig.height=7, fig.width=7}
 plot(rs, legend = FALSE, main = "")
