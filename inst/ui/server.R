@@ -3,11 +3,19 @@ library(rgl)
 library(DT)
 set.seed(314159265)
 
-dose1 <- dose2 <- round(c(0, 3^(-6:0)), 4)
-doseGrid <- expand.grid(list("d1" = sort(dose1),
-                             "d2" = sort(dose2)))
-
 shinyServer(function(input, output, session) {
+
+  doseGrid <- reactive({
+
+    if (input$logScale) {
+      dose1 <- dose2 <- round(c(0, 3^(-6:0)), 4)
+    } else {
+      dose1 <- dose2 <- round(seq(0, 3, length.out = 7), 4)
+    }
+
+    doseGrid <- expand.grid(list("d1" = sort(dose1),
+                                 "d2" = sort(dose2)))
+  })
 
   pars <- reactive({
     c("h1" = input$h1,
@@ -56,7 +64,7 @@ shinyServer(function(input, output, session) {
   })
 
   comp <- reactive({
-    a <- BIGL:::generalizedLoewe(doseGrid, pars())
+    a <- BIGL:::generalizedLoewe(doseGrid(), pars())
     trueo <- with(a$occupancy, (d1/exp(pars()["e1"]) + d2/exp(pars()["e2"]))^pars()["h1"] /
                                (1 + (d1/exp(pars()["e1"]) + d2/exp(pars()["e2"]))^pars()["h1"]))
     a$occupancy$occupancy <- trueo
@@ -73,14 +81,21 @@ shinyServer(function(input, output, session) {
   })
 
   fit <- reactive({
-    shared_asymptote <- if (input$null == "stdloewe") TRUE else FALSE
+
+    if (input$null == "stdloewe") {
+      constraints <- list("matrix" = c(0, 0, 0, 1, -1, 0, 0),
+                          "vector" = 0)
+    } else {
+      constraints <- NULL
+    }
+
     fitMarginals(dr(), method = "nlslm",
                  control = list(maxiter = 200),
-                 shared_asymptote = shared_asymptote)
+                 constraints = constraints)
   })
 
   compE <- reactive({
-    BIGL:::generalizedLoewe(doseGrid, fit()$coef)
+    BIGL:::generalizedLoewe(doseGrid(), fit()$coef)
   })
 
   ## Coefficient table
@@ -95,7 +110,7 @@ shinyServer(function(input, output, session) {
 
   ## Monotherapy plots
   output$marginals <- renderPlot({
-    plot(fit(), logScale = TRUE)
+    plot(fit(), logScale = input$logScale)
   })
 
   ## Table with occupancy values and constructed response
@@ -110,7 +125,7 @@ shinyServer(function(input, output, session) {
 
     contrib1 <- compE()$occupancy$occupancy * weight1 * (pars()["m1"] - pars()["b"])
     contrib2 <- compE()$occupancy$occupancy * weight2 * (pars()["m2"] - pars()["b"])
-    baseline <- pars()["cc"]
+    baseline <- pars()["b"]
 
     ## Only valid if Hill coefficients are equal
     ## trueOcc <- with(comp()$occupancy, (d1/exp(pars()["e1"]) + d2/exp(pars()["e2"]))^pars()["h1"] /
@@ -140,10 +155,19 @@ shinyServer(function(input, output, session) {
   })
 
 
+  output$isobologram <- renderPlot({
+
+    surfaceFit <- list("data" = dr(), fitResult = fit(),
+                       "null_model" = if (input$null == "stdloewe") "loewe" else input$null)
+    class(surfaceFit) <- "ResponseSurface"
+    isobologram(surfaceFit, logScale = input$logScale)
+
+  })
+
   ## Response surface plot
   output$surface <-
     renderRglwidget({
-      plotResponseSurface(data = dr(), fitResult = fit(),
+      plotResponseSurface(data = dr(), fitResult = fit(), logScale = input$logScale,
                           null_model = if (input$null == "stdloewe") "loewe" else input$null,
                           legend = FALSE, colorBy = compE()$occupancy,
                           breaks = c(0, 0.25, 0.5, 0.75, 1),

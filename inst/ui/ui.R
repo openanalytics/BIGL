@@ -38,6 +38,8 @@ shinyUI(fluidPage(
       column(4,
              numericInput("replicates", label = "Replicates", 1, step = 1))
     ),
+    ## Whether doses are evenly spaced in log-scale
+    checkboxInput("logScale", "Doses are evenly spaced in log-scale", TRUE),
     ## Null model
     radioButtons("null", label = "Null model",
                  choices = c("Generalized Loewe" = "loewe",
@@ -66,6 +68,13 @@ shinyUI(fluidPage(
                         tableOutput("coefs")),
                  column(9,
                         plotOutput("marginals"))),
+               br(),
+               strong("Isobologram of the null model"),
+               br(),
+               br(),
+               plotOutput("isobologram"),
+               br(),
+               br(),
                strong("Expected response surface"),
                rglwidgetOutput("surface", width = "1024px", height = "800px")
                ),
@@ -90,7 +99,9 @@ shinyUI(fluidPage(
                  "additivity model."),
 
                p("Doses for both compounds are assumed to be the same and are generated using ",
-                 code("round(c(0, 3^(-6:0)), 4)"), "command in both cases."),
+                 "either ", code("round(seq(0, 3, length.out = 7), 4)"), " or ",
+                 code("round(c(0, 3^(-6:0)), 4)"), "commands for both compounds depending on ",
+                 "whether evenly spaced logarithmic scale is chosen."),
 
                br(),
                h4("Plots"),
