@@ -5,3 +5,5 @@ vignettes/methodology.html
 LICENSE
 README.md
 .travis.yml
+^.*\.Rproj$
+^\.Rproj\.user$
