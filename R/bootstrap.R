@@ -281,9 +281,20 @@ bootstrapData <- function(data, fitResult,
   ## Estimators of the residual variance
   df0b <- fitResultB$df
   MSE0b <- fitResultB$sigma^2
+  
+  dat_offB <- with(dataB, dataB[d1 != 0 & d2 != 0,])
+  off_varB <- aggregate(effect ~ d1 + d2, data = dat_offB, var)
+  mse_offb <- mean(off_varB$effect)
+  off_meanB <-aggregate(effect ~ d1 + d2, data = dat_offB, mean)
+  dfB <- merge(off_varB, off_meanB, by = c("d1", "d2"))
+  names(dfB) <- c("d1", "d2", "Off_var", "Off_mean")
+  
+  linmodB<-lm(Off_var ~ Off_mean, data = dfB)
+  PredvarB <- predict(linmodB, Off_mean = dfB$Off_mean)
 
   out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
-              "n1b" = n1b, "repsb" = repsb)
+              "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,
+              "mse_offb" = mse_offb)
 
   return(out)
 }
