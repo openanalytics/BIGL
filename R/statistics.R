@@ -14,7 +14,7 @@
 #' @param reps Numeric vector containing number of replicates for each off-axis
 #'   dose combination. If missing, it will be calculated automatically from output
 #'   of \code{\link{predictOffAxis}} function.
-#' @param cl If parallel computations are desired, \code{cl} should be a cluster
+#' @param clusterObj If parallel computations are desired, \code{clusterObj} should be a cluster
 #'   object created by \code{\link[parallel]{makeCluster}}. If parallel
 #'   computing is active, progress reporting messages are not necessarily
 #'   ordered as it should be expected.
@@ -45,7 +45,7 @@
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                  cl = NULL, ...) {
+                  clusterObj = NULL, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -109,10 +109,10 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   }
 
   ## Call parallel computation if needed
-  if (is.null(cl)) {
+  if (is.null(clusterObj)) {
     FStatb <- sapply(seq_len(B.B), iterFunction)
   } else {
-    FStatb <- parSapply(cl, seq_len(B.B), iterFunction)
+    FStatb <- parSapply(clusterObj, seq_len(B.B), iterFunction)
   }
 
   pvalb <- mean(FStatb >= FStat)
@@ -172,7 +172,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                 cutoff = 0.95, cl = NULL, ...) {
+                 cutoff = 0.95, clusterObj = NULL, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -254,10 +254,10 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     }
 
     ## Call parallel computation if needed
-    if (is.null(cl)) {
+    if (is.null(clusterObj)) {
       Rnull <- sapply(seq_len(B.B), iterFunction)
     } else {
-      Rnull <- parSapply(cl, seq_len(B.B), iterFunction)
+      Rnull <- parSapply(clusterObj, seq_len(B.B), iterFunction)
     }
 
     M <- apply(abs(Rnull), 2, max)
