@@ -81,6 +81,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     A <- MSE0*CP + mse_off*diag(1/reps)
     FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
     
+    inc_var <- 1
+    
   }else if(MethodVar == "model"){
     
     dat_off <- with(data, data[d1 != 0 & d2 != 0,])
@@ -94,6 +96,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 
     A <- MSE0*CP + Predvar*diag(1/reps)
     FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
+    
+    modelfit <- linmod
     
   }
 
@@ -115,7 +119,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     pb$tick()
 
     out <- bootstrapData(data = data, fitResult = fitResult,
-                         transforms = transforms, null_model = null_model, ...)
+                         transforms = transforms, null_model = null_model,
+                         MethodVar = MethodVar, inc_var = inc_var, modelfit = modelfit, ...)
 
     MSE0b <- out$MSE0b
     Rb <- out$Rb

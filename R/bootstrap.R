@@ -120,6 +120,7 @@ generateData <- function(pars, sigma, data = NULL, MethodVar = c("equal","unequa
                      stop("Unavailable error type.")
                      )
     }else if(MethodVar == "unequal"){
+      
       tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
       error_vec <- numeric(length(ySim))
       errors_test <- numeric(length(ySim))
@@ -154,6 +155,7 @@ generateData <- function(pars, sigma, data = NULL, MethodVar = c("equal","unequa
       
     }else if(MethodVar == "model"){
       
+      sampling_errors <- unname(unlist(sampling_errors))
       tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
       predvar <- predict(modelfit, list(Mean = ySim[-tmp]))
       predvar <- ifelse(predvar < 0,0.00000001, predvar)
