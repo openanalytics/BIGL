@@ -157,7 +157,10 @@ fitSurface <- function(data, fitResult,
     mean_effects <- aggregate(effect ~ d1 + d2, dataT, mean)
     Total <- merge(dataT, mean_effects, by = c("d1", "d2"))
     colnames(Total) <- c("d1", "d2", "effect", "meaneffect")
-    sampling_errors <- Total$effect - Total$meaneffect
+    Total$errors <- Total$effect - Total$meaneffect
+    
+    sampling_errors <- list("on_errors" = Total$errors[Total$d1 == 0 | Total$d2 ==0],
+                            "off_errors" = Total$errors[Total$d1 != 0 & Total$d2 !=0])
   }
 
   ## NB: mean responses are taken
