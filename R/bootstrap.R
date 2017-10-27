@@ -96,6 +96,7 @@ generateData <- function(pars, sigma, data = NULL, MethodVar = c("equal","unequa
   with(as.list(pars), {
     
     if(MethodVar == "equal"){
+      sampling_errors <- unname(unlist(sampling_errors))
     errors <- switch(as.character(error),
                      ## Normal
                      "1" = { rnorm(length(ySim), 0, sigma) },
@@ -122,6 +123,8 @@ generateData <- function(pars, sigma, data = NULL, MethodVar = c("equal","unequa
       tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
       error_vec <- numeric(length(ySim))
       errors_test <- numeric(length(ySim))
+      off_errors <- sampling_errors[[2]]*inc_var
+      on_errors <- sampling_errors[[1]]
       errors <- switch(as.character(error),
                        ## Normal
                        "1" = { error_vec[tmp] <- rnorm(length(tmp), 0, sigma)
@@ -136,8 +139,8 @@ generateData <- function(pars, sigma, data = NULL, MethodVar = c("equal","unequa
                        "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
                        ## Resampling from defined vector
                        "4" = { if (!wild_bootstrap) {
-                         errors_test[tmp] <- sample(sampling_errors, length(tmp), replace = TRUE)
-                         errors_test[-tmp] <- sample(sampling_errors*inc_var, 
+                         errors_test[tmp] <- sample(on_errors, length(tmp), replace = TRUE)
+                         errors_test[-tmp] <- sample(off_errors, 
                                                      length(ySim) - length(tmp), replace = TRUE)
                          errors_test
                        } else {
@@ -209,10 +212,13 @@ generateData <- function(pars, sigma, data = NULL, MethodVar = c("equal","unequa
 #'   CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
 CPBootstrap <- function(data, fitResult,
                         transforms = fitResult$transforms,
-                        null_model = c("loewe", "hsa"), B.CP, ...) {
+                        null_model = c("loewe", "hsa"), B.CP,
+                        MethodVar = c("equal", "unequal", "model"),
+                        inc_var = NULL, modelfit = NULL,...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
+  MethodVar <- match.arg(MethodVar)
 
   if (B.CP < 2) stop("Number of iterations for bootstrapping CP needs to exceed 2.")
   sigma0 <- fitResult$sigma
@@ -220,7 +226,11 @@ CPBootstrap <- function(data, fitResult,
   pred <- sapply(seq_len(B.CP), function(b) {
     simModel <- simulateNull(data = data, fitResult = fitResult,
                              transforms = transforms,
-                             null_model = null_model, ...)
+                             null_model = null_model,
+                             MethodVar = MethodVar,
+                             inc_var = inc_var,
+                             modelfit = modelfit, ...)
+    
     dataCP <- simModel$data
     fitResultCP <- simModel$fitResult
 
@@ -253,14 +263,20 @@ CPBootstrap <- function(data, fitResult,
 #' @inheritParams generateData
 bootstrapData <- function(data, fitResult,
                           transforms = fitResult$transforms,
-                          null_model = c("loewe", "hsa"), ...) {
+                          null_model = c("loewe", "hsa"),  
+                          MethodVar = c("equal", "unequal", "model"),
+                          inc_var = NULL, modelfit = NULL, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
+  MethodVar <- match.arg(MethodVar)
 
   simModel <- simulateNull(data = data, fitResult = fitResult,
                            transforms = transforms,
-                           null_model = null_model, ...)
+                           null_model = null_model, 
+                           MethodVar = MethodVar,
+                           inc_var = inc_var,
+                           modelfit = modelfit, ...)
   dataB <- simModel$data
   fitResultB <- simModel$fitResult
 
@@ -315,10 +331,13 @@ bootstrapData <- function(data, fitResult,
 #'   simulateNull(data, fitResult, null_model = "hsa")
 simulateNull <- function(data, fitResult,
                          transforms = fitResult$transforms,
-                         null_model = c("loewe", "hsa"), ...) {
+                         null_model = c("loewe", "hsa"), 
+                         MethodVar = c("equal", "unequal", "model"),
+                         inc_var = NULL, modelfit = NULL, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
+  MethodVar <- match.arg(MethodVar)
 
   method <- fitResult$method
   coefFit0 <- fitResult$coef
@@ -340,7 +359,9 @@ simulateNull <- function(data, fitResult,
     simData <- generateData(pars = coefFit0, sigma = sigma0,
                             data = data[, c("d1", "d2")],
                             transforms = transforms,
-                            null_model = null_model, ...)
+                            null_model = null_model, 
+                            MethodVar = MethodVar,inc_var = inc_var, 
+                            modelfit = modelfit,...)
 
     ## In cases where added errors put the response into negative domain, revert
     ## it back to the positive one. Usually, values of such observations tend to
