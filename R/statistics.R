@@ -45,7 +45,8 @@
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                  cl = NULL, MethodVar = c("equal", "unequal", "model"), ...) {
+                  cl = NULL, MethodVar = c("equal", "unequal", "model"),
+                  inc_var = NULL, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -80,8 +81,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     
     A <- MSE0*CP + mse_off*diag(1/reps)
     FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
-    
-    inc_var <- 1
+
     
   }else if(MethodVar == "model"){
     
@@ -96,9 +96,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 
     A <- MSE0*CP + Predvar*diag(1/reps)
     FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
-    
-    modelfit <- linmod
-    
+
   }
 
   if (is.null(B.B)) {
@@ -120,7 +118,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 
     out <- bootstrapData(data = data, fitResult = fitResult,
                          transforms = transforms, null_model = null_model,
-                         MethodVar = MethodVar, inc_var = inc_var, modelfit = modelfit, ...)
+                         MethodVar = MethodVar, inc_var = inc_var, ...)
 
     MSE0b <- out$MSE0b
     Rb <- out$Rb
@@ -133,7 +131,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     if (nested_bootstrap)
       CPb <- CPBootstrap(data = data, fitResult = fitResultb,
                          transforms = transforms, null_model = null_model,
-                         B.CP = B.CP, ...)
+                         B.CP = B.CP, MethodVar = MethodVar, ...)
     else
       CPb <- CP
 
