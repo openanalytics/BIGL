@@ -108,13 +108,6 @@ fitSurface <- function(data, fitResult,
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
   MethodVar <- match.arg(MethodVar)
-  
-  if(MethodVar == "unequal"){
-    inc_var <- 1
-  }else{
-      inc_var <- NULL
-    }
-  
 
   ## Verify column names of input dataframe
   if (!all(c(effect, d1, d2) %in% colnames(data)))
@@ -163,10 +156,7 @@ fitSurface <- function(data, fitResult,
     mean_effects <- aggregate(effect ~ d1 + d2, dataT, mean)
     Total <- merge(dataT, mean_effects, by = c("d1", "d2"))
     colnames(Total) <- c("d1", "d2", "effect", "meaneffect")
-    Total$errors <- Total$effect - Total$meaneffect
-    
-    sampling_errors <- list("on_errors" = Total$errors[Total$d1 == 0 | Total$d2 ==0],
-                            "off_errors" = Total$errors[Total$d1 != 0 & Total$d2 !=0])
+    sampling_errors <- Total$effect - Total$meaneffect
   }
 
   ## NB: mean responses are taken
@@ -184,8 +174,7 @@ fitSurface <- function(data, fitResult,
                           "cutoff" = cutoff, "Ymean" = Ymean,
                           "reps" = reps, "R" = R,
                           "clusterObj" = clusterObj,
-                          "MethodVar" = MethodVar,
-                          "inc_var" = inc_var)
+                          "MethodVar" = MethodVar)
 
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- do.call(CPBootstrap, c(paramsBootstrap, paramsEstimate))
