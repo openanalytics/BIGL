@@ -153,6 +153,9 @@ generateData <- function(pars, sigma, data = NULL, var_method = c("equal","unequ
       
       tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
       predvar <- predict(modelfit, list(Mean = ySim[-tmp]))
+      #predvar <- predict(modelfit, list(Mean = ySim[-tmp], 
+      #                                       meansq = (ySim[-tmp])^2,
+      #                                       meanthree = (ySim[-tmp])^3))
       predvar <- ifelse(predvar < 0,0.00000001, predvar)
       error_vec <- numeric(length(ySim))
       errors_test <- numeric(length(ySim))
