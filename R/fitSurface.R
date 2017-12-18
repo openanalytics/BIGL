@@ -101,13 +101,11 @@ fitSurface <- function(data, fitResult,
                        statistic = c("none", "meanR", "maxR", "both"),
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
-                       cutoff = 0.95, parallel = TRUE, 
-                       MethodVar = c("equal", "unequal", "model")) {
+                       cutoff = 0.95, parallel = TRUE) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
-  MethodVar <- match.arg(MethodVar)
 
   ## Verify column names of input dataframe
   if (!all(c(effect, d1, d2) %in% colnames(data)))
@@ -173,8 +171,7 @@ fitSurface <- function(data, fitResult,
                           "wild_bootstrap" = wild_bootstrap,
                           "cutoff" = cutoff, "Ymean" = Ymean,
                           "reps" = reps, "R" = R,
-                          "clusterObj" = clusterObj,
-                          "MethodVar" = MethodVar)
+                          "clusterObj" = clusterObj)
 
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- do.call(CPBootstrap, c(paramsBootstrap, paramsEstimate))
