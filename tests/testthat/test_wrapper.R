@@ -11,10 +11,14 @@ test_that('statistics', {
                    meanR(data, fit, transforms, "loewe", R, rs$CP, reps))
 
   ## Check equality without the attributes
-  expect_that(all.equal(rs$maxR,
-                        maxR(data, fit, null_model = "loewe", B.CP = NULL,
-                             B.B = NULL, cutoff = 0.95, Ymean = offAxisTable,
-                             CP = rs$CP, reps = reps), check.attributes = FALSE), is_true())
+  expect_equal(
+      rs$maxR,
+      maxR(data, fit, null_model = "loewe", B.CP = NULL,
+          B.B = NULL, cutoff = 0.95, Ymean = offAxisTable,
+          CP = rs$CP, reps = reps), 
+      check.attributes = FALSE, 
+      tolerance = 1e-4
+  )
 
 
   ## Check for correct classes and outputs if both are bootstrapped
