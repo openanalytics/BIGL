@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Methodology described in this vignette is adapted from the article *"BIGL: Biochemically Intuitive Generalized Loewe null model for prediction of the expected combined effect compatible with partial agonism and antagonism"* (2017) by K. Van der Borght, A. Tourny, R. Bagdziunas, O. Thas, M. Nazarov, H. Turner, B. Verbist and H. Ceulemans as well as its technical supplement. We advise the reader to consult it for a deeper understanding of the procedure described next.
+Methodology described in this vignette is adapted from the article *"BIGL: Biochemically Intuitive Generalized Loewe null model for prediction of the expected combined effect compatible with partial agonism and antagonism"* (2017) by K. Van der Borght, A. Tourny, R. Bagdziunas, O. Thas, M. Nazarov, H. Turner, B. Verbist and H. Ceulemans ([doi:10.1038/s41598-017-18068-5](https://dx.doi.org/10.1038/s41598-017-18068-5)) as well as its technical supplement. We advise the reader to consult it for a deeper understanding of the procedure described next.
 
 ## Marginal monotherapy curves
 

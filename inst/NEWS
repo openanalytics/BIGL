@@ -1,3 +1,6 @@
+1.1.1 (2018-01-02)
+  o added reference to the original article
+  o fix DESCRIPTION file according to new R CMD check policy
 1.1.0 (2017-09-22)
   o isobologram() plot is now available for ResponseSurface objects
     It is also now included in the shiny app.
