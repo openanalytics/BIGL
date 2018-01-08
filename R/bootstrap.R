@@ -146,8 +146,6 @@ generateData <- function(pars, sigma, data = NULL,
       
     }else if(var_method == "model"){
       
-      
-      
       tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
       predvar <- predict(modelfit, list(Mean = ySim[-tmp]))
       #predvar <- predict(modelfit, list(Mean = ySim[-tmp], 
@@ -285,9 +283,11 @@ bootstrapData <- function(data, fitResult,
   off_meanB <-aggregate(effect ~ d1 + d2, data = dat_offB, mean)
   dfB <- merge(off_varB, off_meanB, by = c("d1", "d2"))
   names(dfB) <- c("d1", "d2", "Off_var", "Off_mean")
+  dfB <- dfB[order(dfB$d2,dfB$d1),]
+  rownames(dfB) <- NULL
   
   linmodB<-lm(Off_var ~ Off_mean, data = dfB)
-  PredvarB <- predict(linmodB, Off_mean = dfB$Off_mean)
+  PredvarB <- predict(linmodB, list(Off_mean = dfB$Off_mean))
 
   out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
               "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,

@@ -90,11 +90,14 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     off_mean <-aggregate(effect ~ d1 + d2, data = dat_off, mean)
     df <- merge(off_var, off_mean, by = c("d1", "d2"))
     names(df) <- c("d1", "d2", "Off_var", "Off_mean")
+    df <- df[order(df$d2,df$d1),]
+    rownames(df) <- NULL
     
     linmod<-lm(Off_var ~ Off_mean, data = df)
-    Predvar <- predict(linmod, Off_mean = df$Off_mean)
+    Predvar <- predict(linmod, list(Off_mean = df$Off_mean))
+ #   Predvar <- ifelse(Predvar < 0,0.00000001, Predvar)
     
-    A <- MSE0*CP + Predvar*diag(1/reps)
+    A <- MSE0*CP + Predvar*diag(1/reps, nrow = n1)
     FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
   }
 
@@ -142,6 +145,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
       FStatb1 <- as.numeric(t(Rb) %*% solve(Ab) %*% Rb)/n1b
       
     }else if(MethodVar == "model"){
+ #     Predvarb <- ifelse(Predvarb < 0,0.00000001, Predvarb)
+      
       Ab <- MSE0b*CPb + Predvarb*diag(1/repsb, nrow = n1b)
       FStatb1 <- as.numeric(t(Rb) %*% solve(Ab) %*% Rb)/n1b
     }
@@ -161,7 +166,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   ans <- list("FStat" = FStat,
               "FDist" = ecdf(FStatb),
               "p.value" = pvalb,
-              "n1" = n1, "df0" = df0)
+              "n1" = n1, "df0" = df0,
+              "Fstatb" = FStatb, "A" = A, "R" = R, "predvar" = Predvar )
   class(ans) <- append("meanR", class(ans))
   ans
 }
