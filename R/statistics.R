@@ -166,8 +166,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   ans <- list("FStat" = FStat,
               "FDist" = ecdf(FStatb),
               "p.value" = pvalb,
-              "n1" = n1, "df0" = df0,
-              "Fstatb" = FStatb, "A" = A, "R" = R, "predvar" = Predvar )
+              "n1" = n1, "df0" = df0)
   class(ans) <- append("meanR", class(ans))
   ans
 }
@@ -219,7 +218,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                 cutoff = 0.95, cl = NULL, ...) {
+                 cutoff = 0.95, cl = NULL, 
+                 MethodVar = c("equal", "unequal", "model"),...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -240,16 +240,45 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   R <- Ymean[["effect - predicted"]]
   n1 <- length(R)
 
-  A <- (CP + diag(1/reps))*MSE0
-
+  if(MethodVar == "equal"){
+    
+    A <- (CP + diag(1/reps))*MSE0
+    
+  }else if(MethodVar == "unequal"){
+    
+    dat_off <- with(data, data[d1 != 0 & d2 != 0,])
+    off_var<-aggregate(effect ~ d1 + d2, data = dat_off, var)
+    mse_off<- mean(off_var$effect)
+    
+    A <- MSE0*CP + mse_off*diag(1/reps)
+    
+  }else if(MethodVar == "model"){
+    
+    dat_off <- with(data, data[d1 != 0 & d2 != 0,])
+    off_var <- aggregate(effect ~ d1 + d2, data = dat_off, var)
+    off_mean <-aggregate(effect ~ d1 + d2, data = dat_off, mean)
+    df <- merge(off_var, off_mean, by = c("d1", "d2"))
+    names(df) <- c("d1", "d2", "Off_var", "Off_mean")
+    df <- df[order(df$d2,df$d1),]
+    rownames(df) <- NULL
+    
+    linmod<-lm(Off_var ~ Off_mean, data = df)
+    Predvar <- predict(linmod, list(Off_mean = df$Off_mean))
+    Predvar <- ifelse(Predvar < 0,0.00001, Predvar)
+    
+    A <- MSE0*CP + Predvar*diag(1/reps)
+  }
+  
   E <- eigen(A)
   V <- E$values
   Q <- E$vectors
   Amsq <- Q %*% diag(1/sqrt(V)) %*% t(Q)
-
+  
   RStud <- t(R) %*% Amsq
   Ymean$R <- t(RStud)
   Ymean$absR <- abs(Ymean$R)
+  
+  
 
   ## Use normal approximation if B.B is not provided.
   ## Otherwise, bootstrap the procedure to find the distribution.
@@ -281,6 +310,8 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
       n1b <- out$n1b
       repsb <- out$repsb
       fitResultb <- out$fitResult
+      Predvarb <- out$Predvarb
+      mse_offb <- out$mse_offb
 
       if (nested_bootstrap)
         CPb <- CPBootstrap(data = data, fitResult = fitResultb,
@@ -288,8 +319,19 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
                            B.CP = B.CP, ...)
       else
         CPb <- CP
-
-      Ab <- (CPb + diag(1/repsb, nrow = n1b))*MSE0b
+      
+      if(MethodVar == "equal"){
+        Ab <- (CPb + diag(1/repsb, nrow = n1b))*MSE0b
+        
+      }else if(MethodVar == "unequal"){
+       
+        Ab <- (MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b))
+        
+      }else if(MethodVar == "model"){
+        
+        Predvarb <- ifelse(Predvarb < 0,0.00001, Predvarb)
+        Ab <- MSE0b*CPb + Predvarb*diag(1/repsb, nrow = n1b)
+      }
 
       Eb <- eigen(Ab)
       Vb <- Eb$values
