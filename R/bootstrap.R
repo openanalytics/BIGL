@@ -47,32 +47,28 @@
 #'   ## Dose levels are taken from existing dataset with d1 and d2 columns
 #'   data <- subset(directAntivirals, experiment == 1)
 #'   generateData(data = data[, c("d1", "d2")], pars = coefs, sigma = 1)
-generateData <- function(pars, sigma, data = NULL, 
-                         var_method = c("equal", "unequal","model"),
-                         inc_var = NULL,
-                         modelfit = NULL,
+generateData <- function(pars, sigma, data = NULL,
                          transforms = NULL,
                          null_model = c("loewe", "hsa"),
                          error = 1, sampling_errors = NULL,
                          wild_bootstrap = FALSE, ...) {
-
+  
   ## Argument matching
   null_model <- match.arg(null_model)
-  var_method <- match.arg(var_method)
-
+  
   if (inherits(pars, "MarginalFit")) {
     transforms <- pars$transforms
     pars <- pars$coef
   }
-
+  
   if (is.null(data)) data <- expand.grid("d1" = rep(0:10, each = 2),
                                          "d2" = rep(0:10, each = 2))
-
+  
   if ("effect" %in% colnames(data)) {
     warning("effect column is unneeded for generateData() function and will be dropped.")
     data <- data[, c("d1", "d2")]
   }
-
+  
   ## Use identity transformation if no transform functions are supplied
   if (is.null(transforms)) {
     idF <- function(z, ...) z
@@ -81,106 +77,38 @@ generateData <- function(pars, sigma, data = NULL,
                        "BiolT" = idF,
                        "compositeArgs" = NULL)
   }
-
+  
   ySim <- switch(null_model,
                  "loewe" = generalizedLoewe(data, pars, asymptotes = 2)$response,
                  "hsa" = hsa(data[, c("d1", "d2")], pars))
-
+  
   ySim <- with(transforms,
                PowerT(BiolT(ySim, compositeArgs), compositeArgs))
-
+  
   with(as.list(pars), {
-    if(var_method == "equal"){
-      errors <- switch(as.character(error),
-                       ## Normal
-                       "1" = { rnorm(length(ySim), 0, sigma) },
-                       ## Two normals
-                       "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
-                       mus <- c(-sigma, sigma)
-                       sigmas <- c(sigma/2, sigma/3)
-                       rnorm(length(ySim), mus[ru], sigmas[ru]) },
-                       ## Distribution with right-tail outliers
-                       "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
-                       ## Resampling from defined vector
-                       "4" = { if (!wild_bootstrap) {
-                         errors_test <- sample(sampling_errors, nrow(data), replace = TRUE)
-                         errors_test
-                       } else {
-                         ## Use Rademacher distribution to account for heteroskedasticity
-                         errors_test <- sampling_errors*
-                           (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
-                         errors_test
-                       }},
-                       stop("Unavailable error type.")
-      )
-    }else if(var_method == "unequal"){
-      tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
-      error_vec <- numeric(length(ySim))
-      errors_test <- numeric(length(ySim))
-      errors <- switch(as.character(error),
-                       ## Normal
-                       "1" = { error_vec[tmp] <- rnorm(length(tmp), 0, sigma)
-                       error_vec[-tmp] <- rnorm(length(ySim) - length(tmp), 0, sigma * inc_var)
-                       error_vec},
-                       ## Two normals
-                       "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
-                       mus <- c(-sigma, sigma)
-                       sigmas <- c(sigma/2, sigma/3)
-                       rnorm(length(ySim), mus[ru], sigmas[ru]) },
-                       ## Distribution with right-tail outliers
-                       "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
-                       ## Resampling from defined vector
-                       "4" = { if (!wild_bootstrap) {
-                         errors_test[tmp] <- sample(sampling_errors, length(tmp), replace = TRUE)
-                         errors_test[-tmp] <- sample(sampling_errors*inc_var, 
-                                                     length(ySim) - length(tmp), replace = TRUE)
-                         errors_test
-                       } else {
-                         ## Use Rademacher distribution to account for heteroskedasticity
-                         errors_test <- sampling_errors*
-                           (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
-                         errors_test
-                       }},
-                       stop("Unavailable error type.")
-      )
-      
-    }else if(var_method == "model"){
-      
-      tmp<- as.numeric(rownames(data[data$d1 == 0 | data$d2 == 0,]))
-      predvar <- predict(modelfit, list(Mean = ySim[-tmp]))
-      #predvar <- predict(modelfit, list(Mean = ySim[-tmp], 
-      #                                       meansq = (ySim[-tmp])^2,
-      #                                       meanthree = (ySim[-tmp])^3))
-      predvar <- ifelse(predvar < 0,0.00000001, predvar)
-      error_vec <- numeric(length(ySim))
-      errors_test <- numeric(length(ySim))
-      errors <- switch(as.character(error),
-                       ## Normal
-                       "1" = { error_vec[tmp] <- rnorm(length(tmp), 0, sigma)
-                       error_vec[-tmp] <- rnorm(length(ySim) - length(tmp), 0, sqrt(predvar))
-                       error_vec},
-                       ## Two normals
-                       "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
-                       mus <- c(-sigma, sigma)
-                       sigmas <- c(sigma/2, sigma/3)
-                       rnorm(length(ySim), mus[ru], sigmas[ru]) },
-                       ## Distribution with right-tail outliers
-                       "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
-                       ## Resampling from defined vector
-                       "4" = { if (!wild_bootstrap) {
-                         errors_test[tmp] <- sample(sampling_errors, length(tmp), replace = TRUE)
-                         errors_test[-tmp] <- rnorm(length(ySim) - length(tmp), 0, sqrt(predvar))
-                         errors_test
-                       } else {
-                         ## Use Rademacher distribution to account for heteroskedasticity
-                         errors_test <- sampling_errors*
-                           (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
-                         errors_test
-                       }},
-                       stop("Unavailable error type.")
-      )
-    }
-
+    errors <- switch(as.character(error),
+                     ## Normal
+                     "1" = { rnorm(length(ySim), 0, sigma) },
+                     ## Two normals
+                     "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
+                     mus <- c(-sigma, sigma)
+                     sigmas <- c(sigma/2, sigma/3)
+                     rnorm(length(ySim), mus[ru], sigmas[ru]) },
+                     ## Distribution with right-tail outliers
+                     "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
+                     ## Resampling from defined vector
+                     "4" = { if (!wild_bootstrap) {
+                       errors_test <- sample(sampling_errors, nrow(data), replace = TRUE)
+                       errors_test
+                     } else {
+                       ## Use Rademacher distribution to account for heteroskedasticity
+                       errors_test <- sampling_errors*
+                         (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
+                       errors_test
+                     }},
+                     stop("Unavailable error type.")
+    )
+    
     ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
     data.frame("effect" = ySim, data)
   })
