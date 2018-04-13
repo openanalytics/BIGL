@@ -64,6 +64,12 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
+#' @param MethodVar Asks what assumption should be used for the variance of on and 
+#' off axis points. This argument can take one of the values from \code{c("model", 
+#' "unequal", "equal")}. With the value \code{"model"} as default. \code{"equal"} 
+#' assumes that both on and off axis points have the same variance, \code{"unequal}
+#' estimates a different parameter for on and off axis points and \code{"model"} will
+#' predict a variance based on the average effect of an off-axis point.
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster
 #' @return This function returns a \code{ResponseSurface} object with estimates
@@ -102,7 +108,7 @@ fitSurface <- function(data, fitResult,
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = TRUE,
-                       MethodVar = c("equal", "unequal", "model")) {
+                       MethodVar = c("model", "unequal","equal")) {
 
   ## Argument matching
   null_model <- match.arg(null_model)

@@ -17,7 +17,7 @@
 #' @param cl If parallel computations are desired, \code{cl} should be a cluster
 #'   object created by \code{\link[parallel]{makeCluster}}. If parallel
 #'   computing is active, progress reporting messages are not necessarily
-#'   ordered as it should be expected.
+#'   ordered as it should be expected. 
 #' @param ... Further arguments that will be later passed to
 #'   \code{\link{generateData}} function during bootstrapping
 #' @inheritParams fitSurface
@@ -46,7 +46,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL,
-                  MethodVar = c("equal", "unequal", "model"), ...) {
+                  MethodVar = c("model", "unequal", "equal"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
