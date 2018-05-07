@@ -67,9 +67,10 @@
 #' @param MethodVar Asks what assumption should be used for the variance of on and 
 #' off axis points. This argument can take one of the values from \code{c("model", 
 #' "unequal", "equal")}. With the value \code{"model"} as default. \code{"equal"} 
-#' assumes that both on and off axis points have the same variance, \code{"unequal}
+#' assumes that both on and off axis points have the same variance, \code{"unequal"}
 #' estimates a different parameter for on and off axis points and \code{"model"} will
-#' predict a variance based on the average effect of an off-axis point.
+#' predict a variance based on the average effect of an off-axis point. If the methods 
+#' model or unequal are chosen the parameter transforms should be equal to 0
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster
 #' @return This function returns a \code{ResponseSurface} object with estimates
@@ -114,6 +115,10 @@ fitSurface <- function(data, fitResult,
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
   MethodVar <- match.arg(MethodVar)
+  
+  if(MethodVar %in% c("model", "unequal") & !is.null(transforms)){
+    stop("No transformations should be used when choosing the method as 'model' or 'unequal'")
+  }
 
   ## Verify column names of input dataframe
   if (!all(c(effect, d1, d2) %in% colnames(data)))
