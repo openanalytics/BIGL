@@ -95,7 +95,6 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     
     linmod<-lm(Off_var ~ Off_mean, data = df)
     Predvar <- predict(linmod, list(Off_mean = df$Off_mean))
- #   Predvar <- ifelse(Predvar < 0,0.00000001, Predvar)
     
     A <- MSE0*CP + Predvar*diag(1/reps, nrow = n1)
     FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
@@ -145,7 +144,6 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
       FStatb1 <- as.numeric(t(Rb) %*% solve(Ab) %*% Rb)/n1b
       
     }else if(MethodVar == "model"){
- #     Predvarb <- ifelse(Predvarb < 0,0.00000001, Predvarb)
       
       Ab <- MSE0b*CPb + Predvarb*diag(1/repsb, nrow = n1b)
       FStatb1 <- as.numeric(t(Rb) %*% solve(Ab) %*% Rb)/n1b
@@ -219,7 +217,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL, 
-                 MethodVar = c("equal", "unequal", "model"),...) {
+                 MethodVar = c("model", "unequal", "equal"),...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
