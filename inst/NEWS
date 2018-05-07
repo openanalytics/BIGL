@@ -1,3 +1,5 @@
+1.1.2 (2018-05-07)
+  o fix monotherapy formula in the vignette
 1.1.1 (2018-01-02)
   o added reference to the original article
   o fix DESCRIPTION file according to new R CMD check policy

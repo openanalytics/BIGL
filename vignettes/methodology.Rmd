@@ -14,7 +14,7 @@ Methodology described in this vignette is adapted from the article *"BIGL: Bioch
 
 First, a monotherapy model is described by the following equation.
 
-$$ y\left(d\right) = b + \dfrac{m - b}{1 + \left(\frac{d}{\operatorname{EC50}}\right)^{|h|}} $$
+$$ y\left(d\right) = b + \dfrac{m - b}{1 + \left(\frac{\operatorname{EC50}}{d}\right)^{|h|}} $$
 
 where $y$ is the response (or effect), $d$ is the dose (or concentration) of the compound, $h$ is the Hill's coefficient and $b$ and $m$ are respectively baseline and maximum response for that compound. Lastly, $\textrm{EC50}$ stands for the dose level of the compound needed to attain the midpoint effect, i.e.
 $$y\left(\textrm{EC50}\right) = b + \frac{m - b}{2}$$
