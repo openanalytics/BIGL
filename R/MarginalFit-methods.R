@@ -10,7 +10,8 @@ summary.MarginalFit <- function(object, ...) {
                      ncol = 2, byrow = TRUE)
   colnames(ans$coef) <- if (!is.null(object$names)) object$names else 
         c("Compound 1", "Compound 2")
-  rownames(ans$coef) <- c("Slope", "Maximal response", "ln(EC50)")
+  rownames(ans$coef) <- c("Slope", "Maximal response", "log10(EC50)")
+  ans$coef["log10(EC50)", ] <- log10(exp(ans$coef["log10(EC50)", ]))      
   ans$baseline <- object$coef["b"]
   ans$vcov <- object$vcov
   ans$n <- nrow(object$data)
