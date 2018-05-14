@@ -194,6 +194,9 @@ fitSurface <- function(data, fitResult,
   retObj <- c(retObj, statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
 
+  # add compound names from marginal fit
+  retObj$names <- fitResult$names
+  
   class(retObj) <- append(class(retObj), "ResponseSurface")
   return(retObj)
 

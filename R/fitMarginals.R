@@ -36,6 +36,7 @@
 #'   optimization based on Nelder-Mean algorithm in \code{\link[stats]{optim}}.
 #'   This method can be noticeably slower than the non-linear least squares
 #'   methods.
+#' @param names Compound names to be used on the plot labels.
 #' @param ... Further arguments that are passed to the optimizer function, 
 #' such as \code{lower} or \code{upper} (for the "nlslm" method), or 
 #' \code{control}.
@@ -71,7 +72,8 @@
 #' @export
 fitMarginals <- function(data, transforms = NULL, start = NULL,
                          constraints = NULL, fixed = NULL,
-                         method = c("nlslm", "nls", "optim"), ...) {
+                         method = c("nlslm", "nls", "optim"), names = NULL, 
+                         ...) {
 
   method <- match.arg(method)
 
@@ -137,6 +139,13 @@ fitMarginals <- function(data, transforms = NULL, start = NULL,
                       "optim" = { do.call(marginalOptim, fitArgs) })
 
   fitResult$method <- method
+
+  # use default names if unspecified
+  if (is.null(names) || !is.character(names) || length(names) != 2) {
+    names <- c("Compound 1", "Compound 2")
+  }
+  fitResult$names <- names
+  
   class(fitResult) <- append("MarginalFit", class(fitResult))
 
   fitResult

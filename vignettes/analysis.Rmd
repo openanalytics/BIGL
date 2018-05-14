@@ -110,9 +110,13 @@ The marginal models will be estimated together using non-linear least squares es
 
 Before proceeding onto the estimation, we get a rough guess of the parameters to use as starting values in optimization and then we fit the model. `marginalFit`, returned by the `fitMarginals` routine, is an object of class `MarginalFit` which is essentially a list containing the main information about the marginal models, in particular the estimated coeffcients.
 
+The optional `names` argument allows to specify the names of the compounds to
+be shown on the plots and in the summary. If not defined, the defaults
+("Compound 1" and "Compound 2") are used.
 ```{r marginalFit}
 ## Fitting marginal models
-marginalFit <- fitMarginals(data, transforms = transforms, method = "nls")
+marginalFit <- fitMarginals(data, transforms = transforms, method = "nls", 
+    names = c("Drug A", "Drug B"))
 summary(marginalFit)
 ```
 

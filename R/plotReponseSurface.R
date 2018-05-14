@@ -212,7 +212,8 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ##
   ## 3-dimensional surface plotting
   ##
-  labnames <- c("Response", "Compound 1", "Compound 2")
+  labnames <- c("Response", if (!is.null(fitResult$names)) 
+            fitResult$names else c("Compound 1", "Compound 2"))
   if (!is.null(attr(data, "orig.colnames")))
     labnames <- attr(data, "orig.colnames")
 

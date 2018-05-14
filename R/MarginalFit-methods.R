@@ -8,7 +8,8 @@ summary.MarginalFit <- function(object, ...) {
   ans <- list()
   ans$coef <- matrix(object$coef[c("h1", "h2", "m1", "m2", "e1", "e2")],
                      ncol = 2, byrow = TRUE)
-  colnames(ans$coef) <- c("Compound 1", "Compound 2")
+  colnames(ans$coef) <- if (!is.null(object$names)) object$names else 
+        c("Compound 1", "Compound 2")
   rownames(ans$coef) <- c("Slope", "Maximal response", "ln(EC50)")
   ans$baseline <- object$coef["b"]
   ans$vcov <- object$vcov
@@ -165,7 +166,8 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, ...) {
     z + 0.5 * eps[comp]
   }
 
-  labnames <- c("Response", "Compound 1", "Compound 2")
+  labnames <- c("Response", 
+      if (!is.null(x$names)) x$names else c("Compound 1", "Compound 2"))
   if (!is.null(attr(x$data, "orig.colnames"))) {
     labnames <- unlist(attr(x$data, "orig.colnames"))
   }
