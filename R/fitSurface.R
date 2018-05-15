@@ -64,6 +64,13 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
+#' @param MethodVar Asks what assumption should be used for the variance of on and 
+#' off axis points. This argument can take one of the values from \code{c("model", 
+#' "unequal", "equal")}. With the value \code{"model"} as default. \code{"equal"} 
+#' assumes that both on and off axis points have the same variance, \code{"unequal"}
+#' estimates a different parameter for on and off axis points and \code{"model"} will
+#' predict a variance based on the average effect of an off-axis point. If the methods 
+#' model or unequal are chosen the parameter transforms should be equal to 0
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster
 #' @return This function returns a \code{ResponseSurface} object with estimates
@@ -101,11 +108,17 @@ fitSurface <- function(data, fitResult,
                        statistic = c("none", "meanR", "maxR", "both"),
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
-                       cutoff = 0.95, parallel = TRUE) {
+                       cutoff = 0.95, parallel = TRUE,
+                       MethodVar = c("model", "unequal","equal")) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
+  MethodVar <- match.arg(MethodVar)
+  
+  if(MethodVar %in% c("model", "unequal") & !is.null(transforms)){
+    stop("No transformations should be used when choosing the method as 'model' or 'unequal'")
+  }
 
   ## Verify column names of input dataframe
   if (!all(c(effect, d1, d2) %in% colnames(data)))
@@ -171,6 +184,7 @@ fitSurface <- function(data, fitResult,
                           "wild_bootstrap" = wild_bootstrap,
                           "cutoff" = cutoff, "Ymean" = Ymean,
                           "reps" = reps, "R" = R,
+                          "MethodVar" = MethodVar,
                           "clusterObj" = clusterObj)
 
   ## If not provided, compute prediction covariance matrix by bootstrap

@@ -9,7 +9,7 @@ fitSurface(data, fitResult, transforms = fitResult$transforms,
   d2 = "d2", statistic = c("none", "meanR", "maxR", "both"), CP = NULL,
   B.CP = 50, B.B = NULL, nested_bootstrap = FALSE, error = 4,
   sampling_errors = NULL, wild_bootstrap = FALSE, cutoff = 0.95,
-  parallel = TRUE)
+  parallel = TRUE, MethodVar = c("model", "unequal", "equal"))
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
@@ -87,6 +87,13 @@ be used or logical \code{TRUE/FALSE}. If \code{parallel = TRUE}, then
 \code{max(1, detectCores()-1)} is set to be the number of threads. If
 \code{parallel = FALSE}, then a single thread is used and cluster object
 is not created.}
+
+\item{MethodVar}{Asks what assumption should be used for the variance of on and 
+off axis points. This argument can take one of the values from \code{c("model", 
+"unequal", "equal")}. With the value \code{"model"} as default. \code{"equal"} 
+assumes that both on and off axis points have the same variance, \code{"unequal"}
+estimates a different parameter for on and off axis points and \code{"model"} will
+predict a variance based on the average effect of an off-axis point.}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates

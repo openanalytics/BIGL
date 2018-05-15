@@ -52,23 +52,23 @@ generateData <- function(pars, sigma, data = NULL,
                          null_model = c("loewe", "hsa"),
                          error = 1, sampling_errors = NULL,
                          wild_bootstrap = FALSE, ...) {
-
+  
   ## Argument matching
   null_model <- match.arg(null_model)
-
+  
   if (inherits(pars, "MarginalFit")) {
     transforms <- pars$transforms
     pars <- pars$coef
   }
-
+  
   if (is.null(data)) data <- expand.grid("d1" = rep(0:10, each = 2),
                                          "d2" = rep(0:10, each = 2))
-
+  
   if ("effect" %in% colnames(data)) {
     warning("effect column is unneeded for generateData() function and will be dropped.")
     data <- data[, c("d1", "d2")]
   }
-
+  
   ## Use identity transformation if no transform functions are supplied
   if (is.null(transforms)) {
     idF <- function(z, ...) z
@@ -77,38 +77,38 @@ generateData <- function(pars, sigma, data = NULL,
                        "BiolT" = idF,
                        "compositeArgs" = NULL)
   }
-
+  
   ySim <- switch(null_model,
                  "loewe" = generalizedLoewe(data, pars, asymptotes = 2)$response,
                  "hsa" = hsa(data[, c("d1", "d2")], pars))
-
+  
   ySim <- with(transforms,
                PowerT(BiolT(ySim, compositeArgs), compositeArgs))
-
+  
   with(as.list(pars), {
     errors <- switch(as.character(error),
                      ## Normal
                      "1" = { rnorm(length(ySim), 0, sigma) },
                      ## Two normals
                      "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
-                             mus <- c(-sigma, sigma)
-                             sigmas <- c(sigma/2, sigma/3)
-                             rnorm(length(ySim), mus[ru], sigmas[ru]) },
+                     mus <- c(-sigma, sigma)
+                     sigmas <- c(sigma/2, sigma/3)
+                     rnorm(length(ySim), mus[ru], sigmas[ru]) },
                      ## Distribution with right-tail outliers
                      "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
                      ## Resampling from defined vector
                      "4" = { if (!wild_bootstrap) {
-                               errors_test <- sample(sampling_errors, nrow(data), replace = TRUE)
-                               errors_test
-                             } else {
-                               ## Use Rademacher distribution to account for heteroskedasticity
-                               errors_test <- sampling_errors*
-                                 (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
-                               errors_test
-                             }},
+                       errors_test <- sample(sampling_errors, nrow(data), replace = TRUE)
+                       errors_test
+                     } else {
+                       ## Use Rademacher distribution to account for heteroskedasticity
+                       errors_test <- sampling_errors*
+                         (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
+                       errors_test
+                     }},
                      stop("Unavailable error type.")
-                     )
-
+    )
+    
     ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
     data.frame("effect" = ySim, data)
   })
@@ -204,9 +204,22 @@ bootstrapData <- function(data, fitResult,
   ## Estimators of the residual variance
   df0b <- fitResultB$df
   MSE0b <- fitResultB$sigma^2
+  
+  dat_offB <- with(dataB, dataB[d1 != 0 & d2 != 0,])
+  off_varB <- aggregate(effect ~ d1 + d2, data = dat_offB, var)
+  mse_offb <- mean(off_varB$effect)
+  off_meanB <-aggregate(effect ~ d1 + d2, data = dat_offB, mean)
+  dfB <- merge(off_varB, off_meanB, by = c("d1", "d2"))
+  names(dfB) <- c("d1", "d2", "Off_var", "Off_mean")
+  dfB <- dfB[order(dfB$d2,dfB$d1),]
+  rownames(dfB) <- NULL
+  
+  linmodB<-lm(Off_var ~ Off_mean, data = dfB)
+  PredvarB <- predict(linmodB, list(Off_mean = dfB$Off_mean))
 
   out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
-              "n1b" = n1b, "repsb" = repsb)
+              "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,
+              "mse_offb" = mse_offb)
 
   return(out)
 }
