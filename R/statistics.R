@@ -46,7 +46,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL,
-                  MethodVar = c("model", "unequal", "equal"), ...) {
+                  MethodVar = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -217,11 +217,12 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL, 
-                 MethodVar = c("model", "unequal", "equal"),...) {
+                 MethodVar = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
-
+  MethodVar <- match.arg(MethodVar)
+  
   ## If not supplied, calculate these manually
   if (missing(reps) | missing(Ymean)) {
     respS <- predictOffAxis(data = data, fitResult = fitResult,
