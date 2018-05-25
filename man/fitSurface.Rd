@@ -9,7 +9,7 @@ fitSurface(data, fitResult, transforms = fitResult$transforms,
   d2 = "d2", statistic = c("none", "meanR", "maxR", "both"), CP = NULL,
   B.CP = 50, B.B = NULL, nested_bootstrap = FALSE, error = 4,
   sampling_errors = NULL, wild_bootstrap = FALSE, cutoff = 0.95,
-  parallel = TRUE, MethodVar = c("model", "unequal", "equal"))
+  parallel = TRUE, MethodVar = c("equal", "model", "unequal"))
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
@@ -88,12 +88,15 @@ be used or logical \code{TRUE/FALSE}. If \code{parallel = TRUE}, then
 \code{parallel = FALSE}, then a single thread is used and cluster object
 is not created.}
 
-\item{MethodVar}{Asks what assumption should be used for the variance of on and 
-off axis points. This argument can take one of the values from \code{c("model", 
-"unequal", "equal")}. With the value \code{"model"} as default. \code{"equal"} 
-assumes that both on and off axis points have the same variance, \code{"unequal"}
-estimates a different parameter for on and off axis points and \code{"model"} will
-predict a variance based on the average effect of an off-axis point.}
+\item{MethodVar}{What assumption should be used for the variance of on- and 
+off-axis points. This argument can take one of the values from 
+\code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
+default. \code{"equal"} assumes that both on- and off-axis points have the 
+same variance, \code{"unequal"} estimates a different parameter for on- and 
+off-axis points and \code{"model"} predicts variance based on the average 
+effect of an off-axis point. If no transformations are used the 
+\code{"model"} method is recommended. If transformations are used, only the
+\code{"equal"} method can be chosen.}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates
