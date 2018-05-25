@@ -46,11 +46,11 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL,
-                  MethodVar = c("equal", "model", "unequal"), ...) {
+                  method = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
-  MethodVar <- match.arg(MethodVar)
+  method <- match.arg(method)
 
   ## If not supplied, calculate these manually
   if (missing(R) | missing(reps)) {
@@ -72,7 +72,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
   linmod   <- lm(off_var ~ off_mean)
   
-  mse_off <- switch(MethodVar,
+  mse_off <- switch(method,
       "equal" = MSE0,
       "model" = predict(linmod),
       "unequal" = mean(off_var)
@@ -115,7 +115,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                          transforms = transforms, null_model = null_model,
                          B.CP = B.CP, ...)
     
-    mse_offb <- switch(MethodVar,
+    mse_offb <- switch(method,
         "equal" = MSE0b,
         "model" = Predvarb,
         "unequal" = mse_offb
@@ -192,11 +192,11 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL, 
-                 MethodVar = c("equal", "model", "unequal"), ...) {
+                 method = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
-  MethodVar <- match.arg(MethodVar)
+  method <- match.arg(method)
   
   ## If not supplied, calculate these manually
   if (missing(reps) | missing(Ymean)) {
@@ -219,7 +219,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
   linmod <- lm(off_var ~ off_mean)
   
-  mse_off <- switch(MethodVar,
+  mse_off <- switch(method,
       "equal" = MSE0,
       "model" = {
         Predvar <- predict(linmod)
@@ -278,7 +278,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
             transforms = transforms, null_model = null_model,
             B.CP = B.CP, ...)
       
-      mse_offb <- switch(MethodVar,
+      mse_offb <- switch(method,
           "equal" = MSE0b,
           "model" = ifelse(Predvarb < 0, 0.00001, Predvarb),
           "unequal" = mse_offb

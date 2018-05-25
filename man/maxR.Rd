@@ -7,7 +7,7 @@
 maxR(data, fitResult, transforms = fitResult$transforms,
   null_model = c("loewe", "hsa"), Ymean, CP, reps, nested_bootstrap = FALSE,
   B.B = NULL, B.CP = NULL, cutoff = 0.95, cl = NULL,
-  MethodVar = c("equal", "model", "unequal"), ...)
+  method = c("equal", "model", "unequal"), ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
@@ -66,7 +66,7 @@ object created by \code{\link[parallel]{makeCluster}}. If parallel
 computing is active, progress reporting messages are not necessarily
 ordered as it should be expected.}
 
-\item{MethodVar}{What assumption should be used for the variance of on- and 
+\item{method}{What assumption should be used for the variance of on- and 
 off-axis points. This argument can take one of the values from 
 \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
 default. \code{"equal"} assumes that both on- and off-axis points have the 

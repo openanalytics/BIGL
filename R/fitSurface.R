@@ -64,7 +64,7 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
-#' @param MethodVar What assumption should be used for the variance of on- and 
+#' @param method What assumption should be used for the variance of on- and 
 #'   off-axis points. This argument can take one of the values from 
 #'   \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
 #'   default. \code{"equal"} assumes that both on- and off-axis points have the 
@@ -111,14 +111,14 @@ fitSurface <- function(data, fitResult,
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = TRUE,
-                       MethodVar = c("equal", "model", "unequal")) {
+                       method = c("equal", "model", "unequal")) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
-  MethodVar <- match.arg(MethodVar)
+  method <- match.arg(method)
   
-  if (MethodVar %in% c("model", "unequal") && (!is.null(transforms) || !is.null(fitResult$transforms))) {
+  if (method %in% c("model", "unequal") && (!is.null(transforms) || !is.null(fitResult$transforms))) {
     stop("No transformations can be used when choosing the method 'model' or 'unequal'")
   }
 
@@ -186,7 +186,7 @@ fitSurface <- function(data, fitResult,
                           "wild_bootstrap" = wild_bootstrap,
                           "cutoff" = cutoff, "Ymean" = Ymean,
                           "reps" = reps, "R" = R,
-                          "MethodVar" = MethodVar,
+                          "method" = method,
                           "clusterObj" = clusterObj)
 
   ## If not provided, compute prediction covariance matrix by bootstrap
