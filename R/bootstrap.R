@@ -205,17 +205,13 @@ bootstrapData <- function(data, fitResult,
   df0b <- fitResultB$df
   MSE0b <- fitResultB$sigma^2
   
-  dat_offB <- with(dataB, dataB[d1 != 0 & d2 != 0,])
-  off_varB <- aggregate(effect ~ d1 + d2, data = dat_offB, var)
-  mse_offb <- mean(off_varB$effect)
-  off_meanB <-aggregate(effect ~ d1 + d2, data = dat_offB, mean)
-  dfB <- merge(off_varB, off_meanB, by = c("d1", "d2"))
-  names(dfB) <- c("d1", "d2", "Off_var", "Off_mean")
-  dfB <- dfB[order(dfB$d2,dfB$d1),]
-  rownames(dfB) <- NULL
+  dat_offB  <- dataB[dataB$d1 != 0 & dataB$d2 != 0, ]
+  off_varB  <- aggregate(effect ~ d1 + d2, data = dat_offB, var)[["effect"]]
+  mse_offb  <- mean(off_varB)
+  off_meanB <- aggregate(effect ~ d1 + d2, data = dat_offB, mean)[["effect"]]
   
-  linmodB<-lm(Off_var ~ Off_mean, data = dfB)
-  PredvarB <- predict(linmodB, list(Off_mean = dfB$Off_mean))
+  linmodB <- lm(off_varB ~ off_meanB)
+  PredvarB <- predict(linmodB)
 
   out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
               "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,

@@ -66,40 +66,21 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   n1 <- length(R)
   MSE0 <- fitResult$sigma^2
   df0 <- fitResult$df
+
+  dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
+  off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
+  off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
+  linmod   <- lm(off_var ~ off_mean)
   
-  if(MethodVar == "equal"){
+  mse_off <- switch(MethodVar,
+      "equal" = MSE0,
+      "model" = predict(linmod),
+      "unequal" = mean(off_var)
+  )
 
-  A <- CP + diag(1/reps)
-
-  ## Test statistic and its degrees of freedom
-  FStat <- as.numeric(t(R) %*% solve(A) %*% R / (n1*MSE0))
+  A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
+  FStat <- as.numeric(t(R) %*% solve(A) %*% R / n1)
   
-  }else if(MethodVar == "unequal"){
-    
-    dat_off <- with(data, data[d1 != 0 & d2 != 0,])
-    off_var<-aggregate(effect ~ d1 + d2, data = dat_off, var)
-    mse_off<- mean(off_var$effect)
-    
-    A <- MSE0*CP + mse_off*diag(1/reps)
-    FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
-    
-  }else if(MethodVar == "model"){
-    
-    dat_off <- with(data, data[d1 != 0 & d2 != 0,])
-    off_var <- aggregate(effect ~ d1 + d2, data = dat_off, var)
-    off_mean <-aggregate(effect ~ d1 + d2, data = dat_off, mean)
-    df <- merge(off_var, off_mean, by = c("d1", "d2"))
-    names(df) <- c("d1", "d2", "Off_var", "Off_mean")
-    df <- df[order(df$d2,df$d1),]
-    rownames(df) <- NULL
-    
-    linmod<-lm(Off_var ~ Off_mean, data = df)
-    Predvar <- predict(linmod, list(Off_mean = df$Off_mean))
-    
-    A <- MSE0*CP + Predvar*diag(1/reps, nrow = n1)
-    FStat <- as.numeric(t(R) %*% solve(A) %*% R)/n1
-  }
-
   if (is.null(B.B)) {
     ans <- list("FStat" = FStat,
                 "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
@@ -128,28 +109,22 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     Predvarb <- out$Predvarb
     mse_offb <- out$mse_offb
 
+    CPb <- CP
     if (nested_bootstrap)
       CPb <- CPBootstrap(data = data, fitResult = fitResultb,
                          transforms = transforms, null_model = null_model,
                          B.CP = B.CP, ...)
-    else
-      CPb <- CP
     
-    if(MethodVar == "equal"){
-      Ab <- (CPb + diag(1/repsb, nrow = n1b))
-      FStatb1 <- t(Rb) %*% solve(Ab) %*% Rb / (n1b*MSE0b)
+    mse_offb <- switch(MethodVar,
+        "equal" = MSE0b,
+        "model" = Predvarb,
+        "unequal" = mse_offb
+    )
       
-    }else if(MethodVar == "unequal"){
-      Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
-      FStatb1 <- as.numeric(t(Rb) %*% solve(Ab) %*% Rb)/n1b
-      
-    }else if(MethodVar == "model"){
-      
-      Ab <- MSE0b*CPb + Predvarb*diag(1/repsb, nrow = n1b)
-      FStatb1 <- as.numeric(t(Rb) %*% solve(Ab) %*% Rb)/n1b
-    }
-      
-    return(FStatb1)
+    Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
+    FStatb1 <- t(Rb) %*% solve(Ab) %*% Rb / n1b
+    
+    return(as.numeric(FStatb1))
   }
 
   ## Call parallel computation if needed
@@ -239,34 +214,21 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   R <- Ymean[["effect - predicted"]]
   n1 <- length(R)
 
-  if(MethodVar == "equal"){
-    
-    A <- (CP + diag(1/reps))*MSE0
-    
-  }else if(MethodVar == "unequal"){
-    
-    dat_off <- with(data, data[d1 != 0 & d2 != 0,])
-    off_var<-aggregate(effect ~ d1 + d2, data = dat_off, var)
-    mse_off<- mean(off_var$effect)
-    
-    A <- MSE0*CP + mse_off*diag(1/reps)
-    
-  }else if(MethodVar == "model"){
-    
-    dat_off <- with(data, data[d1 != 0 & d2 != 0,])
-    off_var <- aggregate(effect ~ d1 + d2, data = dat_off, var)
-    off_mean <-aggregate(effect ~ d1 + d2, data = dat_off, mean)
-    df <- merge(off_var, off_mean, by = c("d1", "d2"))
-    names(df) <- c("d1", "d2", "Off_var", "Off_mean")
-    df <- df[order(df$d2,df$d1),]
-    rownames(df) <- NULL
-    
-    linmod<-lm(Off_var ~ Off_mean, data = df)
-    Predvar <- predict(linmod, list(Off_mean = df$Off_mean))
-    Predvar <- ifelse(Predvar < 0,0.00001, Predvar)
-    
-    A <- MSE0*CP + Predvar*diag(1/reps)
-  }
+  dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
+  off_var <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
+  off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
+  linmod <- lm(off_var ~ off_mean)
+  
+  mse_off <- switch(MethodVar,
+      "equal" = MSE0,
+      "model" = {
+        Predvar <- predict(linmod)
+        ifelse(Predvar < 0, 0.00001, Predvar)
+      },
+      "unequal" = mean(off_var)
+  )
+  
+  A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
   
   E <- eigen(A)
   V <- E$values
@@ -276,8 +238,6 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   RStud <- t(R) %*% Amsq
   Ymean$R <- t(RStud)
   Ymean$absR <- abs(Ymean$R)
-  
-  
 
   ## Use normal approximation if B.B is not provided.
   ## Otherwise, bootstrap the procedure to find the distribution.
@@ -312,25 +272,19 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
       Predvarb <- out$Predvarb
       mse_offb <- out$mse_offb
 
+      CPb <- CP
       if (nested_bootstrap)
         CPb <- CPBootstrap(data = data, fitResult = fitResultb,
-                           transforms = transforms, null_model = null_model,
-                           B.CP = B.CP, ...)
-      else
-        CPb <- CP
+            transforms = transforms, null_model = null_model,
+            B.CP = B.CP, ...)
       
-      if(MethodVar == "equal"){
-        Ab <- (CPb + diag(1/repsb, nrow = n1b))*MSE0b
-        
-      }else if(MethodVar == "unequal"){
-       
-        Ab <- (MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b))
-        
-      }else if(MethodVar == "model"){
-        
-        Predvarb <- ifelse(Predvarb < 0,0.00001, Predvarb)
-        Ab <- MSE0b*CPb + Predvarb*diag(1/repsb, nrow = n1b)
-      }
+      mse_offb <- switch(MethodVar,
+          "equal" = MSE0b,
+          "model" = ifelse(Predvarb < 0, 0.00001, Predvarb),
+          "unequal" = mse_offb
+      )
+      
+      Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
 
       Eb <- eigen(Ab)
       Vb <- Eb$values
