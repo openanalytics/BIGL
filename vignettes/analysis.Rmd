@@ -351,6 +351,35 @@ view3d(0, -75)
 rglwidget()
 ```
 
+# Analysis in case of variance heterogeneity
+
+Starting from the package version `1.2.0` the variance can be estimated
+separatelty for on-axis (monotherapy) and off-axis points using `method`
+argument to `fitSurface`. The possible values for
+`method` are:
+* `"equal"`, equal variances assumed (as above, default),
+* `"unequal"`, variance is estimated separately for on-axis and off-axis
+  points,
+* `"model"`, variance is estimated separately for on-axis points and
+  each off-axis point.
+Please see the [methodology vignette](methodology.html) for details. Below we
+show an example analysis in such case. Note that transformations are not
+possible if variances are not assumed equal.
+
+```{r heterogenanalysis, fig.width=6, fig.height=5}
+marginalFit <- fitMarginals(data, transforms = NULL)
+summary(marginalFit)
+
+resM <- fitSurface(data, marginalFit, method = "model", 
+    statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
+
+resU <- fitSurface(data, marginalFit, method = "unequal", 
+    statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
+
+summary(resM) 
+summary(resU)
+```
+
 # Analysis of multiple experiments
 
 In order to proceed with multiple experiments, we repeat the same procedure as previously. We collect all the necessary objects for which estimations do not have to be repeated to generate `meanR` and `maxR` statistics in a simple list.
