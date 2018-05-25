@@ -262,7 +262,10 @@ Occupancy estimates provided with HSA response surface still rely on the (genera
 
 ## Statistical testing
 
-Presence of synergistic or antagonistic effects can be formalized by means of statistical tests. Two types of tests are considered here and are discussed in more details in the [methodology vignette](methodology.html) as well as the [accompanying paper](../papers/newStatistics.pdf).
+Presence of synergistic or antagonistic effects can be formalized by means of
+statistical tests. Two types of tests are considered here and are discussed in
+more details in the [methodology vignette](methodology.html) as well as the
+[accompanying paper](https://dx.doi.org/10.1038/s41598-017-18068-5).
 
 * `meanR` test evaluates how the predicted response surface based on a specified null model differs from the observed one. If the null hypothesis is rejected, this test suggests that at least some dose combinations may exhibit synergistic or antagonistic behaviour. The `meanR` test is not designed to pinpoint which combinations produce these effects nor what type of deviating effect is present.
 
