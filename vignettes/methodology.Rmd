@@ -75,7 +75,7 @@ In order to evaluate any of the null models described above, the `fitSurface` fu
 3. If desired, the function will then calculate the selected statistic to evaluate the deviation of the predictions from the desired null model.
 
 
-## Synergy evaluation
+## Synergy evaluation assuming equal variances for on- and off-axis points
 
 Synergy is evaluated for all off-axis dose combinations, i.e. dose combinations that are not used in the monotherapy curve estimation. Synergy evaluation depends on the underlying null model and any of the above models, i.e. generalized or classical Loewe or Highest Single Agent, can be used for this purpose. We provide here a brief summary of both statistical tests. Technical derivations and further details are available in the article cited at the beginning of the document.
 
@@ -112,3 +112,84 @@ $$
 $$
 where $\left[\cdot\right]_{k}$ indicates the $k$-th coordinate. This test statistic is then compared either to the null distribution based on normal approximation or a bootstrapped approximation.
 
+## Synergy evaluation in case of variance heterogeneity
+
+In the methodology described above one important assumption is made regarding
+the variance of the on- and off-axis dose combinations. It is considered to be
+equal across all points. This assumption is also mentioned in the orignal
+article and its technical supplement. 
+
+In reality it is often seen that the variance of the monotherapies is not equal
+to the variance of the off-axis combinations. The assumption of equal variances
+is thus not always valid. That is why the `meanR` and `maxR` test-statistics can
+also estimate the variances for on-axis (monotherapies) and
+off-axis dose-combinations seperatly. Two extra methods are described below: the
+`SepVar` method (Separated variance) and the `ModVar` method (Modelled
+variance). For both methods replicates are required and no variance-stabilizing
+transformations are required. The latter is often necessary when assuming equal
+variances.
+
+### Adapted `meanR`
+
+The adapted `meanR` test uses two separate variance estimates for 
+(a) the monotherapies (= $\sigma^{2}_{0}$) 
+and 
+(b) the dose combinations (= $\sigma^{2}_{1}$).
+The notation for both `SepVar` as `ModVar` will be the same, but the estimation
+of $\sigma^{2}_{1}$ will be different. The variance of the monotherapies is
+still estimated the same as before by taking the MSE of the null model. The test
+statistic is given by:
+
+$$
+\operatorname{TestStat} = \frac{R^{T}\left(\sigma^{2}_{1}D + \sigma^{2}_{0}C_{p}\right)^{-1}R}{n_{1}}
+$$
+
+1. **`SepVar` method**: The variance for the dose combinations is estimated by
+   taking the variance in each dose combination and then taking the mean of all
+   these variances. The downside of this method is that the variance for all
+   combinations is assumed to be equal. In reality the variance often depends
+   on the mean effect. This is taken into account in the `ModVar` method.
+
+2. **`ModVar` method**: In this method $\sigma^{2}_{1}$ is no longer estimated
+   as a single number but rather as a vector of variances. Each off-axis point
+   has now its own variance. A linear model is fitted on the original dataset,
+   modelling the variance of each off-axis point as a function of its
+   mean effect. The estimated model parameters are then used to predict the
+   variance for the corresponding mean effect measured for that dose
+   combination. These predicted variances are placed in the
+   vector $\sigma^{2}_{1}$.
+
+### Adapted `maxR`
+
+The same approach is taken for the adapted `maxR` test statistic. Instead of
+using one estimated variance for both on- and off-axis points, two separate
+estimates are used. The estimates for $\sigma^{2}_{1}$ are different depending
+on the method used (`ModVar` or `SepVar`). The methodology of estimating the
+variance is the same as was described in the "Adapted `meanR`" section above.
+
+The `maxR` test becomes
+
+$$
+\max \left| R^{T}\left(\sigma^{2}_{1} D + \sigma^{2}_{0} C_{p}\right)^{-1/2} \right|  \sim \max \left| Z_{1}, \dots, Z_{k} \right|
+$$
+
+where $Z_{j} \sim N\left(0,1\right)$. In particular, the test statistic for the $k$-th off-axis dose
+combination $(d_{1}, d_{2})$ is computed as
+$$
+\operatorname{TestStat}\left(d_{1}, d_{2}\right) = \left[\left| R^{T}\left(\sigma^{2}_{1} D + \sigma^{2}_{0} C_{p}\right)^{-1/2} \right| \right]_{k}
+$$
+where $\left[\cdot\right]_{k}$ indicates the $k$-th coordinate. 
+
+### Advantages of `ModVar` and `SepVar`methods compared to assumption of equal variances
+
+The assumption of equal variances between monotherapies and
+off-axis dose-combinations fails to control the type I error rate around
+pre-specified level, when the variance of off-axis points increases (natural
+variance or outliers). This results in false positive synergy calls when in
+reality there were none. Both the `SepVar` and the `ModVar` methods control
+the type I error rate far better, with slightly better results obtained by the
+`ModVar` method.
+
+Furthermore, the sensitivity and specificity of the `maxR` test statistics are
+higher with the methods assuming variance heterogenity compared to the methods
+where equal variances are assumed.
