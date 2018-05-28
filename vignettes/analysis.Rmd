@@ -357,11 +357,13 @@ Starting from the package version `1.2.0` the variance can be estimated
 separatelty for on-axis (monotherapy) and off-axis points using `method`
 argument to `fitSurface`. The possible values for
 `method` are:
+
 * `"equal"`, equal variances assumed (as above, default),
 * `"unequal"`, variance is estimated separately for on-axis and off-axis
   points,
 * `"model"`, variance is estimated separately for on-axis points and
   each off-axis point.
+
 Please see the [methodology vignette](methodology.html) for details. Below we
 show an example analysis in such case. Note that transformations are not
 possible if variances are not assumed equal.
