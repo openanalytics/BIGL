@@ -66,14 +66,17 @@ contour.ResponseSurface <- function(x, ...) {
   if (!exists("maxR", x))
     stop("maxR statistics were not found.")
 
-  cpdNames <- if (!is.null(x$names)) x$names else c("Compound 1", "Compound 2") 
-  if (!hasArg("xlab"))
-    xlab <- paste0("Dose (", cpdNames[[1]], ")")
-  if (!hasArg("ylab"))
-    ylab <- paste0("Dose (", cpdNames[[2]], ")")
+  cpdNames <- if (!is.null(x$names)) x$names else c("Compound 1", "Compound 2")
+  args <- list(...)
+  if (!exists("xlab", args))
+    args$xlab <- paste0("Dose (", cpdNames[[1]], ")")
+  if (!exists("ylab", args))
+    args$ylab <- paste0("Dose (", cpdNames[[2]], ")")
   
-  plot(x$maxR, xlab = xlab, ylab = ylab, ...)
-
+  args$x <- x$maxR
+  
+  do.call(plot, args)
+  
 }
 
 #' Summary of \code{ResponseSurface} object
