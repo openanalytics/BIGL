@@ -4,9 +4,9 @@
 \alias{constructFormula}
 \title{Construct a model formula from parameter constraint matrix}
 \usage{
-constructFormula(consMatrix = NULL, consVector = NULL, naming = c("h1",
-  "h2", "b", "m1", "m2", "e1", "e2"), extraVars = c("d1", "d2"),
-  formulaArgs = c("effect", "fn"))
+constructFormula(consMatrix = NULL, consVector = NULL,
+  naming = c("h1", "h2", "b", "m1", "m2", "e1", "e2"),
+  extraVars = c("d1", "d2"), formulaArgs = c("effect", "fn"))
 }
 \arguments{
 \item{consMatrix}{Constraint matrix}

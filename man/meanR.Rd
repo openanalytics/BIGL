@@ -5,9 +5,9 @@
 \title{Compute meanR statistic for the estimated model}
 \usage{
 meanR(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa"), R, CP, reps, nested_bootstrap = FALSE,
-  B.B = NULL, B.CP = NULL, cl = NULL, method = c("equal", "model",
-  "unequal"), ...)
+  null_model = c("loewe", "hsa"), R, CP, reps,
+  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL, cl = NULL,
+  method = c("equal", "model", "unequal"), ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

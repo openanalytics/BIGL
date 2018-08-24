@@ -6,10 +6,11 @@
 \usage{
 fitSurface(data, fitResult, transforms = fitResult$transforms,
   null_model = c("loewe", "hsa"), effect = "effect", d1 = "d1",
-  d2 = "d2", statistic = c("none", "meanR", "maxR", "both"), CP = NULL,
-  B.CP = 50, B.B = NULL, nested_bootstrap = FALSE, error = 4,
-  sampling_errors = NULL, wild_bootstrap = FALSE, cutoff = 0.95,
-  parallel = TRUE, method = c("equal", "model", "unequal"))
+  d2 = "d2", statistic = c("none", "meanR", "maxR", "both"),
+  CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
+  error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
+  cutoff = 0.95, parallel = TRUE, method = c("equal", "model",
+  "unequal"))
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
