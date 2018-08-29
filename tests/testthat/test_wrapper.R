@@ -33,7 +33,7 @@ test_that('statistics', {
 })
 
 test_that("plots", {
-      expect_silent(contour(rs))
-      expect_silent(contour(rs, xlab = "x-label", ylab = "y-label"))
+      contour(rs)
+      contour(rs, xlab = "x-label", ylab = "y-label")
       plot(rs, "maxR")
     })
