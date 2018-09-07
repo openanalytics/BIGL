@@ -62,7 +62,10 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     if (missing(reps)) reps <- aggregate(effect ~ d1 + d2,
                                          data = respS$offaxisZTable, length)[["effect"]]
   }
-
+  if (all(reps == 1) && method %in% c("model", "unequal")) {
+    stop("Replicates are required when choosing the method 'model' or 'unequal'")
+  }
+  
   n1 <- length(R)
   MSE0 <- fitResult$sigma^2
   df0 <- fitResult$df
@@ -70,11 +73,13 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
   off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
   off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
-  linmod   <- lm(off_var ~ off_mean)
   
   mse_off <- switch(method,
       "equal" = MSE0,
-      "model" = predict(linmod),
+      "model" = {
+        linmod <- lm(off_var ~ off_mean)
+        predict(linmod)
+      },
       "unequal" = mean(off_var)
   )
 
@@ -207,7 +212,11 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     if (missing(reps)) reps <- aggregate(effect ~ d1 + d2,
                                          respS$offaxisZTable, length)[["effect"]]
   }
-
+  
+  if (all(reps == 1) && method %in% c("model", "unequal")) {
+    stop("Replicates are required when choosing the method 'model' or 'unequal'")
+  }
+  
   MSE0 <- fitResult$sigma^2
   df0 <- fitResult$df
   coefFit <- fitResult$coef
@@ -215,13 +224,13 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   n1 <- length(R)
 
   dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
-  off_var <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
+  off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
   off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
-  linmod <- lm(off_var ~ off_mean)
   
   mse_off <- switch(method,
       "equal" = MSE0,
       "model" = {
+        linmod <- lm(off_var ~ off_mean)
         Predvar <- predict(linmod)
         ifelse(Predvar < 0, 0.00001, Predvar)
       },
