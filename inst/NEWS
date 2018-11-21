@@ -1,3 +1,5 @@
+1.2.3 (2018-11-21)
+  o better support for flat monotherapies
 1.2.2 (2018-09-07)
   o make sure if no replicates are there model/unequal method is not allowed
 1.2.1 (2018-08-24)

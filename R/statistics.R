@@ -320,8 +320,8 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   call <- {
     if (max(Ymean$absR) > q) {
       invertCall <- Ymean$R[which.max(Ymean$absR)] < 0
-      inc1 <- coefFit["m1"] > coefFit["b"]
-      inc2 <- coefFit["m2"] > coefFit["b"]
+      inc1 <- coefFit["m1"] >= coefFit["b"]
+      inc2 <- coefFit["m2"] >= coefFit["b"]
       if (inc1 & inc2) c("Syn", "Ant")[1 + invertCall]
       else if (!inc1 & !inc2) c("Ant", "Syn")[1 + invertCall]
       else "Undefined"
