@@ -29,7 +29,7 @@
 #'   predictOffAxis(data, fitResult, null_model = "hsa")
 predictOffAxis <- function(data, fitResult,
                            transforms = fitResult$transforms,
-                           null_model = c("loewe", "hsa"), ...) {
+                           null_model = c("loewe", "hsa", "bliss"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -42,7 +42,8 @@ predictOffAxis <- function(data, fitResult,
   fitLoewe <- generalizedLoewe(doseGrid, fitResult$coef)
   predSurface[] <- switch(null_model,
                           "loewe" = fitLoewe$response,
-                          "hsa" = hsa(doseGrid, fitResult$coef))
+                          "hsa" = hsa(doseGrid, fitResult$coef),
+                          "bliss" = Blissindependence(doseGrid, fitResult$coef))
 
   if (!is.null(transforms)) {
     CompositeT <- with(transforms,

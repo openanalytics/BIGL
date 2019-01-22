@@ -96,7 +96,7 @@
 #' @export
 fitSurface <- function(data, fitResult,
                        transforms = fitResult$transforms,
-                       null_model = c("loewe", "hsa"),
+                       null_model = c("loewe", "hsa", "bliss"),
                        effect = "effect", d1 = "d1", d2 = "d2",
                        statistic = c("none", "meanR", "maxR", "both"),
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,

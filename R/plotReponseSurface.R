@@ -81,7 +81,7 @@
 #' }
 plotResponseSurface <- function(data, fitResult = NULL,
                                 transforms = fitResult$transforms,
-                                predSurface = NULL, null_model = c("loewe", "hsa"),
+                                predSurface = NULL, null_model = c("loewe", "hsa", "bliss"),
                                 colorPalette = c("blue", "grey70", "red"),
                                 colorBy = "none",
                                 colorPoints = c("black", "sandybrown", "brown", "white"),
