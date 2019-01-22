@@ -5,7 +5,7 @@
 \title{Compute maxR statistic for each off-axis dose combination}
 \usage{
 maxR(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa"), Ymean, CP, reps,
+  null_model = c("loewe", "hsa", "bliss"), Ymean, CP, reps,
   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL, cutoff = 0.95,
   cl = NULL, method = c("equal", "model", "unequal"), ...)
 }

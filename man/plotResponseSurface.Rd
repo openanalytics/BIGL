@@ -6,12 +6,13 @@
 \usage{
 plotResponseSurface(data, fitResult = NULL,
   transforms = fitResult$transforms, predSurface = NULL,
-  null_model = c("loewe", "hsa"), colorPalette = c("blue", "grey70",
-  "red"), colorBy = "none", colorPoints = c("black", "sandybrown",
-  "brown", "white"), breaks = c(-Inf, 0, Inf), radius = NULL,
-  logScale = TRUE, colorfun = median, zTransform = function(x) x,
-  add = FALSE, main = "", legend = TRUE, xat = "actual",
-  yat = "actual", plotfun = NULL, ...)
+  null_model = c("loewe", "hsa", "bliss"), colorPalette = c("blue",
+  "grey70", "red"), colorBy = "none", colorPoints = c("black",
+  "sandybrown", "brown", "white"), breaks = c(-Inf, 0, Inf),
+  radius = NULL, logScale = TRUE, colorfun = median,
+  zTransform = function(x) x, add = FALSE, main = "",
+  legend = TRUE, xat = "actual", yat = "actual", plotfun = NULL,
+  ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
