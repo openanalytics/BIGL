@@ -37,3 +37,22 @@ test_that("calls", {
 
 
 })
+
+test_that("calls with no replicates", {
+      
+      ## Decreasing marginal curves
+      sims <- genData(parsDec, 1, -1)
+      rs <- fitSurface(sims$data, sims$pars, statistic = "both",
+          B.CP = 2, B.B = NULL, parallel = FALSE)
+      expect_equal(rs$maxR$Call, "Syn")
+      
+      expect_error(rs <- fitSurface(sims$data, sims$pars, statistic = "both",
+              B.CP = 2, B.B = NULL, parallel = FALSE, method = "model"),
+          "Replicates are required")
+      
+      expect_error(rs <- fitSurface(sims$data, sims$pars, statistic = "both",
+              B.CP = 2, B.B = NULL, parallel = FALSE, method = "unequal"),
+          "Replicates are required")
+      
+    })
+

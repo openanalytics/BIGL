@@ -64,6 +64,15 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
+#' @param method What assumption should be used for the variance of on- and 
+#'   off-axis points. This argument can take one of the values from 
+#'   \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
+#'   default. \code{"equal"} assumes that both on- and off-axis points have the 
+#'   same variance, \code{"unequal"} estimates a different parameter for on- and 
+#'   off-axis points and \code{"model"} predicts variance based on the average 
+#'   effect of an off-axis point. If no transformations are used the 
+#'   \code{"model"} method is recommended. If transformations are used, only the
+#'   \code{"equal"} method can be chosen.
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster
 #' @return This function returns a \code{ResponseSurface} object with estimates
@@ -101,11 +110,17 @@ fitSurface <- function(data, fitResult,
                        statistic = c("none", "meanR", "maxR", "both"),
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
-                       cutoff = 0.95, parallel = TRUE) {
+                       cutoff = 0.95, parallel = TRUE,
+                       method = c("equal", "model", "unequal")) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
+  method <- match.arg(method)
+  
+  if (method %in% c("model", "unequal") && (!is.null(transforms) || !is.null(fitResult$transforms))) {
+    stop("No transformations can be used when choosing the method 'model' or 'unequal'")
+  }
 
   ## Verify column names of input dataframe
   if (!all(c(effect, d1, d2) %in% colnames(data)))
@@ -171,6 +186,7 @@ fitSurface <- function(data, fitResult,
                           "wild_bootstrap" = wild_bootstrap,
                           "cutoff" = cutoff, "Ymean" = Ymean,
                           "reps" = reps, "R" = R,
+                          "method" = method,
                           "clusterObj" = clusterObj)
 
   ## If not provided, compute prediction covariance matrix by bootstrap
@@ -180,6 +196,7 @@ fitSurface <- function(data, fitResult,
   retObj <- list("data" = data,
                  "fitResult" = fitResult,
                  "transforms" = transforms,
+                 "method" = method,
                  "null_model" = null_model,
                  "offAxisTable" = offAxisTable,
                  "occupancy" = respS$occupancy,
@@ -194,6 +211,9 @@ fitSurface <- function(data, fitResult,
   retObj <- c(retObj, statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
 
+  # add compound names from marginal fit
+  retObj$names <- fitResult$names
+  
   class(retObj) <- append(class(retObj), "ResponseSurface")
   return(retObj)
 

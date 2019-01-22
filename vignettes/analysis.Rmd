@@ -110,9 +110,13 @@ The marginal models will be estimated together using non-linear least squares es
 
 Before proceeding onto the estimation, we get a rough guess of the parameters to use as starting values in optimization and then we fit the model. `marginalFit`, returned by the `fitMarginals` routine, is an object of class `MarginalFit` which is essentially a list containing the main information about the marginal models, in particular the estimated coeffcients.
 
+The optional `names` argument allows to specify the names of the compounds to
+be shown on the plots and in the summary. If not defined, the defaults
+("Compound 1" and "Compound 2") are used.
 ```{r marginalFit}
 ## Fitting marginal models
-marginalFit <- fitMarginals(data, transforms = transforms, method = "nls")
+marginalFit <- fitMarginals(data, transforms = transforms, method = "nls", 
+    names = c("Drug A", "Drug B"))
 summary(marginalFit)
 ```
 
@@ -258,7 +262,10 @@ Occupancy estimates provided with HSA response surface still rely on the (genera
 
 ## Statistical testing
 
-Presence of synergistic or antagonistic effects can be formalized by means of statistical tests. Two types of tests are considered here and are discussed in more details in the [methodology vignette](methodology.html) as well as the [accompanying paper](../papers/newStatistics.pdf).
+Presence of synergistic or antagonistic effects can be formalized by means of
+statistical tests. Two types of tests are considered here and are discussed in
+more details in the [methodology vignette](methodology.html) as well as the
+[accompanying paper](https://dx.doi.org/10.1038/s41598-017-18068-5).
 
 * `meanR` test evaluates how the predicted response surface based on a specified null model differs from the observed one. If the null hypothesis is rejected, this test suggests that at least some dose combinations may exhibit synergistic or antagonistic behaviour. The `meanR` test is not designed to pinpoint which combinations produce these effects nor what type of deviating effect is present.
 
@@ -342,6 +349,37 @@ Previously, we had colored the 3-dimensional predicted response surface plot bas
 plot(maxR_B, color = "maxR", legend = FALSE, main = "")
 view3d(0, -75)
 rglwidget()
+```
+
+# Analysis in case of variance heterogeneity
+
+Starting from the package version `1.2.0` the variance can be estimated
+separatelty for on-axis (monotherapy) and off-axis points using `method`
+argument to `fitSurface`. The possible values for
+`method` are:
+
+* `"equal"`, equal variances assumed (as above, default),
+* `"unequal"`, variance is estimated separately for on-axis and off-axis
+  points,
+* `"model"`, variance is estimated separately for on-axis points and
+  each off-axis point.
+
+Please see the [methodology vignette](methodology.html) for details. Below we
+show an example analysis in such case. Note that transformations are not
+possible if variances are not assumed equal.
+
+```{r heterogenanalysis, fig.width=6, fig.height=5}
+marginalFit <- fitMarginals(data, transforms = NULL)
+summary(marginalFit)
+
+resM <- fitSurface(data, marginalFit, method = "model", 
+    statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
+
+resU <- fitSurface(data, marginalFit, method = "unequal", 
+    statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
+
+summary(resM) 
+summary(resU)
 ```
 
 # Analysis of multiple experiments

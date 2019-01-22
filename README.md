@@ -1,6 +1,16 @@
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version-ago/BIGL)](https://cran.r-project.org/package=BIGL)
+
+# Biochemically Intuitive Generalized Loewe Model
+
 `BIGL` package for R can be used in studying synergistic effects between two drugs or compounds. It uses response surface approach to study deviations of the observed effects from a predicted response surface.
 
-To install the package from Github, we suggest using `devtools`:
+To install the package from CRAN, run:
+
+```r
+install.packages("BIGL")
+```
+
+To install the latest development version from Github, we suggest using `devtools`:
 
 ```r
 devtools::install_github("OpenAnalytics/BIGL", build_vignettes = TRUE)

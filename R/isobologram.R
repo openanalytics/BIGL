@@ -52,7 +52,8 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
                              "d2" = rep(doses2, each = length(doses1)),
                              "effect" = as.numeric(predSurface))
 
-  labnames <- c("Response", "Compound 1", "Compound 2")
+  labnames <- c("Response", 
+      if (!is.null(x$names)) x$names else c("Compound 1", "Compound 2"))
   if (!is.null(attr(x$data, "orig.colnames"))) {
     labnames <- unlist(attr(x$data, "orig.colnames"))
   }

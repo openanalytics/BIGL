@@ -5,8 +5,9 @@
 \title{Compute maxR statistic for each off-axis dose combination}
 \usage{
 maxR(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa"), Ymean, CP, reps, nested_bootstrap = FALSE,
-  B.B = NULL, B.CP = NULL, cutoff = 0.95, cl = NULL, ...)
+  null_model = c("loewe", "hsa"), Ymean, CP, reps,
+  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL, cutoff = 0.95,
+  cl = NULL, method = c("equal", "model", "unequal"), ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
@@ -64,6 +65,16 @@ either meanR or maxR statistics.}
 object created by \code{\link[parallel]{makeCluster}}. If parallel
 computing is active, progress reporting messages are not necessarily
 ordered as it should be expected.}
+
+\item{method}{What assumption should be used for the variance of on- and 
+off-axis points. This argument can take one of the values from 
+\code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
+default. \code{"equal"} assumes that both on- and off-axis points have the 
+same variance, \code{"unequal"} estimates a different parameter for on- and 
+off-axis points and \code{"model"} predicts variance based on the average 
+effect of an off-axis point. If no transformations are used the 
+\code{"model"} method is recommended. If transformations are used, only the
+\code{"equal"} method can be chosen.}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

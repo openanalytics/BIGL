@@ -4,8 +4,9 @@
 \alias{fitMarginals}
 \title{Fit two 4-parameter log-logistic functions for a synergy experiment}
 \usage{
-fitMarginals(data, transforms = NULL, start = NULL, constraints = NULL,
-  fixed = NULL, method = c("nlslm", "nls", "optim"), ...)
+fitMarginals(data, transforms = NULL, start = NULL,
+  constraints = NULL, fixed = NULL, method = c("nlslm", "nls",
+  "optim"), names = NULL, ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe. Marginal data will be extracted from
@@ -41,6 +42,8 @@ Levenberg-Marquardt non-linear least squares
 optimization based on Nelder-Mean algorithm in \code{\link[stats]{optim}}.
 This method can be noticeably slower than the non-linear least squares
 methods.}
+
+\item{names}{Compound names to be used on the plot labels.}
 
 \item{...}{Further arguments that are passed to the optimizer function, 
 such as \code{lower} or \code{upper} (for the "nlslm" method), or 

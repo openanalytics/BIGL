@@ -1,17 +1,22 @@
 Package: BIGL
 Type: Package
 Title: Biochemically Intuitive Generalized Loewe Model
-Version: 1.1.0
-Date: 2017-09-22
+Version: 1.2.3
+Date: 2018-11-21
 Author: Heather Turner, Annelies Tourny, Olivier Thas, Maxim Nazarov, Rytis Bagdziunas
 Maintainer: Maxim Nazarov <maxim.nazarov@openanalytics.eu>
 Description: Response surface methods for drug synergy analysis. Available
     methods include generalized and classical Loewe formulations as well as Highest
     Single Agent methodology. Response surfaces can be plotted in an interactive
     3-D plot and formal statistical tests for presence of synergistic effects are
-    available.
+    available. Implemented methods and tests are described in the article 
+    "BIGL: Biochemically Intuitive Generalized Loewe null model for prediction 
+    of the expected combined effect compatible with partial agonism and antagonism"
+    by Koen Van der Borght, Annelies Tourny, Rytis Bagdziunas, Olivier Thas, 
+    Maxim Nazarov, Heather Turner, Bie Verbist & Hugo Ceulemans (2017) 
+    <doi:10.1038/s41598-017-18068-5>.
 License: GPL-3
-Depends: R (>= 2.10)
+Depends: R (>= 3.0)
 Imports:
     ggplot2,
     MASS,
@@ -25,11 +30,13 @@ Imports:
     scales
 Suggests:
     knitr,
+    rmarkdown,
     testthat,
     shiny,
     DT
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown
 LazyData: true
 URL: https://github.com/openanalytics/BIGL
 BugReports: https://github.com/openanalytics/BIGL/issues
-RoxygenNote: 6.0.1
+Encoding: UTF-8
+RoxygenNote: 6.1.1

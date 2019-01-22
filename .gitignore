@@ -1,0 +1,4 @@
+/.project
+/.gitignore
+/.settings/
+**/vignettes/*.html
