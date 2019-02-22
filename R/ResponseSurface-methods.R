@@ -117,9 +117,9 @@ print.summary.ResponseSurface <- function(x, ...) {
     cat("Highest Single Agent with shared maximal response")
   else if (x$null_model == "hsa" & x$shared_asymptote == FALSE)
     cat("Highest Single Agent with differing maximal response")
-  else if (x$null_model == "Blissindependence" & x$shared_asymptote == TRUE)
+  else if (x$null_model == "bliss" & x$shared_asymptote == TRUE)
     cat("Bliss independence with shared maximal response")
-  else if (x$null_model == "Blissindependence" & x$shared_asymptote == FALSE)
+  else if (x$null_model == "bliss" & x$shared_asymptote == FALSE)
     cat("Bliss independence with differing maximal response")
   else
     cat(x$null_model)
@@ -157,6 +157,6 @@ fitted.ResponseSurface <- function(object, ...) {
   switch(object$null_model,
          "loewe" = generalizedLoewe(doseInput, parmInput)$response,
          "hsa" = hsa(doseInput, parmInput),
-         "Blissindependence" = Blissindependence(doseInput, parmInput))
+         "bliss" = Blissindependence(doseInput, parmInput))
 
 }
