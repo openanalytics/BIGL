@@ -208,12 +208,12 @@ Note that during bootstrapping this would use `minpack.lm::nlsLM` function to re
 
 ## Compute expected response for off-axis data
 
-Three types of null models are available for calculating expected response surfaces.
+Four types of null models are available for calculating expected response surfaces.
 
-* Generalized Loewe model is used if maximal responses are not constrained to be equal, i.e. `shared_asymptote = FALSE`, in the marginal fitting procedure and `null_model = "loewe"` in response calculation
-* Classical Loewe model is used if constraints are such that `shared_asymptote = TRUE` in the marginal fitting procedure and `null_model = "loewe"` in response calculation
+* Generalized Loewe model is used if maximal responses are not constrained to be equal, i.e. `shared_asymptote = FALSE`, in the marginal fitting procedure and `null_model = "loewe"` in response calculation.
+* Classical Loewe model is used if constraints are such that `shared_asymptote = TRUE` in the marginal fitting procedure and `null_model = "loewe"` in response calculation.
 * Highest Single Agent is used if `null_model = "hsa"` irrespectively of the value of `shared_asymptote`.
-
+* Bliss independence model is used when `null_model = "bliss"`. In the situations when maximal responses are constrained to be equal, the classical Bliss independence approach is used, when they are not equal, the Bliss independence calculation is performed on responses rescaled to the maximum range (i.e. absolute difference between baseline and maximal response).	
 
 ### (Generalized) Loewe model
 
@@ -259,6 +259,18 @@ summary(rsh)
 
 Occupancy estimates provided with HSA response surface still rely on the (generalized) Loewe model.
 
+### Bliss Independence
+
+Also for the Bliss independence null model to work properly, it is expected that both marginal curves are either decreasing or increasing. Equivalent `summary` and `plot` methods are also available for this type of null model.
+
+```{r analysis_bliss, message=FALSE, comment = NA}
+rsb <- fitSurface(data, marginalFit, 
+                  null_model = "bliss",
+                  B.CP = 50, statistic = "both", parallel = FALSE)
+summary(rsb)
+```
+
+Occupancy estimates provided with Bliss response surface still rely on the (generalized) Loewe model.
 
 ## Statistical testing
 

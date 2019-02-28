@@ -10,6 +10,9 @@ vignette: >
 
 Methodology described in this vignette is adapted from the article *"BIGL: Biochemically Intuitive Generalized Loewe null model for prediction of the expected combined effect compatible with partial agonism and antagonism"* (2017) by K. Van der Borght, A. Tourny, R. Bagdziunas, O. Thas, M. Nazarov, H. Turner, B. Verbist and H. Ceulemans ([doi:10.1038/s41598-017-18068-5](https://dx.doi.org/10.1038/s41598-017-18068-5)) as well as its technical supplement. We advise the reader to consult it for a deeper understanding of the procedure described next.
 
+Further chapters were added as extensions on top of the original
+article regarding variance heterogeneity and Bliss independence.
+
 ## Marginal monotherapy curves
 
 First, a monotherapy model is described by the following equation.
@@ -74,6 +77,26 @@ In particular, if $m_{1} = m_{2}$, then generalized Loewe is equivalent to the c
 
 A null model based on the Highest Single Agent (HSA) model does not attempt to model interaction effects at all and the predicted effect of a combination is either the minimum (if marginal curves are decreasing) or the maximum (if marginal curves are increasing) of both monotherapy curves.
 
+### Bliss independence model
+
+Bliss independence implies that two agents do not cooperate, i.e. act independently of each other.
+<!-- In the classical Bliss independence model where marginal models share baseline and maximum response, the predicted response at dose combination $(d_{1}, d_{2})$ is based on the fractional effects of the marginal responses: -->
+
+Bliss independence model is formulated for the fractional responses $f$, where the predicted response $f_{12}$ at dose combination $(d_{1}, d_{2})$ is defined as:
+
+$$ f_{12}(d_1, d_2) = f_1(d_1) + f_2(d_2) - f_1(d_1)f_2(d_2), $$
+
+with
+$$f_1(d_1) = \frac{y\left(d_1\right) - b}{m_1 - b} = \frac{1}{1 + \left(\frac{\operatorname{EC50}_{1}}{d_{1}}\right)^{|h_{1}|}}$$
+$$f_2(d_2) = \frac{y\left(d_2\right) - b}{m_2 - b} = \frac{1}{1 + \left(\frac{\operatorname{EC50}_{2}}{d_{2}}\right)^{|h_{2}|}}$$
+In the classical Bliss independence model, marginal models share baseline and maximum response.
+
+To allow the compounds to have different maximal responses, the fractional responses are rescaled to the maximum range (i.e. absolute difference between baseline and maximal response). Then the predicted response is defined as:	 
+$$
+y = b + (m_{max}-b) \left[ \tilde{f_1}(d_1) + \tilde{f_2}(d_2) - \tilde{f_1}(d_1)\tilde{f_2}(d_2) \right],
+$$
+where $m_{max}$ is one of $m_1$ or $m_2$, for which the value of $|m_i - b|$ is larger, and 
+$$ \tilde{f_i} = f_i\frac{m_i-b}{m_{max}-b}~~\text{for}~~i = 1, 2.$$
 
 ### Calculation procedure
 
