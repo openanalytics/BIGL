@@ -43,7 +43,7 @@
 #'   CP <- CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
 #'   meanR(data, fitResult, null_model = "loewe", CP = CP)
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
-                  null_model = c("loewe", "hsa", "bliss"), R, CP, reps,
+                  null_model = c("loewe", "hsa", "bliss", "harbron"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL,
                   method = c("equal", "model", "unequal"), ...) {
@@ -194,7 +194,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 #'   CP <- CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
 #'   maxR(data, fitResult, null_model = "loewe", CP = CP)
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
-                 null_model = c("loewe", "hsa", "bliss"), Ymean, CP, reps,
+                 null_model = c("loewe", "hsa", "bliss", "harbron"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL, 
                  method = c("equal", "model", "unequal"), ...) {

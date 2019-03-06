@@ -5,7 +5,7 @@
 \title{Simulate data from a given null model and monotherapy coefficients}
 \usage{
 simulateNull(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss"), ...)
+  null_model = c("loewe", "hsa", "bliss", "harbron"), ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

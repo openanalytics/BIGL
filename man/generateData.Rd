@@ -5,7 +5,7 @@
 \title{Generate data from parameters of marginal monotherapy model}
 \usage{
 generateData(pars, sigma, data = NULL, transforms = NULL,
-  null_model = c("loewe", "hsa", "bliss"), error = 1,
+  null_model = c("loewe", "hsa", "bliss", "harbron"), error = 1,
   sampling_errors = NULL, wild_bootstrap = FALSE, ...)
 }
 \arguments{

@@ -5,7 +5,7 @@
 \title{Estimate CP matrix with bootstrap}
 \usage{
 CPBootstrap(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss"), B.CP, ...)
+  null_model = c("loewe", "hsa", "bliss", "harbron"), B.CP, ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

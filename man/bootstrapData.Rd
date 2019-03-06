@@ -6,7 +6,7 @@
 maxR statistics}
 \usage{
 bootstrapData(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss"), ...)
+  null_model = c("loewe", "hsa", "bliss", "harbron"), ...)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
