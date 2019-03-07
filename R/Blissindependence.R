@@ -10,7 +10,7 @@ Blissindependence <- function(doseInput, parmInput, ...) {
   pars <- parmInput
 
   increasing <- pars["m1"] >= pars["b"] && pars["m2"] >= pars["b"]
-  decreasing <- pars["m1"] < pars["b"] && pars["m2"] < pars["b"]
+  decreasing <- pars["m1"] <= pars["b"] && pars["m2"] <= pars["b"]
   
   ## If agonist and antagonist, give an error
   if (!(increasing || decreasing)) {
