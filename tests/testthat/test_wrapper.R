@@ -30,12 +30,17 @@ test_that('statistics', {
   expect_true(inherits(rs$maxR, "maxR"))
   expect_identical(rs$transforms, transforms)
 
+  expect_silent(summary(rs))
 })
 
 test_that("plots", {
       contour(rs)
       contour(rs, xlab = "x-label", ylab = "y-label")
       
-      plot(rs, "maxR")
-      rgl.close()
+      expect_silent(isobologram(rs))
+      
+      expect_silent({
+            plot(rs, "maxR")
+            rgl.close()
+          })
     })

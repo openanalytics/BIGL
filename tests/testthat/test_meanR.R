@@ -25,5 +25,6 @@ test_that('statistics', {
   expect_that(MeanR$p.value >= 0, is_true())
   expect_that(MeanR$p.value <= 1, is_true())
 
+  expect_silent(summary(MeanR))
 
 })

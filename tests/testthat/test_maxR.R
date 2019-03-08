@@ -18,4 +18,6 @@ test_that('statistics', {
   expect_that(exists("distr", where = attributes(MaxR$Ymean)) &
               inherits(attr(MaxR$Ymean, "distr"), "ecdf"), is_true())
 
+  expect_silent(summary(MaxR))
+      
 })
