@@ -28,7 +28,7 @@ doseRatio <- function(response, d, h, b, m, e) {
 }
 
 
-#' Harbron-like Loewe generalization
+#' Alternative Loewe generalization
 #' 
 #' @inheritParams generalizedLoewe
 harbronLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
@@ -50,7 +50,7 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   
   ## If agonist and antagonist, give an error
   if (!(increasing || decreasing)) {
-    stop("Harbron-Loewe does not work for diverging marginal curves.")
+    stop("Alternative Loewe generalization does not work for diverging marginal curves.")
   }  
     
   solver <- function(dose, par) {
@@ -72,8 +72,8 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   
   res <- apply(dose, 1, solver, parmInput)
 
-  if (all(is.na(res))) stop("harbronLoewe: no roots found between starting parameters")
-  if (any(is.na(res))) warning("harbronLoewe: some roots not found")
+  if (all(is.na(res))) stop("Alternative Loewe generalization: no roots found between starting parameters")
+  if (any(is.na(res))) warning("Alternative Loewe generalization: some roots not found")
 
   ## Set baseline response for observations where both doses are zero.
   ## Otherwise, use the estimate above.

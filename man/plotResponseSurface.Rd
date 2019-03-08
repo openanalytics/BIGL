@@ -6,7 +6,7 @@
 \usage{
 plotResponseSurface(data, fitResult = NULL,
   transforms = fitResult$transforms, predSurface = NULL,
-  null_model = c("loewe", "hsa", "bliss", "harbron"),
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
   colorPalette = c("blue", "grey70", "red"), colorBy = "none",
   colorPoints = c("black", "sandybrown", "brown", "white"),
   breaks = c(-Inf, 0, Inf), radius = NULL, logScale = TRUE,

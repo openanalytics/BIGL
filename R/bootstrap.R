@@ -49,7 +49,7 @@
 #'   generateData(data = data[, c("d1", "d2")], pars = coefs, sigma = 1)
 generateData <- function(pars, sigma, data = NULL,
                          transforms = NULL,
-                         null_model = c("loewe", "hsa", "bliss", "harbron"),
+                         null_model = c("loewe", "hsa", "bliss", "loewe2"),
                          error = 1, sampling_errors = NULL,
                          wild_bootstrap = FALSE, ...) {
   
@@ -82,7 +82,7 @@ generateData <- function(pars, sigma, data = NULL,
                  "loewe" = generalizedLoewe(data, pars, asymptotes = 2)$response,
                  "hsa" = hsa(data[, c("d1", "d2")], pars),
                  "bliss" = Blissindependence(data[, c("d1", "d2")], pars),
-                 "harbron" = harbronLoewe(data[, c("d1", "d2")], pars))
+                 "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars))
   ySim <- with(transforms,
                PowerT(BiolT(ySim, compositeArgs), compositeArgs))
   
@@ -133,7 +133,7 @@ generateData <- function(pars, sigma, data = NULL,
 #'   CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
 CPBootstrap <- function(data, fitResult,
                         transforms = fitResult$transforms,
-                        null_model = c("loewe", "hsa", "bliss", "harbron"), B.CP, ...) {
+                        null_model = c("loewe", "hsa", "bliss", "loewe2"), B.CP, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -177,7 +177,7 @@ CPBootstrap <- function(data, fitResult,
 #' @inheritParams generateData
 bootstrapData <- function(data, fitResult,
                           transforms = fitResult$transforms,
-                          null_model = c("loewe", "hsa", "bliss", "harbron"), ...) {
+                          null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -237,7 +237,7 @@ bootstrapData <- function(data, fitResult,
 #'   simulateNull(data, fitResult, null_model = "hsa")
 simulateNull <- function(data, fitResult,
                          transforms = fitResult$transforms,
-                         null_model = c("loewe", "hsa", "bliss", "harbron"), ...) {
+                         null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)

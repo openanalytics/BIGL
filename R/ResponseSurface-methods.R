@@ -121,10 +121,10 @@ print.summary.ResponseSurface <- function(x, ...) {
     cat("Bliss independence with shared maximal response")
   else if (x$null_model == "bliss" & x$shared_asymptote == FALSE)
     cat("Bliss independence with differing maximal response")
-  else if (x$null_model == "harbron" & x$shared_asymptote == TRUE)
+  else if (x$null_model == "loewe2" & x$shared_asymptote == TRUE)
     cat("Standard Loewe Additivity") # FIXME: check
-  else if (x$null_model == "harbron" & x$shared_asymptote == FALSE)
-    cat("Harbron-like generalization of Loewe Additivity")
+  else if (x$null_model == "loewe2" & x$shared_asymptote == FALSE)
+    cat("Alternative generalization of Loewe Additivity")
   else
     cat(x$null_model)
 
@@ -162,6 +162,6 @@ fitted.ResponseSurface <- function(object, ...) {
          "loewe" = generalizedLoewe(doseInput, parmInput)$response,
          "hsa" = hsa(doseInput, parmInput),
          "bliss" = Blissindependence(doseInput, parmInput),
-         "harbron" = harbronLoewe(doseInput, parmInput))
+         "loewe2" = harbronLoewe(doseInput, parmInput))
 
 }

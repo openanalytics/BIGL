@@ -2,7 +2,7 @@
 % Please edit documentation in R/harbronLoewe.R
 \name{harbronLoewe}
 \alias{harbronLoewe}
-\title{Harbron-like Loewe generalization}
+\title{Alternative Loewe generalization}
 \usage{
 harbronLoewe(doseInput, parmInput, asymptotes = 2, ...)
 }
@@ -20,5 +20,5 @@ as in standard Loewe model or \code{2} as in generalized Loewe model.}
 \item{...}{Further arguments that are currently unused}
 }
 \description{
-Harbron-like Loewe generalization
+Alternative Loewe generalization
 }

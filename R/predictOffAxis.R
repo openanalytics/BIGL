@@ -29,7 +29,7 @@
 #'   predictOffAxis(data, fitResult, null_model = "hsa")
 predictOffAxis <- function(data, fitResult,
                            transforms = fitResult$transforms,
-                           null_model = c("loewe", "hsa", "bliss", "harbron"), ...) {
+                           null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -44,7 +44,7 @@ predictOffAxis <- function(data, fitResult,
                           "loewe" = fitLoewe$response,
                           "hsa" = hsa(doseGrid, fitResult$coef),
                           "bliss" = Blissindependence(doseGrid, fitResult$coef),
-                          "harbron" = harbronLoewe(doseGrid, fitResult$coef))
+                          "loewe2" = harbronLoewe(doseGrid, fitResult$coef))
 
   if (!is.null(transforms)) {
     CompositeT <- with(transforms,
