@@ -35,7 +35,8 @@ information.}
 
 \item{null_model}{Specified null model for the expected response surface.
 Currently, allowed options are \code{"loewe"} for generalized Loewe model,
-and \code{"hsa"} for Highest Single Agent model.}
+\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
+and \code{"loewe2"} for the alternative Loewe generalization.}
 
 \item{effect}{Name of the response column in the data ("effect")}
 

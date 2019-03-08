@@ -32,7 +32,8 @@ information.}
 
 \item{null_model}{Specified null model for the expected response surface.
 Currently, allowed options are \code{"loewe"} for generalized Loewe model,
-and \code{"hsa"} for Highest Single Agent model.}
+\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
+and \code{"loewe2"} for the alternative Loewe generalization.}
 
 \item{R}{Numeric vector containing mean deviation of predicted response
 surface from the observed one at each of the off-axis points. If missing,

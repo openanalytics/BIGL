@@ -19,7 +19,8 @@
 #'   not be passed and if it is, the column will be replaced by simulated data.
 #' @param null_model Specified null model for the expected response surface.
 #'   Currently, allowed options are \code{"loewe"} for generalized Loewe model,
-#'   and \code{"hsa"} for Highest Single Agent model.
+#'   \code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
+#'   and \code{"loewe2"} for the alternative Loewe generalization.
 #' @param error Type of error for resampling. \code{error = 1} (Default) adds
 #'   normal errors to the simulated effects, \code{error = 2} adds errors sampled
 #'   from a mixture of two normal distributions, \code{error = 3} generates errors

@@ -15,8 +15,8 @@
 #'   \code{expand.grid(uniqueDoses)}. If not supplied, it will be computed
 #'   with \code{\link{predictOffAxis}} function.
 #' @param null_model If \code{predSurface} is not supplied, it is computed using
-#'   one of the available null models, i.e. \code{"loewe"} or \code{"hsa"}. See
-#'   also \code{\link{fitSurface}}.
+#'   one of the available null models, i.e. \code{"loewe"}, \code{"hsa"}, 
+#'   \code{"bliss"} and \code{"loewe2"}. See also \code{\link{fitSurface}}.
 #' @param breaks Numeric vector with numerical breaks. To be used in conjunction
 #'   with \code{colorPalette} argument.
 #' @param colorPalette Vector of color names for surface
