@@ -10,8 +10,7 @@ vignette: >
 
 Methodology described in this vignette is adapted from the article *"BIGL: Biochemically Intuitive Generalized Loewe null model for prediction of the expected combined effect compatible with partial agonism and antagonism"* (2017) by K. Van der Borght, A. Tourny, R. Bagdziunas, O. Thas, M. Nazarov, H. Turner, B. Verbist and H. Ceulemans ([doi:10.1038/s41598-017-18068-5](https://dx.doi.org/10.1038/s41598-017-18068-5)) as well as its technical supplement. We advise the reader to consult it for a deeper understanding of the procedure described next.
 
-Further chapters were added as extensions on top of the original
-article regarding variance heterogeneity and Bliss independence.
+Further chapters were added as extensions on top of the original article regarding variance heterogeneity, Bliss independence and alternative Loewe generalization.
 
 ## Marginal monotherapy curves
 
@@ -97,6 +96,19 @@ y = b + (m_{max}-b) \left[ \tilde{f_1}(d_1) + \tilde{f_2}(d_2) - \tilde{f_1}(d_1
 $$
 where $m_{max}$ is one of $m_1$ or $m_2$, for which the value of $|m_i - b|$ is larger, and 
 $$ \tilde{f_i} = f_i\frac{m_i-b}{m_{max}-b}~~\text{for}~~i = 1, 2.$$
+
+### Alternative Loewe Generalization
+
+An alternative generalization of Loewe Additivity for the case of diferent asymptotes can be defined as a combination of Loewe and HSA approaches as follows:
+
+In a classical Loewe equation, predicted response $y$ at a given dose combination $(d_1, d_2)$ can be found by solving the equation:
+
+$$ \frac{d_1}{D_1(y)} + \frac{d_2}{D_2(y)} = 1, $$
+
+where $D_i(y) = \operatorname{EC50}_{i}\left(\frac{y-b}{m_i-y}\right)^{\frac{1}{|h_i|}}$, for $i = 1, 2$ is the dose of the $i$-th compound that gives response $y$.
+Note that here $D_i$ is properly defined only if $y$ is between $b$ and $m_i$.
+
+For the case of different asymptotes, say when $y > m_1$ (increasing curve) or $y < m_1$ (decreasing curve), we set $D_1(y) = +\infty,$ so that the $y$ is determined from the equation $d_2 = D_2(y)$, replicating what is done in the HSA approach.
 
 ### Calculation procedure
 
