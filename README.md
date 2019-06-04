@@ -35,4 +35,4 @@ library(BIGL)
 runBIGL()
 ```
 
-Alternatively, the demo can be accessed [here](https://bigl.openanalytics.eu).
+Alternatively, the demo can be accessed [here](https://bigl.openanalytics.eu/app/bigl).
