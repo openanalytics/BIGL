@@ -38,10 +38,16 @@ predictOffAxis <- function(data, fitResult,
                                  "d2" = sort(unique(data$d2))))
   doseGrid <- expand.grid(uniqueDoses)
 
+  occupancy <- NULL
+  
   predSurface <- array(dim = lengths(uniqueDoses))
-  fitLoewe <- generalizedLoewe(doseGrid, fitResult$coef)
+  
   predSurface[] <- switch(null_model,
-                          "loewe" = fitLoewe$response,
+                          "loewe" = {
+                            fitLoewe <- generalizedLoewe(doseGrid, fitResult$coef)
+                            occupancy <- fitLoewe$occupancy
+                            fitLoewe$response
+                          },
                           "hsa" = hsa(doseGrid, fitResult$coef),
                           "bliss" = Blissindependence(doseGrid, fitResult$coef),
                           "loewe2" = harbronLoewe(doseGrid, fitResult$coef))
@@ -64,5 +70,5 @@ predictOffAxis <- function(data, fitResult,
 
   return(list("offaxisZTable" = offaxisZTable,
               "predSurface" = predSurface,
-              "occupancy" = fitLoewe$occupancy))
+              "occupancy" = occupancy))
 }

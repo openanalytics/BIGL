@@ -214,7 +214,7 @@ Five types of null models are available for calculating expected response surfac
 * Classical Loewe model is used if constraints are such that `shared_asymptote = TRUE` in the marginal fitting procedure and `null_model = "loewe"` in response calculation.
 * Highest Single Agent is used if `null_model = "hsa"` irrespectively of the value of `shared_asymptote`.
 * Bliss independence model is used when `null_model = "bliss"`. In the situations when maximal responses are constrained to be equal, the classical Bliss independence approach is used, when they are not equal, the Bliss independence calculation is performed on responses rescaled to the maximum range (i.e. absolute difference between baseline and maximal response).	
-* Alternative Loewe Generalization is used when `null_model = "loewe2"`. If the asymptotes are constrained to be equal, this reduces to the classical Loewe. 
+* Alternative Loewe Generalization is used when `null_model = "loewe2"`. If the asymptotes are constrained to be equal, this reduces to the classical Loewe. Note that if `shared_asymptote = TRUE` constraints are used, this also reduces to classical Loewe model.
 
 ### (Generalized) Loewe model
 
@@ -258,7 +258,7 @@ rsh <- fitSurface(data, marginalFit,
 summary(rsh)
 ```
 
-Occupancy estimates provided with HSA response surface still rely on the (generalized) Loewe model.
+<!-- Occupancy estimates provided with HSA response surface still rely on the (generalized) Loewe model. -->
 
 ### Bliss Independence
 
@@ -271,7 +271,7 @@ rsb <- fitSurface(data, marginalFit,
 summary(rsb)
 ```
 
-Occupancy estimates provided with Bliss response surface still rely on the (generalized) Loewe model.
+<!-- Occupancy estimates provided with Bliss response surface still rely on the (generalized) Loewe model. -->
 
 ### Alternative Loewe Generalization
 
@@ -284,7 +284,7 @@ rsl2 <- fitSurface(data, marginalFit,
 summary(rsl2)
 ```
 
-Occupancy estimates provided still rely on the (generalized) Loewe model.
+<!-- Occupancy estimates provided still rely on the (generalized) Loewe model. -->
 
 ## Statistical testing
 

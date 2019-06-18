@@ -7,7 +7,8 @@ test_that("calls", {
   rs <- fitSurface(sims$data, sims$pars, statistic = "maxR",
                    B.CP = 2, B.B = NULL, parallel = FALSE)
   expect_equal(rs$maxR$Call, "Syn")
-
+  expect_named(rs$occupancy, c("d1", "d2", "occupancy"))
+  
   sims <- genData(parsDec, 2, 1)
   rs <- fitSurface(sims$data, sims$pars, statistic = "maxR",
                    B.CP = 2, B.B = NULL, parallel = FALSE)
@@ -63,6 +64,7 @@ test_that("HSA calls", {
       rs <- fitSurface(sims$data, sims$pars, null_model = "hsa", statistic = "maxR",
           B.CP = 2, B.B = NULL, parallel = FALSE)
       expect_equal(rs$maxR$Call, "Syn")
+      expect_null(rs$occupancy) # no occupancy
       
       sims <- genData(parsDec, 2, 1)
       rs <- fitSurface(sims$data, sims$pars, null_model = "hsa", statistic = "maxR",
@@ -89,6 +91,7 @@ test_that("Bliss calls", {
       rs <- fitSurface(sims$data, sims$pars, null_model = "bliss", statistic = "maxR",
           B.CP = 2, B.B = NULL, parallel = FALSE)
       expect_equal(rs$maxR$Call, "Syn")
+      expect_null(rs$occupancy) # no occupancy
       
       sims <- genData(parsDec, 2, 1)
       rs <- fitSurface(sims$data, sims$pars, null_model = "bliss", statistic = "maxR",
@@ -128,6 +131,7 @@ test_that("Alternative Loewe calls", {
       rs <- fitSurface(sims$data, sims$pars, null_model = "loewe2", statistic = "maxR",
           B.CP = 2, B.B = NULL, parallel = FALSE)
       expect_equal(rs$maxR$Call, "Syn")
+      expect_null(rs$occupancy) # no occupancy
       
       sims <- genData(parsDec, 2, 1)
       rs <- fitSurface(sims$data, sims$pars, null_model = "loewe2", statistic = "maxR",
