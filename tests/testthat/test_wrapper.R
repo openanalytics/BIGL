@@ -1,6 +1,6 @@
 context("Response surface evaluation")
 
-test_that('statistics', {
+test_that('statistics 1', {
 
   expect_true(inherits(rs, "ResponseSurface"))
   expect_true(inherits(rs$meanR, "meanR"))
@@ -10,7 +10,9 @@ test_that('statistics', {
   expect_identical(rs$meanR,
                    meanR(data, fit, transforms, "loewe", R, rs$CP, reps))
 
+  
   ## Check equality without the attributes
+  skip_on_cran()
   expect_equal(
       rs$maxR,
       maxR(data, fit, null_model = "loewe", B.CP = NULL,
@@ -20,7 +22,10 @@ test_that('statistics', {
       tolerance = 1e-4
   )
 
+})
 
+test_that('statistics 2', {
+      
   ## Check for correct classes and outputs if both are bootstrapped
   rs <- fitSurface(data, fit, statistic = "both",
                    B.CP = 2, B.B = 2, parallel = FALSE)
@@ -31,6 +36,7 @@ test_that('statistics', {
   expect_identical(rs$transforms, transforms)
 
   expect_silent(summary(rs))
+
 })
 
 test_that("plots", {

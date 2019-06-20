@@ -9,10 +9,10 @@ test_that('statistics', {
   expect_silent(MeanR <- meanR(data, fit, transforms, "loewe",
                                R, rs$CP, reps))
 
-  expect_that(inherits(MeanR, "meanR"), is_true())
-  expect_that(MeanR$FStat > 0, is_true())
-  expect_that(MeanR$p.value >= 0, is_true())
-  expect_that(MeanR$p.value <= 1, is_true())
+  expect_true(inherits(MeanR, "meanR"))
+  expect_true(MeanR$FStat > 0)
+  expect_true(MeanR$p.value >= 0)
+  expect_true(MeanR$p.value <= 1)
 
   ## Try computation with random data
   reps <- sample(1:10, length(reps), replace = TRUE)
@@ -21,9 +21,9 @@ test_that('statistics', {
 
   expect_silent(MeanR <- meanR(data, fit, transforms, "loewe",
                                R, CP, reps))
-  expect_that(MeanR$FStat > 0, is_true())
-  expect_that(MeanR$p.value >= 0, is_true())
-  expect_that(MeanR$p.value <= 1, is_true())
+  expect_true(MeanR$FStat > 0)
+  expect_true(MeanR$p.value >= 0)
+  expect_true(MeanR$p.value <= 1)
 
   expect_silent(summary(MeanR))
 

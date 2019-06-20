@@ -26,8 +26,7 @@ test_that('marginals', {
   expect_equal(fitted(fit2), predict(fit2, newdata = dataM))
 
   ## Give some leeway for this to pass
-  expect_that(all(abs(vcov(fit1) - vcov(fit2)) < 1e-1),
-              is_true())
+  expect_true(all(abs(vcov(fit1) - vcov(fit2)) < 1e-1))
 
   expect_equal(df.residual(fit1), df.residual(fit2))
   expect_equal(df.residual(fit1), df.residual(fit3))
@@ -98,7 +97,7 @@ test_that('marginals-constraints', {
   expect_equal(length(coef(fit2)), 7)
   expect_equal(length(coef(fit3)), 7)
 
-  expect_that(all(abs(fit1$coef - fit2$coef) < 1e-4), is_true())
+  expect_true(all(abs(fit1$coef - fit2$coef) < 1e-4))
 
   ## Fitting with shared asymptote
   fit1 <- fitMarginals(data, method = "nls", constraints = constraintsA)
@@ -113,7 +112,7 @@ test_that('marginals-constraints', {
   expect_equal(length(coef(fit2)), 7)
   expect_equal(length(coef(fit3)), 7)
 
-  expect_that(all(abs(fit1$coef - fit2$coef) < 1e-4), is_true())
+  expect_true(all(abs(fit1$coef - fit2$coef) < 1e-4))
 
   ## Fitting with fixed baseline and shared asymptote
   fit1 <- fitMarginals(data, method = "nls", constraints = constraints2)
@@ -131,7 +130,7 @@ test_that('marginals-constraints', {
   expect_equal(length(coef(fit2)), 7)
   expect_equal(length(coef(fit3)), 7)
 
-  expect_that(all(abs(fit1$coef - fit2$coef) < 1e-4), is_true())
+  expect_true(all(abs(fit1$coef - fit2$coef) < 1e-4))
 
   fit1 <- fitMarginals(data, method = "nls", constraints = constraints)
   fit2 <- fitMarginals(data, method = "nlslm", constraints = constraints)
@@ -168,14 +167,14 @@ test_that('marginals-transforms', {
   expect_equal(length(coef(fit2)), 7)
   expect_equal(length(coef(fit3)), 7)
 
-  expect_that(all(abs(fit1$coef - fit2$coef) < 1e-4), is_true())
-  expect_that(all(abs(fitted(fit1) - fitted(fit2)) < 1e-4), is_true())
-  expect_that(all(abs(residuals(fit1) - residuals(fit2)) < 1e-4), is_true())
+  expect_true(all(abs(fit1$coef - fit2$coef) < 1e-4))
+  expect_true(all(abs(fitted(fit1) - fitted(fit2)) < 1e-4))
+  expect_true(all(abs(residuals(fit1) - residuals(fit2)) < 1e-4))
 
   expect_equal(fitted(fit1), predict(fit1, newdata = dataM))
   expect_equal(fitted(fit2), predict(fit2, newdata = dataM))
 
-  expect_that(all(abs(vcov(fit1) - vcov(fit2)) < 3e-2), is_true())
+  expect_true(all(abs(vcov(fit1) - vcov(fit2)) < 3e-2))
 
   expect_equal(df.residual(fit1), df.residual(fit2))
   expect_equal(df.residual(fit1), df.residual(fit3))
@@ -191,7 +190,7 @@ test_that('marginals-transforms', {
                        transforms = transforms, method = "nls")
   fit2 <- fitMarginals(data, start = initParsT,
                        transforms = transforms, method = "nlslm")
-  expect_that(all(abs(fit1$coef - fit2$coef) < 1e-4), is_true())
+  expect_true(all(abs(fit1$coef - fit2$coef) < 1e-4))
 
 
   constraints <- list(
@@ -237,8 +236,8 @@ test_that('marginals-extraArgs', {
   fit2 <- fitMarginals(data, method = "nlslm", 
       lower = lowerBounds, upper = upperBounds)
   
-  expect_that(all(coef(fit1) >= 0), is_true())
-  expect_that(all(coef(fit2) >= 0), is_true())
+  expect_true(all(coef(fit1) >= 0))
+  expect_true(all(coef(fit2) >= 0))
   
   expect_equal(coef(fit1)[[1]], 1)
   expect_equal(coef(fit2)[[1]], 1)
