@@ -99,6 +99,9 @@ $$
 where $m_{max}$ is one of $m_1$ or $m_2$, for which the value of $|m_i - b|$ is larger, and 
 $$ \tilde{f_i} = f_i\frac{m_i-b}{m_{max}-b}~~\text{for}~~i = 1, 2.$$
 
+This implementation of Bliss independence supports both compounds with decreasing and increasing monotherapy profiles.
+However using one compound with decreasing profile and another with an increasing profile in combination is not supported.
+
 ### Alternative Loewe Generalization
 
 An alternative generalization of Loewe Additivity for the case of diferent asymptotes can be defined as a combination of Loewe and HSA approaches as follows:
