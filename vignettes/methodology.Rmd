@@ -82,8 +82,9 @@ A null model based on the Highest Single Agent (HSA) model does not attempt to m
 
 Bliss independence implies that two agents do not cooperate, i.e. act independently of each other.
 <!-- In the classical Bliss independence model where marginal models share baseline and maximum response, the predicted response at dose combination $(d_{1}, d_{2})$ is based on the fractional effects of the marginal responses: -->
+Additionally, the assumption is that a decreasing monotherapy curves express the fractions of _unaffected_ control populations, while increasing curves express the fractions of _affected_ control populations.
 
-Bliss independence model is formulated for the fractional responses $f$, where the predicted response $f_{12}$ at dose combination $(d_{1}, d_{2})$ is defined as:
+Bliss independence model is formulated for the fractional responses $f$ ("fraction affected"), where the predicted response $f_{12}$ at dose combination $(d_{1}, d_{2})$ is defined as:
 
 $$ f_{12}(d_1, d_2) = f_1(d_1) + f_2(d_2) - f_1(d_1)f_2(d_2), $$
 
@@ -100,7 +101,7 @@ where $m_{max}$ is one of $m_1$ or $m_2$, for which the value of $|m_i - b|$ is 
 $$ \tilde{f_i} = f_i\frac{m_i-b}{m_{max}-b}~~\text{for}~~i = 1, 2.$$
 
 This implementation of Bliss independence supports both compounds with decreasing and increasing monotherapy profiles.
-However using one compound with decreasing profile and another with an increasing profile in combination is not supported.
+However using one compound with a decreasing profile and another with an increasing profile in combination is not supported.
 
 ### Alternative Loewe Generalization
 
