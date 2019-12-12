@@ -70,14 +70,17 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
                                      "orange1", "tomato3", "red")) +
     geom_contour(bins = 7, col = "black", size = 0.2)
 
+  xBreaks <- unique(x$data$d1)
+  yBreaks <- unique(x$data$d2)
+  
   if (logScale) {
     p <- p +
-      scale_x_log10(breaks = unique(x$data$d1)) +
-      scale_y_log10(breaks = unique(x$data$d1))
+      scale_x_log10(breaks = xBreaks) +
+      scale_y_log10(breaks = yBreaks)
   } else {
     p <- p +
-      scale_x_continuous(breaks = unique(x$data$d1)) +
-      scale_y_continuous(breaks = unique(x$data$d1))
+      scale_x_continuous(breaks = xBreaks) +
+      scale_y_continuous(breaks = yBreaks)
   }
 
   p
