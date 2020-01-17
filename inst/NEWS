@@ -1,3 +1,7 @@
+1.4.2 (2020-01-17)
+  o even better support for flat monotherapies, consistent calls/colors for all representations (contour plot, summary table and 3d plot)
+  o added clarification to description of Bliss method in the "Methodology" vignette
+  o fixed typos
 1.4.1 (2019-06-20)
   o improve tests
 1.4.0 (2019-06-18)
