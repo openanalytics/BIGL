@@ -22,12 +22,14 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy"), .
   color <- match.arg(color)
   inputs <- as.list(substitute(list(...)))[-1L]
 
-  ## Green is synergy, red is antagonism
+  ## Blue is synergy, red is antagonism
   if(!exists("colorPalette", inputs)) {
     inputs$colorPalette <- c("red", rep("grey70", 2), "blue")
-    if (x$fitResult$coef["b"] > x$fitResult$coef["m1"]) {
+    if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] && 
+        x$fitResult$coef["b"] >= x$fitResult$coef["m2"]) {
       inputs$colorPalette <- rev(inputs$colorPalette)
     }
+    # TODO: what to do in the 'undefined' case - agonist+antagonist or both flat?
   }
 
   if (color == "z-score") {
@@ -72,6 +74,16 @@ contour.ResponseSurface <- function(x, ...) {
     args$xlab <- paste0("Dose (", cpdNames[[1]], ")")
   if (!exists("ylab", args))
     args$ylab <- paste0("Dose (", cpdNames[[2]], ")")
+  
+  ## Blue is synergy, red is antagonism
+  if(!exists("colorPalette", args)) {
+    args$colorPalette <- c("red", "white", "blue")
+    if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] && 
+        x$fitResult$coef["b"] >= x$fitResult$coef["m2"]) {
+      args$colorPalette <- rev(args$colorPalette)
+    }
+    # TODO: what to do in the 'undefined' case - agonist+antagonist or both flat?
+  }
   
   args$x <- x$maxR
   

@@ -7,8 +7,8 @@
 hsa <- function(doseInput, parmInput, ...) {
 
   pars <- parmInput
-  increasing <- pars["m1"] > pars["b"] & pars["m2"] > pars["b"]
-  decreasing <- pars["m1"] < pars["b"] & pars["m2"] < pars["b"]
+  increasing <- pars["m1"] >= pars["b"] & pars["m2"] >= pars["b"]
+  decreasing <- pars["m1"] <= pars["b"] & pars["m2"] <= pars["b"]
 
   ## If agonist and antagonist, try to determine the leading compound and emit a
   ## warning.

@@ -46,7 +46,7 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   }
   
   increasing <- parm["m1"] >= parm["b"] && parm["m2"] >= parm["b"]
-  decreasing <- parm["m1"] < parm["b"] && parm["m2"] < parm["b"]
+  decreasing <- parm["m1"] <= parm["b"] && parm["m2"] <= parm["b"]
   
   ## If agonist and antagonist, give an error
   if (!(increasing || decreasing)) {

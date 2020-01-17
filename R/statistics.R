@@ -316,14 +316,19 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
 
   }
 
-
+  eq1  <- coefFit["m1"] == coefFit["b"]
+  eq2  <- coefFit["m2"] == coefFit["b"]
+  inc1 <- coefFit["m1"] >= coefFit["b"]
+  inc2 <- coefFit["m2"] >= coefFit["b"]
+  dec1 <- coefFit["m1"] <= coefFit["b"]
+  dec2 <- coefFit["m2"] <= coefFit["b"]
+  
   call <- {
     if (max(Ymean$absR) > q) {
       invertCall <- Ymean$R[which.max(Ymean$absR)] < 0
-      inc1 <- coefFit["m1"] >= coefFit["b"]
-      inc2 <- coefFit["m2"] >= coefFit["b"]
-      if (inc1 & inc2) c("Syn", "Ant")[1 + invertCall]
-      else if (!inc1 & !inc2) c("Ant", "Syn")[1 + invertCall]
+      if (eq1 & eq2) "Undefined"
+      else if (inc1 & inc2) c("Syn", "Ant")[1 + invertCall]
+      else if (dec1 & dec2) c("Ant", "Syn")[1 + invertCall]
       else "Undefined"
     } else "None"
   }
@@ -332,11 +337,14 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   Ymean$call <- "None"
 
   ## MN: here make call based on the parameters
-  Ymean$call[Ymean$sign] <- c("Syn", "Ant")[1+(Ymean$R[Ymean$sign] < 0)]
-  if (coefFit["b"] > coefFit["m1"]) {
-    Ymean$call[Ymean$sign] <- c("Ant", "Syn")[1+(Ymean$R[Ymean$sign] < 0)]
-  }
-
+  Ymean$call[Ymean$sign] <- if (eq1 & eq2) {
+    "Undefined"
+  } else if (inc1 & inc2) {
+    c("Syn", "Ant")[1+(Ymean$R[Ymean$sign] < 0)]
+  } else if (dec1 & dec2) {
+    c("Ant", "Syn")[1+(Ymean$R[Ymean$sign] < 0)]
+  } else "Undefined"  
+  
   attr(Ymean, "df0") <- df0
   attr(Ymean, "cutoff") <- cutoff
   attr(Ymean, "q") <- q
