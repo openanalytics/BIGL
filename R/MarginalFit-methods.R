@@ -189,6 +189,8 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, ...) {
   }
   ## Assign the appropriate Compound 1/2 label to the row scale the doses
   dat$comp <- rep(labnames[2:3], c(sum(!data$d2), sum(!data$d1)))
+  # make sure given order is unchanged
+  dat$comp <- factor(dat$comp, levels = unique(dat$comp))
   dat$dose <- with(dat, ifelse(!d2, d1, d2))
   if (logScale) dat$dose <- with(dat, transformF(dose, comp))
 
