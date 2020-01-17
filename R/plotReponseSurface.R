@@ -147,16 +147,12 @@ plotResponseSurface <- function(data, fitResult = NULL,
     coloredBy <- colorVec
     cols <- colnames(coloredBy)
     pCols <- which(!(cols %in% c("d1", "d2")))
-    if (length(pCols) > 1) pCols <- min[pCols]
+    if (length(pCols) > 1) pCols <- min(pCols)
 
     if (any(duplicated(coloredBy[, c("d1", "d2")]))) {
       coloredBy <- aggregate(coloredBy[, pCols],
                              by = coloredBy[, c("d1", "d2")], FUN = colorfun)
     }
-
-    cols <- colnames(coloredBy)
-    pCols <- which(!(cols %in% c("d1", "d2")))
-    if (length(pCols) > 1) pCols <- min[pCols]
 
     colorVec <- rep(NA, nrow(doseGrid))
     for (i in 1L:nrow(doseGrid)) {
