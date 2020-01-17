@@ -84,7 +84,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   )
 
   A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
-  FStat <- as.numeric(t(R) %*% solve(A) %*% R / n1)
+  FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
   
   if (is.null(B.B)) {
     ans <- list("FStat" = FStat,
