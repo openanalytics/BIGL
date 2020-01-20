@@ -4,7 +4,7 @@
 \alias{boxcox.transformation}
 \title{Apply two-parameter Box-Cox transformation}
 \usage{
-\method{boxcox}{transformation}(y, lambda, alpha = 0)
+boxcox.transformation(y, lambda, alpha = 0)
 }
 \arguments{
 \item{y}{Numeric vector}

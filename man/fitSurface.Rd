@@ -65,7 +65,7 @@ nested bootstrap may however significantly increase computational time. If
 \item{error}{Type of error for resampling in the bootstrapping procedure.
 This argument will be passed to \code{\link{generateData}}. If \code{error
 = 4} (default), the error terms for generating distribution of the null
-will be resampled from the vector specified in \code{sampling}. If
+will be resampled from the vector specified in \code{sampling_errors}. If
 \code{error = 1}, normal errors are added. If \code{error = 2}, errors are
 sampled from a mixture of two normal distributions. If \code{error = 3},
 errors are generated from a rescaled chi-square distribution.}
