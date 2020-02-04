@@ -62,15 +62,18 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
       res
       ifelse(is.finite(res), res, 1)
     }
-    uniroot(fun0, range(par[c("b", "m1", "m2")]), tol = .Machine$double.eps)$root
+    parRange <- range(par[c("b", "m1", "m2")])
+    if (length(unique(parRange)) == 1) # special case of 2 flat profiles
+      return(par["b"])
     
+    uniroot(fun0, parRange, tol = .Machine$double.eps)$root
   }
   
   ## Remove observations where both drugs are dosed at zero
   allZero <- !rowSums(doseInput != 0)
   dose <- doseInput[!allZero, , drop = FALSE]
   
-  res <- apply(dose, 1, solver, parmInput)
+  res <- apply(dose, 1, solver, parm)
 
   if (all(is.na(res))) stop("Alternative Loewe generalization: no roots found between starting parameters")
   if (any(is.na(res))) warning("Alternative Loewe generalization: some roots not found")

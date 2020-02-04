@@ -50,7 +50,8 @@ predictOffAxis <- function(data, fitResult,
                           },
                           "hsa" = hsa(doseGrid, fitResult$coef),
                           "bliss" = Blissindependence(doseGrid, fitResult$coef),
-                          "loewe2" = harbronLoewe(doseGrid, fitResult$coef))
+                          "loewe2" = harbronLoewe(doseGrid, fitResult$coef)
+                      )
 
   if (!is.null(transforms)) {
     CompositeT <- with(transforms,

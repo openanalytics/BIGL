@@ -19,6 +19,10 @@ Blissindependence <- function(doseInput, parmInput, ...) {
   
   # Calculate prediction mono and rescale to max upper for percentage
   maxRange <- max(abs(pars["m1"]-pars["b"]), abs(pars["m2"]-pars["b"]))
+  
+  if (maxRange == 0) # special case of 2 flat profiles
+    return(pars["b"] + rep(0, nrow(doseInput)))
+  
   pred1 <- L4(doseInput[["d1"]], b = pars["h1"], logEC50 = pars["e1"], L = 0, U = 1) * 
       abs(pars["m1"]-pars["b"]) / maxRange
   pred2 <- L4(doseInput[["d2"]], b = pars["h2"], logEC50 = pars["e2"], L = 0, U = 1) *
