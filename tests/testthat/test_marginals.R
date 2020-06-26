@@ -243,3 +243,13 @@ test_that('marginals-extraArgs', {
   expect_equal(coef(fit2)[[1]], 1)
   
 })
+
+test_that('marginals-plots', {
+      fit <- fitMarginals(data)
+      fitT <- fitMarginals(data, transforms = transforms)
+      expect_silent(plot(fit))
+      expect_silent(plot(fit, smooth = FALSE))
+      expect_silent(plot(fitT))
+      expect_silent(plot(fitT, smooth = FALSE))
+      expect_silent(plot(fitT, dataScale = TRUE))
+    })
