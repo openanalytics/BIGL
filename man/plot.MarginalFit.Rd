@@ -4,7 +4,7 @@
 \alias{plot.MarginalFit}
 \title{Plot monotherapy curve estimates}
 \usage{
-\method{plot}{MarginalFit}(x, ncol = 2, logScale = TRUE, ...)
+\method{plot}{MarginalFit}(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataScale = FALSE, ...)
 }
 \arguments{
 \item{x}{Output of \code{\link{fitMarginals}} function or a
@@ -13,6 +13,13 @@
 \item{ncol}{Number of plots per row}
 
 \item{logScale}{Whether x-axis should be plotted on a logarithmic scale}
+
+\item{smooth}{Whether to draw a smooth fitted curve (deafult), or 
+line segments connecting predicted points only}
+
+\item{dataScale}{Whether to draw plot on original data scale in case when 
+transformations were used for fitting. Default (FALSE) is to plot on the 
+\code{coef(x)} scale}
 
 \item{...}{Further arguments}
 }
