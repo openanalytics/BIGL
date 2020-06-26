@@ -26,16 +26,15 @@ test_that("calls", {
   expect_equal(rs$maxR$Call, "Ant")
 
   ## Diverging marginal curves
-  sims <- genData(parsDiv, 2, 1)
-  rs <- fitSurface(sims$data, sims$pars, statistic = "maxR",
-                   B.CP = 2, B.B = NULL, parallel = FALSE)
+  expect_warning(sims <- genData(parsDiv, 2, 1), "Marginal curves are diverging")
+  expect_warning(rs <- fitSurface(sims$data, sims$pars, statistic = "maxR",
+                   B.CP = 2, B.B = NULL, parallel = FALSE), "Marginal curves are diverging")
   expect_equal(rs$maxR$Call, "Undefined")
 
-  sims <- genData(parsDiv, 2, -1)
-  rs <- fitSurface(sims$data, sims$pars, statistic = "maxR",
-                   B.CP = 2, B.B = NULL, parallel = FALSE)
+  expect_warning(sims <- genData(parsDiv, 2, -1), "Marginal curves are diverging")
+  expect_warning(rs <- fitSurface(sims$data, sims$pars, statistic = "maxR",
+                   B.CP = 2, B.B = NULL, parallel = FALSE), "Marginal curves are diverging")
   expect_equal(rs$maxR$Call, "Undefined")
-
 
 })
 
@@ -110,13 +109,13 @@ test_that("Bliss calls", {
       expect_equal(rs$maxR$Call, "Ant")
       
       ## Diverging marginal curves
-      sims <- genData(parsDiv, 2, 1)
+      expect_warning(sims <- genData(parsDiv, 2, 1), "Marginal curves are diverging")
       expect_error(
           rs <- fitSurface(sims$data, sims$pars, null_model = "bliss", statistic = "maxR",
               B.CP = 2, B.B = NULL, parallel = FALSE),
           "Bliss independence does not work for diverging marginal curves")
       
-      sims <- genData(parsDiv, 2, -1)
+      expect_warning(sims <- genData(parsDiv, 2, -1), "Marginal curves are diverging")
       expect_error(
           rs <- fitSurface(sims$data, sims$pars, null_model = "bliss", statistic = "maxR",
               B.CP = 2, B.B = NULL, parallel = FALSE),
@@ -150,13 +149,13 @@ test_that("Alternative Loewe calls", {
       expect_equal(rs$maxR$Call, "Ant")
       
       ## Diverging marginal curves
-      sims <- genData(parsDiv, 2, 1)
+      expect_warning(sims <- genData(parsDiv, 2, 1), "Marginal curves are diverging")
       expect_error(
           rs <- fitSurface(sims$data, sims$pars, null_model = "loewe2", statistic = "maxR",
               B.CP = 2, B.B = NULL, parallel = FALSE),
           "Alternative Loewe generalization does not work for diverging marginal curves.")
       
-      sims <- genData(parsDiv, 2, -1)
+      expect_warning(sims <- genData(parsDiv, 2, -1), "Marginal curves are diverging")
       expect_error(
           rs <- fitSurface(sims$data, sims$pars, null_model = "loewe2", statistic = "maxR",
               B.CP = 2, B.B = NULL, parallel = FALSE),
