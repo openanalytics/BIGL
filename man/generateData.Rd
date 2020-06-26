@@ -4,9 +4,17 @@
 \alias{generateData}
 \title{Generate data from parameters of marginal monotherapy model}
 \usage{
-generateData(pars, sigma, data = NULL, transforms = NULL,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), error = 1,
-  sampling_errors = NULL, wild_bootstrap = FALSE, ...)
+generateData(
+  pars,
+  sigma,
+  data = NULL,
+  transforms = NULL,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  error = 1,
+  sampling_errors = NULL,
+  wild_bootstrap = FALSE,
+  ...
+)
 }
 \arguments{
 \item{pars}{Coefficients of the marginal model along with their appropriate

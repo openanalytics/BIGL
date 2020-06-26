@@ -4,8 +4,14 @@
 \alias{CPBootstrap}
 \title{Estimate CP matrix with bootstrap}
 \usage{
-CPBootstrap(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), B.CP, ...)
+CPBootstrap(
+  data,
+  fitResult,
+  transforms = fitResult$transforms,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  B.CP,
+  ...
+)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

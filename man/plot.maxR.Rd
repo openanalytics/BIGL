@@ -4,11 +4,19 @@
 \alias{plot.maxR}
 \title{Plot of maxR object}
 \usage{
-\method{plot}{maxR}(x, main = "Contour plot for maxR",
-  xlab = "Dose (Compound 1)", ylab = "Dose (Compound 2)",
-  colorPalette = c("blue", "white", "red"), logScale = TRUE,
-  zTransform = function(z) {     z }, plevels = c(0.7, 0.8, 0.9, 0.95,
-  0.99, 0.999), cutoff = max(plevels), maxshow = NULL, ...)
+\method{plot}{maxR}(
+  x,
+  main = "Contour plot for maxR",
+  xlab = "Dose (Compound 1)",
+  ylab = "Dose (Compound 2)",
+  colorPalette = c("blue", "white", "red"),
+  logScale = TRUE,
+  zTransform = function(z) {     z },
+  plevels = c(0.7, 0.8, 0.9, 0.95, 0.99, 0.999),
+  cutoff = max(plevels),
+  maxshow = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{Output of \code{\link{maxR}}. This can also be \code{"maxR"}

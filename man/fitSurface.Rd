@@ -4,13 +4,26 @@
 \alias{fitSurface}
 \title{Fit response surface model and compute meanR and maxR statistics}
 \usage{
-fitSurface(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), effect = "effect",
-  d1 = "d1", d2 = "d2", statistic = c("none", "meanR", "maxR",
-  "both"), CP = NULL, B.CP = 50, B.B = NULL,
-  nested_bootstrap = FALSE, error = 4, sampling_errors = NULL,
-  wild_bootstrap = FALSE, cutoff = 0.95, parallel = TRUE,
-  method = c("equal", "model", "unequal"))
+fitSurface(
+  data,
+  fitResult,
+  transforms = fitResult$transforms,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  effect = "effect",
+  d1 = "d1",
+  d2 = "d2",
+  statistic = c("none", "meanR", "maxR", "both"),
+  CP = NULL,
+  B.CP = 50,
+  B.B = NULL,
+  nested_bootstrap = FALSE,
+  error = 4,
+  sampling_errors = NULL,
+  wild_bootstrap = FALSE,
+  cutoff = 0.95,
+  parallel = TRUE,
+  method = c("equal", "model", "unequal")
+)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

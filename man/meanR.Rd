@@ -4,10 +4,21 @@
 \alias{meanR}
 \title{Compute meanR statistic for the estimated model}
 \usage{
-meanR(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
-  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL, cl = NULL,
-  method = c("equal", "model", "unequal"), ...)
+meanR(
+  data,
+  fitResult,
+  transforms = fitResult$transforms,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  R,
+  CP,
+  reps,
+  nested_bootstrap = FALSE,
+  B.B = NULL,
+  B.CP = NULL,
+  cl = NULL,
+  method = c("equal", "model", "unequal"),
+  ...
+)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
