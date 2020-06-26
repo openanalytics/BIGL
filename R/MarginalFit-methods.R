@@ -163,13 +163,6 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
 
   data <- x$data
 
-  ## Transformation object for ggplot2
-  log10eps_trans <- function() {
-    trans_new("log10eps",
-              function(z) log10(z + 0.5 * min(z[z != 0])),
-              function(z) 10^z - min(10^z)*1/3, domain = c(0, Inf))
-  }
-
   transformF <- function(z, comp) {
     eps <- tapply(z, comp, function(x) min(x[x != 0]))
     z + 0.5 * eps[comp]
