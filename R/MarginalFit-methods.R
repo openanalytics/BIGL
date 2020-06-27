@@ -220,10 +220,25 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
         InvBiolT(curveDat$predicted, compositeArgs))
   }
   
+  # draw a dotted line from 0 to the first non-0 dose
+  if (any(curveDat$d1 + curveDat$d2 == 0, na.rm = TRUE)) {
+    minD1 <- min(dat$d1[dat$d1 != 0], na.rm = TRUE)
+    minD2 <- min(dat$d2[dat$d2 != 0], na.rm = TRUE)
+    curveDat$type <- (curveDat$d1<=minD1 & curveDat$d2 == 0) | (curveDat$d2<=minD2 & curveDat$d1 == 0)
+    # for non-smooth curves, we need to duplicate first non-0 dose to avoid line
+    # breakage, as we are actually drawing 2 different lines 
+    if (!smooth) {
+      auxDat <- rbind(curveDat[curveDat$d1 == minD1, ], curveDat[curveDat$d2 == minD2, ])
+      auxDat$type <- !auxDat$type
+      curveDat <- rbind(curveDat, auxDat)
+    }
+  }
+
   p <- ggplot() +
-    geom_line(data = curveDat, aes_string(x = "dose", y = "predicted")) +
+    geom_line(data = curveDat, aes_string(x = "dose", y = "predicted", linetype = "type")) +
     geom_point(data = dat, aes_string(x = "dose", y = "effect")) +
     facet_wrap(~ comp, ncol = ncol, scales = "free_x") +
+    scale_linetype_manual(values = c("TRUE" = "dotted", "FALSE" = "solid"), guide = "none") +
     xlab("Dose") + ylab("Effect") + theme_bw()
   if (logScale) p <- p + scale_x_log10()
 
