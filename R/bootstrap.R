@@ -218,7 +218,7 @@ bootstrapData <- function(data, fitResult,
   PredvarB <- linmodB$coef[1] + linmodB$coef[2]*off_meanB
 
   out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
-              "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,
+              "n1b" = n1b, "repsb" = repsb, "Predvarb" = c(PredvarB),
               "mse_offb" = mse_offb)
   return(out)
 }
