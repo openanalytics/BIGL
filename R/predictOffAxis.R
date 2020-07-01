@@ -33,9 +33,9 @@ predictOffAxis <- function(data, fitResult,
 
   ## Argument matching
   null_model <- match.arg(null_model)
-    data = with(data, data[d1 & d2, , drop = FALSE])
   uniqueDoses <- with(data, list("d1" = sort(unique(data$d1)),
                                  "d2" = sort(unique(data$d2))))
+  data = with(data, data[d1 & d2, , drop = FALSE])
   doseGrid <- expand.grid(uniqueDoses)
 
   occupancy <- NULL
