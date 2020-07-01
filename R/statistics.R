@@ -17,7 +17,7 @@
 #' @param cl If parallel computations are desired, \code{cl} should be a cluster
 #'   object created by \code{\link[parallel]{makeCluster}}. If parallel
 #'   computing is active, progress reporting messages are not necessarily
-#'   ordered as it should be expected. 
+#'   ordered as it should be expected.
 #' @param ... Further arguments that will be later passed to
 #'   \code{\link{generateData}} function during bootstrapping
 #' @inheritParams fitSurface
@@ -65,7 +65,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
-  
+
   n1 <- length(R)
   MSE0 <- fitResult$sigma^2
   df0 <- fitResult$df
@@ -73,7 +73,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
   off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
   off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
-  
+
   mse_off <- switch(method,
       "equal" = MSE0,
       "model" = {
@@ -85,7 +85,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 
   A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
   FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
-  
+
   if (is.null(B.B)) {
     ans <- list("FStat" = FStat,
                 "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
@@ -119,16 +119,16 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
       CPb <- CPBootstrap(data = data, fitResult = fitResultb,
                          transforms = transforms, null_model = null_model,
                          B.CP = B.CP, ...)
-    
+
     mse_offb <- switch(method,
         "equal" = MSE0b,
         "model" = Predvarb,
-        "unequal" = mse_offb
+        "unequal" = mse_offb #Marginal variance being used here?
     )
-      
+
     Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
     FStatb1 <- t(Rb) %*% solve(Ab) %*% Rb / n1b
-    
+
     return(as.numeric(FStatb1))
   }
 
@@ -196,13 +196,13 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                 cutoff = 0.95, cl = NULL, 
+                 cutoff = 0.95, cl = NULL,
                  method = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   method <- match.arg(method)
-  
+
   ## If not supplied, calculate these manually
   if (missing(reps) | missing(Ymean)) {
     respS <- predictOffAxis(data = data, fitResult = fitResult,
@@ -212,11 +212,11 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     if (missing(reps)) reps <- aggregate(effect ~ d1 + d2,
                                          respS$offaxisZTable, length)[["effect"]]
   }
-  
+
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
-  
+
   MSE0 <- fitResult$sigma^2
   df0 <- fitResult$df
   coefFit <- fitResult$coef
@@ -226,7 +226,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
   off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
   off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
-  
+
   mse_off <- switch(method,
       "equal" = MSE0,
       "model" = {
@@ -236,14 +236,14 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
       },
       "unequal" = mean(off_var)
   )
-  
+
   A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
-  
+
   E <- eigen(A)
   V <- E$values
   Q <- E$vectors
   Amsq <- Q %*% diag(1/sqrt(V)) %*% t(Q)
-  
+
   RStud <- t(R) %*% Amsq
   Ymean$R <- t(RStud)
   Ymean$absR <- abs(Ymean$R)
@@ -267,10 +267,8 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     pb$tick(0)
 
     iterFunction <- function(i) {
-
       ## Update progress bar
       pb$tick()
-
       out <- bootstrapData(data = data, fitResult = fitResult,
                            transforms = transforms, null_model = null_model, ...)
       MSE0b <- out$MSE0b
@@ -286,13 +284,12 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
         CPb <- CPBootstrap(data = data, fitResult = fitResultb,
             transforms = transforms, null_model = null_model,
             B.CP = B.CP, ...)
-      
       mse_offb <- switch(method,
           "equal" = MSE0b,
           "model" = ifelse(Predvarb < 0, 0.00001, Predvarb),
           "unequal" = mse_offb
       )
-      
+
       Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
 
       Eb <- eigen(Ab)
@@ -322,7 +319,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   inc2 <- coefFit["m2"] >= coefFit["b"]
   dec1 <- coefFit["m1"] <= coefFit["b"]
   dec2 <- coefFit["m2"] <= coefFit["b"]
-  
+
   call <- {
     if (max(Ymean$absR) > q) {
       invertCall <- Ymean$R[which.max(Ymean$absR)] < 0
@@ -343,8 +340,8 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     c("Syn", "Ant")[1+(Ymean$R[Ymean$sign] < 0)]
   } else if (dec1 & dec2) {
     c("Ant", "Syn")[1+(Ymean$R[Ymean$sign] < 0)]
-  } else "Undefined"  
-  
+  } else "Undefined"
+
   attr(Ymean, "df0") <- df0
   attr(Ymean, "cutoff") <- cutoff
   attr(Ymean, "q") <- q

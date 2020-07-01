@@ -41,7 +41,6 @@
 #' @examples
 #'   coefs <- c("h1" = 1, "h2" = 1.5, "b" = 0,
 #'              "m1" = 1, "m2" = 2, "e1" = 0.5, "e2" = 0.1)
-#'
 #'   ## Dose levels are set to be integers from 0 to 10
 #'   generateData(coefs, sigma = 1)
 #'
@@ -53,23 +52,23 @@ generateData <- function(pars, sigma, data = NULL,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"),
                          error = 1, sampling_errors = NULL,
                          wild_bootstrap = FALSE, ...) {
-  
+
   ## Argument matching
   null_model <- match.arg(null_model)
-  
+
   if (inherits(pars, "MarginalFit")) {
     transforms <- pars$transforms
     pars <- pars$coef
   }
-  
+
   if (is.null(data)) data <- expand.grid("d1" = rep(0:10, each = 2),
                                          "d2" = rep(0:10, each = 2))
-  
+
   if ("effect" %in% colnames(data)) {
     warning("effect column is unneeded for generateData() function and will be dropped.")
     data <- data[, c("d1", "d2")]
   }
-  
+
   ## Use identity transformation if no transform functions are supplied
   if (is.null(transforms)) {
     idF <- function(z, ...) z
@@ -78,7 +77,7 @@ generateData <- function(pars, sigma, data = NULL,
                        "BiolT" = idF,
                        "compositeArgs" = NULL)
   }
-  
+
   ySim <- switch(null_model,
                  "loewe" = generalizedLoewe(data, pars, asymptotes = 2)$response,
                  "hsa" = hsa(data[, c("d1", "d2")], pars),
@@ -86,7 +85,7 @@ generateData <- function(pars, sigma, data = NULL,
                  "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars))
   ySim <- with(transforms,
                PowerT(BiolT(ySim, compositeArgs), compositeArgs))
-  
+
   with(as.list(pars), {
     errors <- switch(as.character(error),
                      ## Normal
@@ -110,7 +109,7 @@ generateData <- function(pars, sigma, data = NULL,
                      }},
                      stop("Unavailable error type.")
     )
-    
+
     ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
     data.frame("effect" = ySim, data)
   })
@@ -123,7 +122,7 @@ generateData <- function(pars, sigma, data = NULL,
 #' @param ... Further parameters that will be passed to \code{\link{generateData}}
 #' @inheritParams fitSurface
 #' @inheritParams generateData
-#' @importFrom stats aggregate var
+#' @importFrom stats lm.fit var
 #' @importFrom parallel clusterApply
 #' @return Estimated CP matrix
 #' @export
@@ -187,17 +186,17 @@ bootstrapData <- function(data, fitResult,
                            transforms = transforms,
                            null_model = null_model, ...)
   dataB <- simModel$data
+  dataB$d1d2 = apply(dataB[, c("d1", "d2")], 1, paste, collapse = "_")
   fitResultB <- simModel$fitResult
 
   respS <- predictOffAxis(dataB, fitResultB,
                           null_model = null_model,
                           transforms = transforms)
+  respS$offaxisZTable$d1d2 = apply(respS$offaxisZTable[, c("d1", "d2")], 1,
+                                   paste, collapse = "_")
 
-  Rb <- aggregate(effect - predicted ~ d1 + d2,
-                  data = respS$offaxisZTable, mean)[[3]]
-
-  repsb <- aggregate(effect ~ d1 + d2,
-                     data = respS$offaxisZTable, length)$effect
+  Rb <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
+  repsb <- with(respS$offaxisZTable, tapply(effect, d1d2, length))
 
   ## Covariance matrix of the predictions
   n1b <- length(Rb)
@@ -206,19 +205,24 @@ bootstrapData <- function(data, fitResult,
   ## Estimators of the residual variance
   df0b <- fitResultB$df
   MSE0b <- fitResultB$sigma^2
-  
-  dat_offB  <- dataB[dataB$d1 != 0 & dataB$d2 != 0, ]
-  off_varB  <- aggregate(effect ~ d1 + d2, data = dat_offB, var)[["effect"]]
+
+  # dat_offB  <- dataB[dataB$d1 != 0 & dataB$d2 != 0, ]
+  # off_varB  <- aggregate(effect ~ d1 + d2, data = dat_offB, var)[["effect"]]
+  # mse_offb  <- mean(off_varB)
+  # off_meanB <- aggregate(effect ~ d1 + d2, data = dat_offB, mean)[["effect"]]
+  # linmodB <- lm(off_varB ~ off_meanB)
+  # PredvarB <- predict(linmodB)
+
+  dat_offB  <- dataB[dataB$d1 & dataB$d2, ]
+  off_varB  <- with(dat_offB, tapply(effect, d1d2, var))
   mse_offb  <- mean(off_varB)
-  off_meanB <- aggregate(effect ~ d1 + d2, data = dat_offB, mean)[["effect"]]
-  
-  linmodB <- lm(off_varB ~ off_meanB)
-  PredvarB <- predict(linmodB)
+  off_meanB = with(dat_offB, tapply(effect, d1d2, mean))
+  linmodB <- lm.fit(off_varB, x = cbind(1, off_meanB))
+  PredvarB <- linmodB$coef[1] + linmodB$coef[2]*off_meanB
 
   out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
               "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,
               "mse_offb" = mse_offb)
-
   return(out)
 }
 
@@ -270,15 +274,15 @@ simulateNull <- function(data, fitResult,
     ## be quite small.
     simData$effect <- abs(simData$effect)
 
-    ## construct a list of arguments, including ... passed to original 
+    ## construct a list of arguments, including ... passed to original
     ## `fitMarginals` call (saved as `extraArgs`)
-    paramsMarginal <- list("data" = simData, "method" = method, 
+    paramsMarginal <- list("data" = simData, "method" = method,
         "start" = initPars, "model" = model, "transforms" = transforms,
         "control" = control)
     if (!is.null(fitResult$extraArgs) && is.list(fitResult$extraArgs))
       # use `modifyList` here, since `control` could be user-defined
       paramsMarginal <- modifyList(paramsMarginal, fitResult$extraArgs)
-    
+
     simFit <- try({
       do.call(fitMarginals, paramsMarginal)
     }, silent = TRUE)
