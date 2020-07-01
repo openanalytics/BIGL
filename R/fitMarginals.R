@@ -37,8 +37,8 @@
 #'   This method can be noticeably slower than the non-linear least squares
 #'   methods.
 #' @param names Compound names to be used on the plot labels.
-#' @param ... Further arguments that are passed to the optimizer function, 
-#' such as \code{lower} or \code{upper} (for the "nlslm" method), or 
+#' @param ... Further arguments that are passed to the optimizer function,
+#' such as \code{lower} or \code{upper} (for the "nlslm" method), or
 #' \code{control}.
 #' @inheritParams fitSurface
 #' @importFrom methods hasArg
@@ -72,7 +72,7 @@
 #' @export
 fitMarginals <- function(data, transforms = NULL, start = NULL,
                          constraints = NULL, fixed = NULL,
-                         method = c("nlslm", "nls", "optim"), names = NULL, 
+                         method = c("nlslm", "nls", "optim"), names = NULL,
                          ...) {
 
   method <- match.arg(method)
@@ -124,12 +124,12 @@ fitMarginals <- function(data, transforms = NULL, start = NULL,
     fitArgs$model <- list(...)$model
   }
 
-  ## Pass ... along, except for 'model' :-/ 
+  ## Pass ... along, except for 'model' :-/
   ## FIXME by renaming 'model' argument here and in marginalNLS
   extraArgs <- list(...)
   extraArgs <- extraArgs[names(extraArgs) != "model"]
   fitArgs <- modifyList(fitArgs, extraArgs, keep.null = TRUE)
-  
+
   ## Subset only free parameters
   fitArgs$start <- start[fitArgs$model$free]
 
@@ -145,7 +145,7 @@ fitMarginals <- function(data, transforms = NULL, start = NULL,
     names <- c("Compound 1", "Compound 2")
   }
   fitResult$names <- names
-  
+
   class(fitResult) <- append("MarginalFit", class(fitResult))
 
   fitResult
@@ -241,10 +241,7 @@ constructFormula <- function(consMatrix = NULL, consVector = NULL,
        "vars" = extraVars,
        "constraints" = list("matrix" = normMatrix,
                             "vector" = normVector))
-
 }
-
-
 #' Fit two 4-parameter log-logistic functions with non-linear least squares
 #'
 #' This function does not automatically extract marginal data and requires
@@ -407,6 +404,6 @@ marginalOptim <- function(data, transforms = NULL, start, model, ...) {
        "vcov" = vcov,
        "model" = model,
        "shared_asymptote" = as.logical(coefs["m1"] == coefs["m2"]),
-       "extraArgs" = as.list(substitute(list(...)))[-1L]   
+       "extraArgs" = as.list(substitute(list(...)))[-1L]
    )
 }
