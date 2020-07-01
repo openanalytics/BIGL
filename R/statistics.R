@@ -45,7 +45,7 @@
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                  cl = NULL,
+                  cl = NULL, progressBar = TRUE,
                   method = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
@@ -82,7 +82,6 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
       },
       "unequal" = mean(off_var)
   )
-
   A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
   FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
 
@@ -196,7 +195,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), Ymean, CP, reps,
                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                 cutoff = 0.95, cl = NULL,
+                 cutoff = 0.95, cl = NULL, progressBar = TRUE,
                  method = c("equal", "model", "unequal"), ...) {
 
   ## Argument matching
@@ -261,14 +260,14 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     Rnull <- NULL
 
   } else {
-
-    pb <- progress_bar$new(format = "(maxR): [:bar]:percent",
-                           total = B.B, width = 60)
-    pb$tick(0)
-
+      if(progressBar){
+          pb <- progress_bar$new(format = "(maxR): [:bar]:percent",
+                                 total = B.B, width = 60)
+          pb$tick(0)
+      }
     iterFunction <- function(i) {
       ## Update progress bar
-      pb$tick()
+        if(progressBar) pb$tick()
       out <- bootstrapData(data = data, fitResult = fitResult,
                            transforms = transforms, null_model = null_model, ...)
       MSE0b <- out$MSE0b

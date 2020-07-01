@@ -186,14 +186,11 @@ bootstrapData <- function(data, fitResult,
                            transforms = transforms,
                            null_model = null_model, ...)
   dataB <- simModel$data
-  dataB$d1d2 = apply(dataB[, c("d1", "d2")], 1, paste, collapse = "_")
   fitResultB <- simModel$fitResult
 
   respS <- predictOffAxis(dataB, fitResultB,
                           null_model = null_model,
                           transforms = transforms)
-  respS$offaxisZTable$d1d2 = apply(respS$offaxisZTable[, c("d1", "d2")], 1,
-                                   paste, collapse = "_")
 
   Rb <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
   repsb <- with(respS$offaxisZTable, tapply(effect, d1d2, length))
@@ -243,7 +240,6 @@ bootstrapData <- function(data, fitResult,
 simulateNull <- function(data, fitResult,
                          transforms = fitResult$transforms,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
-
   ## Argument matching
   null_model <- match.arg(null_model)
 
@@ -251,19 +247,16 @@ simulateNull <- function(data, fitResult,
   coefFit0 <- fitResult$coef
   sigma0 <- fitResult$sigma
   model <- fitResult$model
-
   control <- {
     if (method %in% c("nls", "nlslm"))
       list("maxiter" = 200)
   }
-
   ## Parameter estimates may at times return an error due to non-convergence. If
   ## necessary, repeat the step until it functions properly and 1000 times at
   ## most.
   counter <- 0
   initPars <- coefFit0
   repeat {
-
     simData <- generateData(pars = coefFit0, sigma = sigma0,
                             data = data[, c("d1", "d2")],
                             transforms = transforms,
@@ -273,6 +266,7 @@ simulateNull <- function(data, fitResult,
     ## it back to the positive one. Usually, values of such observations tend to
     ## be quite small.
     simData$effect <- abs(simData$effect)
+    simData$d1d2 = data$d1d2
 
     ## construct a list of arguments, including ... passed to original
     ## `fitMarginals` call (saved as `extraArgs`)
@@ -282,7 +276,6 @@ simulateNull <- function(data, fitResult,
     if (!is.null(fitResult$extraArgs) && is.list(fitResult$extraArgs))
       # use `modifyList` here, since `control` could be user-defined
       paramsMarginal <- modifyList(paramsMarginal, fitResult$extraArgs)
-
     simFit <- try({
       do.call(fitMarginals, paramsMarginal)
     }, silent = TRUE)
@@ -294,10 +287,7 @@ simulateNull <- function(data, fitResult,
                  "Check that transformation functions correspond ",
                  "to the marginal model."))
     if (!inherits(simFit, "try-error")) break
-
   }
-
   return(list("data" = simData,
               "fitResult" = simFit))
-
 }
