@@ -35,6 +35,7 @@
 #'   following Rademacher distribution. Argument is used only if \code{error = 4}.
 #' @param ... Further arguments
 #' @inheritParams fitSurface
+#' @importFrom stats lm.fit
 #' @return Dose-response dataframe with generated data including \code{"effect"}
 #'   as well as \code{"d1"} and \code{"d2"} columns.
 #' @export
@@ -131,6 +132,21 @@ generateData <- function(pars, sigma, data = NULL,
 #'   ## Data must contain d1, d2 and effect columns
 #'   fitResult <- fitMarginals(data)
 #'   CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
+getCP = function(bootStraps, null_model, transforms){
+    pred <- vapply(bootStraps,
+                   FUN.VALUE = double(with(bootStraps[[1]]$data, length(unique(d1d2[d1 &d2])))),
+                   function(b) {
+        predOffAxis <- predictOffAxis(data =  b$data, fitResult = b$fitResult,
+                                      null_model = null_model,
+                                      transforms = transforms)
+        ## If multiple predictions with same x-y coordinates are available,
+        ## average them out.
+        pred <- with(predOffAxis$offaxisZTable,
+                     tapply(predicted, d1d2, mean))/fitResult$sigma
+        return(pred)
+    })
+   var(t(pred))
+}
 CPBootstrap <- function(data, fitResult,
                         transforms = fitResult$transforms,
                         null_model = c("loewe", "hsa", "bliss", "loewe2"), B.CP, ...) {
@@ -202,13 +218,6 @@ bootstrapData <- function(data, fitResult,
   ## Estimators of the residual variance
   df0b <- fitResultB$df
   MSE0b <- fitResultB$sigma^2
-
-  # dat_offB  <- dataB[dataB$d1 != 0 & dataB$d2 != 0, ]
-  # off_varB  <- aggregate(effect ~ d1 + d2, data = dat_offB, var)[["effect"]]
-  # mse_offb  <- mean(off_varB)
-  # off_meanB <- aggregate(effect ~ d1 + d2, data = dat_offB, mean)[["effect"]]
-  # linmodB <- lm(off_varB ~ off_meanB)
-  # PredvarB <- predict(linmodB)
 
   dat_offB  <- dataB[dataB$d1 & dataB$d2, ]
   off_varB  <- with(dat_offB, tapply(effect, d1d2, var))

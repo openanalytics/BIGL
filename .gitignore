@@ -4,3 +4,4 @@
 **/vignettes/*.html
 .Rproj.user
 *.Rproj
+*.pdf

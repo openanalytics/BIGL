@@ -64,6 +64,7 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
+#'  @param progressBar A boolean, should progress of bootstraps be shown?
 #' @param method What assumption should be used for the variance of on- and
 #'   off-axis points. This argument can take one of the values from
 #'   \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
@@ -139,7 +140,8 @@ fitSurface <- function(data, fitResult,
                          "fitResult" = fitResult,
                          "coefFit" = coefFit,
                          "null_model" = null_model,
-                         "transforms" = transforms)
+                         "transforms" = transforms, "Ymean" = Ymean,
+                         "reps" = reps, "R" = R)
 
   respS <- do.call(predictOffAxis, paramsEstimate)
   offaxisZScores <- with(respS$offaxisZTable,
@@ -182,24 +184,32 @@ fitSurface <- function(data, fitResult,
   ## Covariance matrix of the predictions
   stopifnot(length(R) == length(reps))
 
-  paramsBootstrap <- list("B.B" = B.B, "B.CP" = B.CP,
-                          "error" = error, "sampling_errors" = sampling_errors,
-                          "nested_bootstrap" = nested_bootstrap,
-                          "wild_bootstrap" = wild_bootstrap,
-                          "cutoff" = cutoff, "Ymean" = Ymean,
-                          "reps" = reps, "R" = R,
-                          "method" = method, "progressBar" = progressBar,
-                          "clusterObj" = clusterObj)
+  #If any bootstraps needed, do them first
+  if(is.null(CP) | (!is.null(B.B))){
+      B = if(is.null(B.B)) B.CP else max(B.B, B.CP)
+      paramsBootstrap <- list("data"  =data,
+          "fitResult" = fitResult, "transforms" = transforms,
+                              "null_model" = null_model,
+          "error" = error, "sampling_errors" = sampling_errors,
+                              "nested_bootstrap" = nested_bootstrap,
+                              "wild_bootstrap" = wild_bootstrap,
+                              "cutoff" = cutoff, "Ymean" = Ymean,
+                              "reps" = reps, "R" = R,
+                              "method" = method)
+      bootFun = function(i, args) do.call(simulateNull, args) #Wrapper with index
+      bootStraps = if(is.null(clusterObj)) {
+          lapply(integer(B), bootFun, args = paramsBootstrap)
+          } else {
+              parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
+          }
+  }
 
   ## If not provided, compute prediction covariance matrix by bootstrap
-  if (is.null(CP)) CP <- do.call(CPBootstrap, c(paramsBootstrap, paramsEstimate))
-  paramsBootstrap$CP <- CP
+  if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms)
 
-  retObj <- list("data" = data,
-                 "fitResult" = fitResult,
-                 "transforms" = transforms,
-                 "method" = method,
-                 "null_model" = null_model,
+  retObj <- list("data"  =data,
+                 "fitResult" = fitResult, "transforms" = transforms,
+                 "null_model" = null_model, "method" = method,
                  "offAxisTable" = offAxisTable,
                  "occupancy" = respS$occupancy,
                  "CP" = CP)
@@ -207,7 +217,8 @@ fitSurface <- function(data, fitResult,
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
     statObj <- c(statObj,
-                 list("meanR" = do.call(meanR, c(paramsBootstrap, paramsEstimate))))
+                 list("meanR" = do.call(meanR, c(list(bootStraps = bootStraps),
+                                                 paramsEstimate))))
   if (statistic %in% c("maxR", "both"))
     statObj <- c(statObj,
                  list("maxR" = do.call(maxR, c(paramsBootstrap, paramsEstimate))))

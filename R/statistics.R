@@ -46,7 +46,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL, progressBar = TRUE,
-                  method = c("equal", "model", "unequal"), ...) {
+                  method = c("equal", "model", "unequal"), bootStraps,...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -65,26 +65,9 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
-
   n1 <- length(R)
-  MSE0 <- fitResult$sigma^2
-  df0 <- fitResult$df
-
-  dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
-  off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
-  off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
-
-  mse_off <- switch(method,
-      "equal" = MSE0,
-      "model" = {
-        linmod <- lm(off_var ~ off_mean)
-        predict(linmod)
-      },
-      "unequal" = mean(off_var)
-  )
-  A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
-  FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
-
+  FStat <- getMeanRF(data, fitResult, method, CP, reps, transforms, null_model,
+                                       reps, R, n1)
   if (is.null(B.B)) {
     ans <- list("FStat" = FStat,
                 "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
@@ -93,50 +76,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     return(ans)
   }
 
-  pb <- progress_bar$new(format = "(meanR): [:bar]:percent",
-                         total = B.B, width = 60)
-  pb$tick(0)
+ FStatb <- sapply(bootStraps, function(x) do.call(getMeanRF, x))
 
-  iterFunction <- function(i) {
-
-    ## Update progress bar
-    pb$tick()
-
-    out <- bootstrapData(data = data, fitResult = fitResult,
-                         transforms = transforms, null_model = null_model, ...)
-
-    MSE0b <- out$MSE0b
-    Rb <- out$Rb
-    n1b <- out$n1b
-    repsb <- out$repsb
-    fitResultb <- out$fitResult
-    Predvarb <- out$Predvarb
-    mse_offb <- out$mse_offb
-
-    CPb <- CP
-    if (nested_bootstrap)
-      CPb <- CPBootstrap(data = data, fitResult = fitResultb,
-                         transforms = transforms, null_model = null_model,
-                         B.CP = B.CP, ...)
-
-    mse_offb <- switch(method,
-        "equal" = MSE0b,
-        "model" = Predvarb,
-        "unequal" = mse_offb #Marginal variance being used here?
-    )
-
-    Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
-    FStatb1 <- t(Rb) %*% solve(Ab) %*% Rb / n1b
-
-    return(as.numeric(FStatb1))
-  }
-
-  ## Call parallel computation if needed
-  if (is.null(cl)) {
-    FStatb <- sapply(seq_len(B.B), iterFunction)
-  } else {
-    FStatb <- parSapply(cl, seq_len(B.B), iterFunction)
-  }
 
   pvalb <- mean(FStatb >= FStat)
 
@@ -146,6 +87,37 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
               "n1" = n1, "df0" = df0)
   class(ans) <- append("meanR", class(ans))
   ans
+}
+#' A helper function to calculate the meanR statistic of data and a fit
+getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
+                     reps, R, n1){
+    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1)
+    FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
+    return(FStat)
+}
+getMaxRF(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1){
+    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1)
+    E <- eigen(A)
+    V <- E$values
+    Q <- E$vectors
+    Amsq <- Q %*% diag(1/sqrt(V)) %*% t(Q)
+    RStud <- t(R) %*% Amsq
+    return(as.numeric(RStudb))
+    # Ymean$R <- t(RStud)
+    # Ymean$absR <- abs(Ymean$R)
+}
+getA = function(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1){
+    respS <- predictOffAxis(data = data, fitResult = fitResult,
+                            transforms = transforms, null_model = null_model)
+    MSE0 <- fitResult$sigma^2
+    dat_off  <- data[data$d1 & data$d2, ]
+    mse_off <- switch(method,
+                      "equal" = MSE0,
+                      "model" = modelVar(dat_off),
+                      "unequal" = mean(with(dat_off, tapply(effect, d1d2, var)))
+    )
+    A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
+    return(A)
 }
 
 #' Compute maxR statistic for each off-axis dose combination
