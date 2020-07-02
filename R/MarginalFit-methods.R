@@ -225,11 +225,11 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
   if (any(curveDat$d1 + curveDat$d2 == 0, na.rm = TRUE)) {
     minD1 <- min(dat$d1[dat$d1 != 0], na.rm = TRUE)
     minD2 <- min(dat$d2[dat$d2 != 0], na.rm = TRUE)
-    curveDat$type <- (curveDat$d1<=minD1 & curveDat$d2 == 0) | (curveDat$d2<=minD2 & curveDat$d1 == 0)
+    curveDat$type <- (curveDat$d1<=minD1+.Machine$double.eps & curveDat$d2 == 0) | (curveDat$d2<=minD2+.Machine$double.eps & curveDat$d1 == 0)
     # for non-smooth curves, we need to duplicate first non-0 dose to avoid line
     # breakage, as we are actually drawing 2 different lines 
     if (!smooth) {
-      auxDat <- rbind(curveDat[curveDat$d1 == minD1, ], curveDat[curveDat$d2 == minD2, ])
+      auxDat <- rbind(curveDat[abs(curveDat$d1-minD1) < .Machine$double.eps, ], curveDat[abs(curveDat$d2-minD2) < .Machine$double.eps, ])
       auxDat$type <- !auxDat$type
       curveDat <- rbind(curveDat, auxDat)
     }
