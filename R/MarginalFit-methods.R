@@ -221,6 +221,7 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
   }
   
   # draw a dotted line from 0 to the first non-0 dose
+  curveDat$type <- FALSE
   if (any(curveDat$d1 + curveDat$d2 == 0, na.rm = TRUE)) {
     minD1 <- min(dat$d1[dat$d1 != 0], na.rm = TRUE)
     minD2 <- min(dat$d2[dat$d2 != 0], na.rm = TRUE)
