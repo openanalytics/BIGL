@@ -44,11 +44,9 @@
 #'   maxR(data, fitResult, null_model = "loewe", CP = CP)
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
-                 CP, reps,
-                 nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
+                 CP, reps, nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL, progressBar = TRUE,
                  method = c("equal", "model", "unequal"), ...) {
-
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
@@ -68,7 +66,9 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
 
     FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
                       R, n1)
-    Ymean = list(R = FStat, absR = abs(FStat))
+    Ymean = data.frame("d1" =  with(respS$offaxisZTable, tapply(d1, d1d2, function(x) x[1])),
+                       "d2" =  with(respS$offaxisZTable, tapply(d2, d1d2, function(x) x[1])),
+                       R = FStat, absR = abs(FStat), "effect - predicted" = R)
     df0 = fitResult$df
 
     ## Use normal approximation if B.B is not provided.

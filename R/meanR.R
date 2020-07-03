@@ -73,7 +73,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                     "n1" = n1, "df0" = df0)
         class(ans) <- append("meanR", class(ans))
         return(ans)
-    } FStatb <- sapply(bootStraps, function(x) {
+    }
+    FStatb <- sapply(bootStraps, function(x) {
         if(nested_bootstrap){
             paramsBootstrap <- list("data"  =x$data,
                                     "fitResult" = x$simFit, "transforms" = transforms,
