@@ -6,14 +6,8 @@
 #' antagonistic. These can be based either on normal approximation or a
 #' fully bootstrapped distribution of the statistics.
 #'
-#' @param Ymean Aggregate summary of off-axis predicted responses. In
-#'   particular, it should contain \code{"effect - predicted"} column. If
-#'   \code{Ymean} is missing, it will be calculated automatically from output of
-#'   \code{\link{predictOffAxis}} function.
 #' @inheritParams fitSurface
 #' @inheritParams meanR
-#' @importFrom parallel parSapply
-#' @importFrom progress progress_bar
 #' @importFrom stats rt ecdf
 #' @return This function returns a \code{maxR} object with estimates for the
 #'   maxR statistical test. \code{maxR} object is essentially a list with
@@ -45,7 +39,7 @@
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                 cutoff = 0.95, cl = NULL, progressBar = TRUE,
+                 cutoff = 0.95, cl = NULL,
                  method = c("equal", "model", "unequal"), ...) {
     ## Argument matching
     null_model <- match.arg(null_model)
