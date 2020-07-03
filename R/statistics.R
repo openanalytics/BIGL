@@ -56,11 +56,9 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   if (missing(R) | missing(reps)) {
     respS <- predictOffAxis(data = data, fitResult = fitResult,
                             transforms = transforms, null_model = null_model)
-    Ymean <- aggregate(effect - predicted ~ d1 + d2,
-                       respS$offaxisZTable, mean)
-    if (missing(R)) R <- Ymean[["effect - predicted"]]
-    if (missing(reps)) reps <- aggregate(effect ~ d1 + d2,
-                                         data = respS$offaxisZTable, length)[["effect"]]
+    if (missing(R)) R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
+    if (missing(reps)) reps <- with(respS$offaxisZTable,
+                                    tapply(effect - predicted, d1d2, length))
   }
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
@@ -77,8 +75,9 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   }
 
  FStatb <- sapply(bootStraps, function(x) {
-     getMeanRF(x$data, x$simFit, method, CP, reps, transforms, null_model,
-                                                    R, n1)
+     getMeanRF(data = x$data, fitResult = x$simFit, method = method, CP = CP,
+               reps = reps, transforms = transforms, null_model = null_model,
+                                                    n1 = n1)
      })
  pvalb <- mean(FStatb >= FStat)
  ans <- list("FStat" = FStat, "FDist" = ecdf(FStatb), "p.value" = pvalb,
@@ -86,9 +85,18 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   class(ans) <- append("meanR", class(ans))
   ans
 }
+getR = function(data, fitResult, transforms, null_model){
+    respS <- predictOffAxis(data = data, fitResult = fitResult,
+                            transforms = transforms, null_model = null_model)
+    R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
+}
 #' A helper function to calculate the meanR statistic of data and a fit
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
                      R, n1){
+    if(missing(R)){
+        R = getR(data = data, fitResult = fitResult, transforms = transforms,
+                 null_model = null_model)
+    }
     A <- getA(data, fitResult, method, CP, reps, transforms, null_model, R, n1)
     FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
     return(FStat)
@@ -105,8 +113,6 @@ getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model, R
     # Ymean$absR <- abs(Ymean$R)
 }
 getA = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){
-    respS <- predictOffAxis(data = data, fitResult = fitResult,
-                            transforms = transforms, null_model = null_model)
     MSE0 <- fitResult$sigma^2
     dat_off  <- data[data$d1 & data$d2, ]
     mse_off <- switch(method,
