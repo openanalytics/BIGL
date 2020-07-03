@@ -132,7 +132,7 @@ generateData <- function(pars, sigma, data = NULL,
 #'   ## Data must contain d1, d2 and effect columns
 #'   fitResult <- fitMarginals(data)
 #'   CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
-getCP = function(bootStraps, null_model, transforms){
+getCP = function(bootStraps, null_model, transforms, sigma0){
     pred <- vapply(bootStraps,
                    FUN.VALUE = double(with(bootStraps[[1]]$data, length(unique(d1d2[d1 &d2])))),
                    function(b) {
@@ -142,7 +142,7 @@ getCP = function(bootStraps, null_model, transforms){
         ## If multiple predictions with same x-y coordinates are available,
         ## average them out.
         pred <- with(predOffAxis$offaxisZTable,
-                     tapply(predicted, d1d2, mean))/b$simFit$sigma
+                     tapply(predicted, d1d2, mean))/sigma0
         return(pred)
     })
    var(t(pred))

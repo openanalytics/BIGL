@@ -190,7 +190,7 @@ fitSurface <- function(data, fitResult,
   } else {bootStraps = NULL}
 
   ## If not provided, compute prediction covariance matrix by bootstrap
-  if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms)
+  if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms, sigma0 = sigma0)
 
   #Calculate test statistics
   paramsStatistics = c(list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff),
