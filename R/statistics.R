@@ -50,6 +50,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   ## Argument matching
   null_model <- match.arg(null_model)
   method <- match.arg(method)
+  df0 = fitResult$df
 
   ## If not supplied, calculate these manually
   if (missing(R) | missing(reps)) {

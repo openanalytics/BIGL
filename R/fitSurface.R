@@ -111,7 +111,7 @@ fitSurface <- function(data, fitResult,
                        statistic = c("none", "meanR", "maxR", "both"),
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
-                       cutoff = 0.95, parallel = TRUE, progressBar = TRUE,
+                       cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
                        method = c("equal", "model", "unequal")) {
 
   ## Argument matching
