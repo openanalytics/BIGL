@@ -186,18 +186,17 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
   method <- match.arg(method)
 
   ## If not supplied, calculate these manually
-  if (missing(reps) | missing(Ymean)) {
-    respS <- predictOffAxis(data = data, fitResult = fitResult,
-                            transforms = transforms, null_model = null_model)
-    if (missing(Ymean)) Ymean <- aggregate(effect - predicted ~ d1 + d2,
-                                           data = respS$offaxisZTable, mean)
-    if (missing(reps)) reps <- aggregate(effect ~ d1 + d2,
-                                         respS$offaxisZTable, length)[["effect"]]
+  if (missing(R) | missing(reps)) {
+      respS <- predictOffAxis(data = data, fitResult = fitResult,
+                              transforms = transforms, null_model = null_model)
+      if (missing(R)) R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
+      if (missing(reps)) reps <- with(respS$offaxisZTable,
+                                      tapply(effect - predicted, d1d2, length))
   }
-
   if (all(reps == 1) && method %in% c("model", "unequal")) {
-    stop("Replicates are required when choosing the method 'model' or 'unequal'")
+      stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
+  n1 <- length(R)
 
   FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
                      R, n1)
