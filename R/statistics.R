@@ -44,9 +44,8 @@
 #'   meanR(data, fitResult, null_model = "loewe", CP = CP)
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
-                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
-                  cl = NULL, progressBar = TRUE,
-                  method = c("equal", "model", "unequal"), bootStraps,...) {
+                  nested_bootstrap = FALSE, B.CP = NULL,
+                  cl = NULL, method = c("equal", "model", "unequal"), bootStraps,...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -67,8 +66,8 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   }
   n1 <- length(R)
   FStat <- getMeanRF(data, fitResult, method, CP, reps, transforms, null_model,
-                                       reps, R, n1)
-  if (is.null(B.B)) {
+                                       R, n1)
+  if (is.null(bootStraps)) {
     ans <- list("FStat" = FStat,
                 "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
                 "n1" = n1, "df0" = df0)
@@ -76,27 +75,25 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     return(ans)
   }
 
- FStatb <- sapply(bootStraps, function(x) do.call(getMeanRF, x))
-
-
-  pvalb <- mean(FStatb >= FStat)
-
-  ans <- list("FStat" = FStat,
-              "FDist" = ecdf(FStatb),
-              "p.value" = pvalb,
+ FStatb <- sapply(bootStraps, function(x) {
+     getMeanRF(x$data, x$simFit, method, CP, reps, transforms, null_model,
+                                                    R, n1)
+     })
+ pvalb <- mean(FStatb >= FStat)
+ ans <- list("FStat" = FStat, "FDist" = ecdf(FStatb), "p.value" = pvalb,
               "n1" = n1, "df0" = df0)
   class(ans) <- append("meanR", class(ans))
   ans
 }
 #' A helper function to calculate the meanR statistic of data and a fit
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
-                     reps, R, n1){
-    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1)
+                     R, n1){
+    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, R, n1)
     FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
     return(FStat)
 }
-getMaxRF(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1){
-    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1)
+getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){
+    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, R, n1)
     E <- eigen(A)
     V <- E$values
     Q <- E$vectors
@@ -106,7 +103,7 @@ getMaxRF(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1)
     # Ymean$R <- t(RStud)
     # Ymean$absR <- abs(Ymean$R)
 }
-getA = function(data, fitResult, method, CP, reps, transforms, null_model, reps, R, n1){
+getA = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){
     respS <- predictOffAxis(data = data, fitResult = fitResult,
                             transforms = transforms, null_model = null_model)
     MSE0 <- fitResult$sigma^2
@@ -119,7 +116,6 @@ getA = function(data, fitResult, method, CP, reps, transforms, null_model, reps,
     A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
     return(A)
 }
-
 #' Compute maxR statistic for each off-axis dose combination
 #'
 #' \code{\link{maxR}} computes maxR statistics for each off-axis dose
@@ -188,34 +184,8 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
 
-  MSE0 <- fitResult$sigma^2
-  df0 <- fitResult$df
-  coefFit <- fitResult$coef
-  R <- Ymean[["effect - predicted"]]
-  n1 <- length(R)
-
-  dat_off  <- data[data$d1 != 0 & data$d2 != 0, ]
-  off_var  <- aggregate(effect ~ d1 + d2, data = dat_off, var)[["effect"]]
-  off_mean <- aggregate(effect ~ d1 + d2, data = dat_off, mean)[["effect"]]
-
-  mse_off <- switch(method,
-      "equal" = MSE0,
-      "model" = {
-        linmod <- lm(off_var ~ off_mean)
-        Predvar <- predict(linmod)
-        ifelse(Predvar < 0, 0.00001, Predvar)
-      },
-      "unequal" = mean(off_var)
-  )
-
-  A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
-
-  E <- eigen(A)
-  V <- E$values
-  Q <- E$vectors
-  Amsq <- Q %*% diag(1/sqrt(V)) %*% t(Q)
-
-  RStud <- t(R) %*% Amsq
+  FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
+                     R, n1)
   Ymean$R <- t(RStud)
   Ymean$absR <- abs(Ymean$R)
 
@@ -232,52 +202,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
     Rnull <- NULL
 
   } else {
-      if(progressBar){
-          pb <- progress_bar$new(format = "(maxR): [:bar]:percent",
-                                 total = B.B, width = 60)
-          pb$tick(0)
-      }
-    iterFunction <- function(i) {
-      ## Update progress bar
-        if(progressBar) pb$tick()
-      out <- bootstrapData(data = data, fitResult = fitResult,
-                           transforms = transforms, null_model = null_model, ...)
-      MSE0b <- out$MSE0b
-      Rb <- out$Rb
-      n1b <- out$n1b
-      repsb <- out$repsb
-      fitResultb <- out$fitResult
-      Predvarb <- out$Predvarb
-      mse_offb <- out$mse_offb
-
-      CPb <- CP
-      if (nested_bootstrap)
-        CPb <- CPBootstrap(data = data, fitResult = fitResultb,
-            transforms = transforms, null_model = null_model,
-            B.CP = B.CP, ...)
-      mse_offb <- switch(method,
-          "equal" = MSE0b,
-          "model" = ifelse(Predvarb < 0, 0.00001, Predvarb),
-          "unequal" = mse_offb
-      )
-
-      Ab <- MSE0b*CPb + mse_offb*diag(1/repsb, nrow = n1b)
-
-      Eb <- eigen(Ab)
-      Vb <- Eb$values
-      Qb <- Eb$vectors
-      Amsqb <- Qb %*% diag(1/sqrt(Vb)) %*% t(Qb)
-
-      RStudb <- t(Rb) %*% Amsqb
-      return(RStudb)
-    }
-
-    ## Call parallel computation if needed
-    if (is.null(cl)) {
-      Rnull <- sapply(seq_len(B.B), iterFunction)
-    } else {
-      Rnull <- parSapply(cl, seq_len(B.B), iterFunction)
-    }
+    Rnull <- sapply(bootStraps, function(x) do.call(getmaxRF, x))
 
     M <- apply(abs(Rnull), 2, max)
     q <- quantile(M, cutoff)
@@ -322,5 +247,4 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
               "Ymean" = Ymean)
   class(ans) <- append(class(ans), "maxR")
   ans
-
 }

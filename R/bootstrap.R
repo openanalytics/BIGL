@@ -136,7 +136,7 @@ getCP = function(bootStraps, null_model, transforms){
     pred <- vapply(bootStraps,
                    FUN.VALUE = double(with(bootStraps[[1]]$data, length(unique(d1d2[d1 &d2])))),
                    function(b) {
-        predOffAxis <- predictOffAxis(data =  b$data, fitResult = b$fitResult,
+        predOffAxis <- predictOffAxis(data =  b$data, fitResult = b$simFit,
                                       null_model = null_model,
                                       transforms = transforms)
         ## If multiple predictions with same x-y coordinates are available,
@@ -147,39 +147,6 @@ getCP = function(bootStraps, null_model, transforms){
     })
    var(t(pred))
 }
-CPBootstrap <- function(data, fitResult,
-                        transforms = fitResult$transforms,
-                        null_model = c("loewe", "hsa", "bliss", "loewe2"), B.CP, ...) {
-
-  ## Argument matching
-  null_model <- match.arg(null_model)
-
-  if (B.CP < 2) stop("Number of iterations for bootstrapping CP needs to exceed 2.")
-  sigma0 <- fitResult$sigma
-
-  pred <- sapply(seq_len(B.CP), function(b) {
-    simModel <- simulateNull(data = data, fitResult = fitResult,
-                             transforms = transforms,
-                             null_model = null_model, ...)
-    dataCP <- simModel$data
-    fitResultCP <- simModel$fitResult
-
-    predOffAxis <- predictOffAxis(data = dataCP, fitResult = fitResultCP,
-                                  null_model = null_model,
-                                  transforms = transforms)
-
-    ## If multiple predictions with same x-y coordinates are available,
-    ## average them out.
-    pred <- aggregate(predicted ~ d1 + d2,
-                      predOffAxis$offaxisZTable, mean)$predicted/sigma0
-
-    return(pred)
-  })
-
-  CP <- var(t(pred))
-  return(CP)
-}
-
 #' Data generating function used for constructing null distribution of meanR and
 #' maxR statistics
 #'
@@ -298,5 +265,5 @@ simulateNull <- function(data, fitResult,
     if (!inherits(simFit, "try-error")) break
   }
   return(list("data" = simData,
-              "fitResult" = simFit))
+              "simFit" = simFit))
 }

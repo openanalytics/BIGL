@@ -75,7 +75,7 @@
 #'   \code{"model"} method is recommended. If transformations are used, only the
 #'   \code{"equal"} method can be chosen.
 #' @inheritParams generateData
-#' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster
+#' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
 #' @return This function returns a \code{ResponseSurface} object with estimates
 #'   of the predicted surface. \code{ResponseSurface} object is essentially a
 #'   list with appropriately named elements.
@@ -140,25 +140,12 @@ fitSurface <- function(data, fitResult,
                          "fitResult" = fitResult,
                          "coefFit" = coefFit,
                          "null_model" = null_model,
-                         "transforms" = transforms, "Ymean" = Ymean,
-                         "reps" = reps, "R" = R)
+                         "transforms" = transforms)
 
   respS <- do.call(predictOffAxis, paramsEstimate)
   offaxisZScores <- with(respS$offaxisZTable,
                          (effect - predicted) / sigma0)
   offAxisTable <- cbind(respS$offaxisZTable, "z.score" = offaxisZScores)
-
-  ## Setup parallel computation
-  if ((is.logical(parallel) & parallel) | is.numeric(parallel)) {
-    nCores <- ifelse(is.logical(parallel),
-                     max(1, detectCores() - 1),
-                     parallel)
-    clusterObj <- makeCluster(nCores, outfile="")
-    clusterSetRNGStream(clusterObj)
-  } else {
-    clusterObj <- NULL
-  }
-
 
 ### Computation of MeanR/MaxR statistics
   ## Bootstrap sampling vector
@@ -186,6 +173,17 @@ fitSurface <- function(data, fitResult,
 
   #If any bootstraps needed, do them first
   if(is.null(CP) | (!is.null(B.B))){
+      ## Setup parallel computation
+      if ((is.logical(parallel) & parallel) | is.numeric(parallel)) {
+          nCores <- ifelse(is.logical(parallel),
+                           max(1, detectCores() - 1),
+                           parallel)
+          clusterObj <- makeCluster(nCores, outfile="")
+          clusterSetRNGStream(clusterObj)
+      } else {
+          clusterObj <- NULL
+      }
+
       B = if(is.null(B.B)) B.CP else max(B.B, B.CP)
       paramsBootstrap <- list("data"  =data,
           "fitResult" = fitResult, "transforms" = transforms,
@@ -202,26 +200,22 @@ fitSurface <- function(data, fitResult,
           } else {
               parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
           }
-  }
-
+  } else {bootStraps = NULL}
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms)
-
-  retObj <- list("data"  =data,
+  retObj <- list("data" = data,
                  "fitResult" = fitResult, "transforms" = transforms,
                  "null_model" = null_model, "method" = method,
                  "offAxisTable" = offAxisTable,
-                 "occupancy" = respS$occupancy,
-                 "CP" = CP)
+                 "occupancy" = respS$occupancy, "CP" = CP)
 
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
-    statObj <- c(statObj,
-                 list("meanR" = do.call(meanR, c(list(bootStraps = bootStraps),
-                                                 paramsEstimate))))
+    statObj <- c(statObj, list("meanR" = do.call(meanR,
+        c(list("bootStraps" = bootStraps, "CP" = CP), paramsEstimate))))
   if (statistic %in% c("maxR", "both"))
     statObj <- c(statObj,
-                 list("maxR" = do.call(maxR, c(paramsBootstrap, paramsEstimate))))
+                 list("maxR" = do.call(maxR, c(list("bootStraps" = bootStraps, "CP" = CP)))))
   retObj <- c(retObj, statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
 
