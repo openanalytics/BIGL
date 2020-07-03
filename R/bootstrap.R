@@ -142,63 +142,11 @@ getCP = function(bootStraps, null_model, transforms){
         ## If multiple predictions with same x-y coordinates are available,
         ## average them out.
         pred <- with(predOffAxis$offaxisZTable,
-                     tapply(predicted, d1d2, mean))/fitResult$sigma
+                     tapply(predicted, d1d2, mean))/b$simFit$sigma
         return(pred)
     })
    var(t(pred))
 }
-#' Data generating function used for constructing null distribution of meanR and
-#' maxR statistics
-#'
-#' This function uses \code{\link{simulateNull}} and simulates all necessary
-#' steps to calculate null distribution which will furtherly be used in either
-#' \code{\link{meanR}} or \code{\link{maxR}} functions.
-#'
-#' @param ... Further arguments that will be passed to
-#'   \code{\link{generateData}} function
-#' @inheritParams fitSurface
-#' @inheritParams generateData
-bootstrapData <- function(data, fitResult,
-                          transforms = fitResult$transforms,
-                          null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
-
-  ## Argument matching
-  null_model <- match.arg(null_model)
-
-  simModel <- simulateNull(data = data, fitResult = fitResult,
-                           transforms = transforms,
-                           null_model = null_model, ...)
-  dataB <- simModel$data
-  fitResultB <- simModel$fitResult
-
-  respS <- predictOffAxis(dataB, fitResultB,
-                          null_model = null_model,
-                          transforms = transforms)
-
-  Rb <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
-  repsb <- with(respS$offaxisZTable, tapply(effect, d1d2, length))
-
-  ## Covariance matrix of the predictions
-  n1b <- length(Rb)
-  stopifnot(n1b == length(repsb))
-
-  ## Estimators of the residual variance
-  df0b <- fitResultB$df
-  MSE0b <- fitResultB$sigma^2
-
-  dat_offB  <- dataB[dataB$d1 & dataB$d2, ]
-  off_varB  <- with(dat_offB, tapply(effect, d1d2, var))
-  mse_offb  <- mean(off_varB)
-  off_meanB = with(dat_offB, tapply(effect, d1d2, mean))
-  linmodB <- lm.fit(off_varB, x = cbind(1, off_meanB))
-  PredvarB <- linmodB$coef[1] + linmodB$coef[2]*off_meanB
-
-  out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
-              "n1b" = n1b, "repsb" = repsb, "Predvarb" = c(PredvarB),
-              "mse_offb" = mse_offb)
-  return(out)
-}
-
 #' Simulate data from a given null model and monotherapy coefficients
 #'
 #' @param ... Further parameters that will be passed to
@@ -237,7 +185,6 @@ simulateNull <- function(data, fitResult,
                             data = data[, c("d1", "d2")],
                             transforms = transforms,
                             null_model = null_model, ...)
-
     ## In cases where added errors put the response into negative domain, revert
     ## it back to the positive one. Usually, values of such observations tend to
     ## be quite small.
@@ -255,7 +202,6 @@ simulateNull <- function(data, fitResult,
     simFit <- try({
       do.call(fitMarginals, paramsMarginal)
     }, silent = TRUE)
-
     counter <- counter + 1
     initPars <- NULL
     if (counter > 1000)
@@ -267,3 +213,4 @@ simulateNull <- function(data, fitResult,
   return(list("data" = simData,
               "simFit" = simFit))
 }
+bootFun = function(i, args) do.call(simulateNull, args) #Wrapper with index

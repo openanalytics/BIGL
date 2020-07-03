@@ -45,7 +45,8 @@
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.CP = NULL,
-                  cl = NULL, method = c("equal", "model", "unequal"), bootStraps,...) {
+                  cl = NULL, method = c("equal", "model", "unequal"),
+                  bootStraps, paramsBootstrap, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -75,6 +76,13 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
   }
 
  FStatb <- sapply(bootStraps, function(x) {
+     if(nested_bootstrap){
+        paramsBootstrap <- list("data"  =x$data,
+                                 "fitResult" = x$simFit, "transforms" = transforms,
+                                 "null_model" = null_model)
+        nestedBootstraps = lapply(integer(B.CP), bootFun, args = paramsBootstrap)
+        CP = getCP(nestedBootstraps, null_model, transforms)
+     }
      getMeanRF(data = x$data, fitResult = x$simFit, method = method, CP = CP,
                reps = reps, transforms = transforms, null_model = null_model,
                                                     n1 = n1)

@@ -128,20 +128,14 @@ fitSurface <- function(data, fitResult,
     stop("effect, d1 and d2 arguments must be column names of data")
   id <- match(c(effect, d1, d2), colnames(data))
   colnames(data)[id] <- c("effect", "d1", "d2")
-
   data$d1d2 = apply(data[, c("d1", "d2")], 1, paste, collapse = "_")
 
   sigma0 <- fitResult$sigma
   df0 <- fitResult$df
   MSE0 <- sigma0^2
-  coefFit <- fitResult$coef
 
-  paramsEstimate <- list("data" = data,
-                         "fitResult" = fitResult,
-                         "coefFit" = coefFit,
-                         "null_model" = null_model,
-                         "transforms" = transforms)
-
+  paramsEstimate <- list("data" = data, "fitResult" = fitResult,
+                         "null_model" = null_model, "transforms" = transforms)
   respS <- do.call(predictOffAxis, paramsEstimate)
   offaxisZScores <- with(respS$offaxisZTable,
                          (effect - predicted) / sigma0)
@@ -151,23 +145,20 @@ fitSurface <- function(data, fitResult,
   ## Bootstrap sampling vector
   if (is.null(sampling_errors)) {
     ## Ensure errors are generated from transformed data if applicable
-    dataT <- data[, c("d1", "d2", "effect")]
+    dataT <- data[, c("d1", "d2", "effect", "d1d2")]
     if (!is.null(transforms)) {
       dataT$effect <- with(transforms,
                            PowerT(dataT$effect, compositeArgs))
     }
-
-    mean_effects <- aggregate(effect ~ d1 + d2, dataT, mean)
-    Total <- merge(dataT, mean_effects, by = c("d1", "d2"))
-    colnames(Total) <- c("d1", "d2", "effect", "meaneffect")
+    mean_effects <- aggregate(data = dataT, effect ~ d1d2, mean)
+    names(mean_effects) = c("d1d2", "meaneffect")
+    Total <- merge(dataT, mean_effects, by = c("d1d2"))
     sampling_errors <- Total$effect - Total$meaneffect
   }
 
   ## NB: mean responses are taken
-  Ymean <- aggregate(effect - predicted ~ d1 + d2,
-                     respS$offaxisZTable, mean)
-  R <- Ymean[["effect - predicted"]]
-  reps <- aggregate(effect ~ d1 + d2, respS$offaxisZTable, length)$effect
+  R = with(respS$offaxisZTable, tapply(effect-predicted, d1d2, mean))
+  reps <- with(respS$offaxisZTable, tapply(effect-predicted, d1d2, length))
   ## Covariance matrix of the predictions
   stopifnot(length(R) == length(reps))
 
@@ -183,42 +174,38 @@ fitSurface <- function(data, fitResult,
       } else {
           clusterObj <- NULL
       }
-
-      B = if(is.null(B.B)) B.CP else max(B.B, B.CP)
-      paramsBootstrap <- list("data"  =data,
+      B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
+     #Start bootstrapping
+       paramsBootstrap <- list("data"  =data,
           "fitResult" = fitResult, "transforms" = transforms,
                               "null_model" = null_model,
           "error" = error, "sampling_errors" = sampling_errors,
-                              "nested_bootstrap" = nested_bootstrap,
-                              "wild_bootstrap" = wild_bootstrap,
-                              "cutoff" = cutoff, "Ymean" = Ymean,
-                              "reps" = reps, "R" = R,
+                             "wild_bootstrap" = wild_bootstrap,
                               "method" = method)
-      bootFun = function(i, args) do.call(simulateNull, args) #Wrapper with index
       bootStraps = if(is.null(clusterObj)) {
           lapply(integer(B), bootFun, args = paramsBootstrap)
           } else {
               parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
           }
   } else {bootStraps = NULL}
+
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms)
-  retObj <- list("data" = data,
-                 "fitResult" = fitResult, "transforms" = transforms,
-                 "null_model" = null_model, "method" = method,
-                 "offAxisTable" = offAxisTable,
-                 "occupancy" = respS$occupancy, "CP" = CP)
 
+  #Calculate test statistics
+  paramsStatistics = c(list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff),
+                       paramsEstimate)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
-    statObj <- c(statObj, list("meanR" = do.call(meanR,
-        c(list("bootStraps" = bootStraps, "CP" = CP), paramsEstimate))))
+    statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
   if (statistic %in% c("maxR", "both"))
-    statObj <- c(statObj,
-                 list("maxR" = do.call(maxR, c(list("bootStraps" = bootStraps, "CP" = CP)))))
-  retObj <- c(retObj, statObj)
+      statObj <- c(statObj, list("maxR" = do.call(maxR, paramsStatistics)))
+  retObj <- c(list("data" = data,
+                   "fitResult" = fitResult, "transforms" = transforms,
+                   "null_model" = null_model, "method" = method,
+                   "offAxisTable" = offAxisTable,
+                   "occupancy" = respS$occupancy, "CP" = CP), statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
-
   # add compound names from marginal fit
   retObj$names <- fitResult$names
 
