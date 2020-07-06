@@ -4,7 +4,7 @@
 \alias{getCP}
 \title{Estimate CP matrix from bootstraps}
 \usage{
-getCP(bootStraps, null_model, transforms, sigma0)
+getCP(bootStraps, null_model, transforms, sigma0, doseGrid)
 }
 \arguments{
 \item{bootStraps}{the bootstraps carried out already}

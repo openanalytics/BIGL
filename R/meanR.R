@@ -41,27 +41,19 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.CP = NULL,
                   cl = NULL, method = c("equal", "model", "unequal"),
-                  bootStraps, paramsBootstrap, ...) {
+                  bootStraps, paramsBootstrap, doseGrid, idUnique, ...) {
 
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
     df0 = fitResult$df
 
-    ## If not supplied, calculate these manually
-    if (missing(R) | missing(reps)) {
-        respS <- predictOffAxis(data = data, fitResult = fitResult,
-                                transforms = transforms, null_model = null_model)
-        if (missing(R)) R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
-        if (missing(reps)) reps <- with(respS$offaxisZTable,
-                                        tapply(effect - predicted, d1d2, length))
-    }
     if (all(reps == 1) && method %in% c("model", "unequal")) {
         stop("Replicates are required when choosing the method 'model' or 'unequal'")
     }
     n1 <- length(R)
     FStat <- getMeanRF(data, fitResult, method, CP, reps, transforms, null_model,
-                       R, n1)
+                       R, n1, idUnique)
     if (is.null(bootStraps)) {
         ans <- list("FStat" = FStat,
                     "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
@@ -77,9 +69,9 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
             nestedBootstraps = lapply(integer(B.CP), bootFun, args = paramsBootstrap)
             CP = getCP(nestedBootstraps, null_model, transforms)
         }
-        getMeanRF(data = x$data, fitResult = x$simFit, method = method, CP = CP,
+        getMeanRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1)
+                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid)
     })
     pvalb <- mean(FStatb >= FStat)
     ans <- list("FStat" = FStat, "FDist" = ecdf(FStatb), "p.value" = pvalb,

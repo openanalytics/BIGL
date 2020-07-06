@@ -18,6 +18,8 @@ meanR(
   method = c("equal", "model", "unequal"),
   bootStraps,
   paramsBootstrap,
+  doseGrid,
+  idUnique,
   ...
 )
 }

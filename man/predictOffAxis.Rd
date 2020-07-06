@@ -5,16 +5,14 @@
 \title{Compute off-axis predictions}
 \usage{
 predictOffAxis(
-  data,
+  doseGrid,
   fitResult,
-  transforms = fitResult$transforms,
+  transforms,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
   ...
 )
 }
 \arguments{
-\item{data}{Dose-response dataframe.}
-
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
 \code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
 list containing \code{df}, \code{sigma}, \code{coef},
@@ -41,19 +39,7 @@ and \code{"loewe2"} for the alternative Loewe generalization.}
 \item{...}{Further arguments that are currently unused}
 }
 \value{
-This functions returns a list with 3 elements.
-
-  \code{"offaxisZTable"} is a dataframe containing dose levels, observed
-  effects and effects predicted according to the specified null model. This
-  dataframe also contains replicates, if there are any.
-
-  \code{"predSurface"} are the predicted effects (without replicates)
-  according to the specified null model. These effects are arranged in a
-  matrix form so that each direction of the matrix rightward or downward
-  corresponds to increasing dose of one of the compounds.
-
-  \code{"occupancy"} contains occupancy levels at each dose
-  combination as (always) computed by generalized Loewe model.
+This functions returns a vector with predicted off-axis points
 }
 \description{
 Given a dataframe with dose-response data, this function uses coefficient
@@ -66,5 +52,8 @@ null model.
   ## Data must contain d1, d2 and effect columns
   transforms <- getTransformations(data)
   fitResult <- fitMarginals(data, transforms)
-  predictOffAxis(data, fitResult, null_model = "hsa")
+    uniqueDoses <- with(data, list("d1" = sort(unique(data$d1)),
+    "d2" = sort(unique(data$d2))))
+    doseGrid <- expand.grid(uniqueDoses)
+  predictOffAxis(fitResult, null_model = "hsa", doseGrid = doseGrid)
 }

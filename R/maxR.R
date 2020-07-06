@@ -33,25 +33,17 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL,
-                 method = c("equal", "model", "unequal"), bootStraps,...) {
+                 method = c("equal", "model", "unequal"), bootStraps, doseGrid,
+                 idUnique,...) {
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
 
-    ## If not supplied, calculate these manually
-    if (missing(R) | missing(reps)) {
-        respS <- predictOffAxis(data = data, fitResult = fitResult,
-                                transforms = transforms, null_model = null_model)
-        if (missing(R)) R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
-        if (missing(reps)) reps <- with(respS$offaxisZTable,
-                                        tapply(effect - predicted, d1d2, length))
-    }
     n1 <- length(R)
 
     FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
                       R, n1)
-    Ymean = data.frame("d1" =  with(respS$offaxisZTable, tapply(d1, d1d2, function(x) x[1])),
-                       "d2" =  with(respS$offaxisZTable, tapply(d2, d1d2, function(x) x[1])),
+    Ymean = data.frame(doseGrid,
                        R = FStat, absR = abs(FStat), "effect - predicted" = R)
     df0 = fitResult$df
 
@@ -78,7 +70,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
         }
         getMaxRF(data = x$data, fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1)
+                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid)
         })
         M <- apply(abs(Rnull), 2, max)
         q <- quantile(M, cutoff)

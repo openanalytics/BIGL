@@ -19,6 +19,8 @@ maxR(
   cl = NULL,
   method = c("equal", "model", "unequal"),
   bootStraps,
+  doseGrid,
+  idUnique,
   ...
 )
 }

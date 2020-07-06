@@ -1,19 +1,20 @@
 #' Helper functions for the test statistics
 #'@inheritParams predictOffAxis
-getR = function(data, fitResult, transforms, null_model){
+getR = function(data, fitResult, doseGrid, null_model, idUnique, transforms){
     respS <- predictOffAxis(data = data, fitResult = fitResult,
-                            transforms = transforms, null_model = null_model)
-    R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
+                            transforms = transforms,
+                            doseGrid = doseGrid, null_model = null_model)
+    tapply(data$effect - respS[idUnique], data$d1d2, mean)
 }
 #'@inheritParams predictOffAxis
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
-                     R, n1){
+                     R, n1, idUnique, doseGrid){
     if(missing(R)){
-        R = getR(data = data, fitResult = fitResult, transforms = transforms,
-                 null_model = null_model)
+        R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
+                 null_model = null_model, doseGrid = doseGrid, transforms =transforms)
     }
     A <- getA(data, fitResult, method, CP, reps, transforms, null_model, R, n1)
-    FStat <- max(0, as.numeric(t(R) %*% solve(A) %*% R / n1))
+    FStat <- max(0, as.numeric(crossprod(R, solve(A)) %*% R / n1))
     return(FStat)
 }
 getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){
@@ -21,8 +22,8 @@ getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model, R
     E <- eigen(A)
     V <- E$values
     Q <- E$vectors
-    Amsq <- Q %*% diag(1/sqrt(V)) %*% t(Q)
-    RStud <- t(R) %*% Amsq
+    Amsq <- Q %*% tcrossprod(diag(1/sqrt(V)), Q)
+    RStud <- crossprod(R, Amsq)
     return(as.numeric(RStud))
 }
 getA = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){

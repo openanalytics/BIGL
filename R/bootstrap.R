@@ -126,18 +126,13 @@ generateData <- function(pars, sigma, data = NULL,
 #' @inheritParams generateData
 #' @importFrom stats lm.fit var
 #' @return Estimated CP matrix
-getCP = function(bootStraps, null_model, transforms, sigma0){
+getCP = function(bootStraps, null_model, transforms, sigma0, doseGrid){
     pred <- vapply(bootStraps,
-                   FUN.VALUE = double(with(bootStraps[[1]]$data, length(unique(d1d2[d1 &d2])))),
+                   FUN.VALUE = double(nrow(doseGrid)),
                    function(b) {
-        predOffAxis <- predictOffAxis(data =  b$data, fitResult = b$simFit,
+      predictOffAxis(fitResult = b$simFit, transforms = transforms,
                                       null_model = null_model,
-                                      transforms = transforms)
-        ## If multiple predictions with same x-y coordinates are available,
-        ## average them out.
-        pred <- with(predOffAxis$offaxisZTable,
-                     tapply(predicted, d1d2, mean))/sigma0
-        return(pred)
+                                      doseGrid = doseGrid)/sigma0
     })
    var(t(pred))
 }

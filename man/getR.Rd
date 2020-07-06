@@ -4,11 +4,9 @@
 \alias{getR}
 \title{Helper functions for the test statistics}
 \usage{
-getR(data, fitResult, transforms, null_model)
+getR(data, fitResult, doseGrid, null_model, idUnique, transforms)
 }
 \arguments{
-\item{data}{Dose-response dataframe.}
-
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
 \code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
 list containing \code{df}, \code{sigma}, \code{coef},
@@ -21,16 +19,16 @@ were used in marginal model estimation, \code{fitResult} should contain
 \code{transforms} elements with these transformations. Alternatively, these
 can also be specified via \code{transforms} argument.}
 
+\item{null_model}{Specified null model for the expected response surface.
+Currently, allowed options are \code{"loewe"} for generalized Loewe model,
+\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
+and \code{"loewe2"} for the alternative Loewe generalization.}
+
 \item{transforms}{Transformation functions. If non-null, \code{transforms} is
 a list containing 5 elements, namely biological and power transformations
 along with their inverse functions and \code{compositeArgs} which is a list
 with argument values shared across the 4 functions. See vignette for more
 information.}
-
-\item{null_model}{Specified null model for the expected response surface.
-Currently, allowed options are \code{"loewe"} for generalized Loewe model,
-\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
-and \code{"loewe2"} for the alternative Loewe generalization.}
 }
 \description{
 Helper functions for the test statistics

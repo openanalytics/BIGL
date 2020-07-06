@@ -11,11 +11,10 @@
 #' @param ... Further arguments that are currently unused
 #' @importFrom nleqslv nleqslv
 generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
-
   stopifnot(asymptotes %in% c(1, 2))
   stopifnot(identical(colnames(doseInput), c("d1", "d2")))
   parmInput[c("h1", "h2")] = abs(parmInput[c("h1", "h2")])
-  logDoseMinE = log(doseInput) - rep(par[c("e1", "e2")], each = nrow(doseInput))
+  logDoseMinE = log(doseInput) - rep(parmInput[c("e1", "e2")], each = nrow(doseInput))
   ## Need good accuracy here: solve for -logit(o)
   solver <- function(dose, par){
     fun0 <- function(x){
@@ -54,7 +53,7 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   
   ## For each combination of Compound 1 and Compound 2, find transformed
   ## occupancy rate, i.e. -logit(o*), which satisfies Loewe model equation.
-  oc <- apply(logDoseMinE, 1, solver, parmInput)
+  oc <- apply(logDoseMinE[!allZero,, drop = FALSE], 1, solver, parmInput)
   if (all(is.na(oc))) stop("genLoewe: no roots found between starting parameters")
   if (any(is.na(oc))) warning("genLoewe: some roots not found")
 

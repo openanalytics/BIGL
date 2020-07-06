@@ -130,17 +130,26 @@ fitSurface <- function(data, fitResult,
   id <- match(c(effect, d1, d2), colnames(data))
   colnames(data)[id] <- c("effect", "d1", "d2")
   data$d1d2 = apply(data[, c("d1", "d2")], 1, paste, collapse = "_")
-
   sigma0 <- fitResult$sigma
   df0 <- fitResult$df
   MSE0 <- sigma0^2
 
-  paramsEstimate <- list("data" = data, "fitResult" = fitResult,
-                         "null_model" = null_model, "transforms" = transforms)
-  respS <- do.call(predictOffAxis, paramsEstimate)
-  offaxisZScores <- with(respS$offaxisZTable,
-                         (effect - predicted) / sigma0)
-  offAxisTable <- cbind(respS$offaxisZTable, "z.score" = offaxisZScores)
+  #Off-axis data and predictions
+  data_off = with(data, data[d1 & d2, , drop = FALSE])
+  uniqueDoses <- with(data_off, list("d1" = sort(unique(d1)),
+     "d2" = sort(unique(d2))))
+  doseGrid <- expand.grid(uniqueDoses)
+  offAxisPred = predictOffAxis(fitResult, null_model = null_model,
+                               doseGrid = doseGrid, transforms = transforms)
+  idUnique = match(data_off$d1d2,
+                   apply(doseGrid, 1, paste, collapse = "_"))
+  offAxisPredAll <- offAxisPred[idUnique]
+  offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
+                         "predicted" = offAxisPredAll)
+  offAxisTable <- cbind(offaxisZTable,
+                        "z.score" = with(offaxisZTable, (effect - predicted) / sigma0))
+  occupancy = switch(null_model, "loewe" = generalizedLoewe(doseGrid,
+                                                            fitResult$coef)$occupancy, NULL)
 
 ### Computation of MeanR/MaxR statistics
   ## Bootstrap sampling vector
@@ -158,8 +167,8 @@ fitSurface <- function(data, fitResult,
   }
 
   ## NB: mean responses are taken
-  R = with(respS$offaxisZTable, tapply(effect-predicted, d1d2, mean))
-  reps <- with(respS$offaxisZTable, tapply(effect-predicted, d1d2, length))
+  R = with(offaxisZTable, tapply(effect-predicted, d1d2, mean))
+  reps <- with(offaxisZTable, tapply(effect-predicted, d1d2, length))
   stopifnot(length(R) == length(reps))
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
@@ -184,20 +193,23 @@ fitSurface <- function(data, fitResult,
                               "null_model" = null_model,
           "error" = error, "sampling_errors" = sampling_errors,
                              "wild_bootstrap" = wild_bootstrap,
-                              "method" = method)
+                              "method" = method, "doseGrid" = doseGrid)
       bootStraps = if(is.null(clusterObj)) {
-          lapply(integer(B), bootFun, args = paramsBootstrap)
+              lapply(integer(B), bootFun, args = paramsBootstrap)
           } else {
               parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
           }
   } else {bootStraps = clusterObj = NULL}
 
   ## If not provided, compute prediction covariance matrix by bootstrap
-  if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms, sigma0 = sigma0)
-
+  if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms,
+                               sigma0 = sigma0, doseGrid = doseGrid)
   #Calculate test statistics
-  paramsStatistics = c(list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff),
-                       paramsEstimate)
+  paramsStatistics = list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff,
+                          "data" = data, "fitResult" = fitResult,
+                          "null_model" = null_model, "transforms" = transforms,
+                          "doseGrid" = doseGrid, "reps" = reps, "R" = R,
+                          "idUnique" = idUnique)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
     statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
@@ -207,7 +219,7 @@ fitSurface <- function(data, fitResult,
                    "fitResult" = fitResult, "transforms" = transforms,
                    "null_model" = null_model, "method" = method,
                    "offAxisTable" = offAxisTable,
-                   "occupancy" = respS$occupancy, "CP" = CP), statObj)
+                   "occupancy" = occupancy, "CP" = CP), statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
   # add compound names from marginal fit
   retObj$names <- fitResult$names
