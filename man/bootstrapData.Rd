@@ -5,8 +5,13 @@
 \title{Data generating function used for constructing null distribution of meanR and
 maxR statistics}
 \usage{
-bootstrapData(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), ...)
+bootstrapData(
+  data,
+  fitResult,
+  transforms = fitResult$transforms,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  ...
+)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

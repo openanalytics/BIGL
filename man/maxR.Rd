@@ -4,10 +4,22 @@
 \alias{maxR}
 \title{Compute maxR statistic for each off-axis dose combination}
 \usage{
-maxR(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), Ymean, CP, reps,
-  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL, cutoff = 0.95,
-  cl = NULL, method = c("equal", "model", "unequal"), ...)
+maxR(
+  data,
+  fitResult,
+  transforms = fitResult$transforms,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  Ymean,
+  CP,
+  reps,
+  nested_bootstrap = FALSE,
+  B.B = NULL,
+  B.CP = NULL,
+  cutoff = 0.95,
+  cl = NULL,
+  method = c("equal", "model", "unequal"),
+  ...
+)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

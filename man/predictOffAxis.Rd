@@ -4,8 +4,13 @@
 \alias{predictOffAxis}
 \title{Compute off-axis predictions}
 \usage{
-predictOffAxis(data, fitResult, transforms = fitResult$transforms,
-  null_model = c("loewe", "hsa", "bliss", "loewe2"), ...)
+predictOffAxis(
+  data,
+  fitResult,
+  transforms = fitResult$transforms,
+  null_model = c("loewe", "hsa", "bliss", "loewe2"),
+  ...
+)
 }
 \arguments{
 \item{data}{Dose-response dataframe.}

@@ -4,8 +4,7 @@
 \alias{getTransformations}
 \title{Return a list with transformation functions}
 \usage{
-getTransformations(data, shift = FALSE, args = list(N0 = 1, time.hours
-  = 1))
+getTransformations(data, shift = FALSE, args = list(N0 = 1, time.hours = 1))
 }
 \arguments{
 \item{data}{Dose-response dataframe.}
