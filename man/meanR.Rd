@@ -13,7 +13,7 @@ meanR(
   CP,
   reps,
   nested_bootstrap = FALSE,
-  B.CP = NULL,
+  B.B = NULL,
   cl = NULL,
   method = c("equal", "model", "unequal"),
   bootStraps,
@@ -67,7 +67,8 @@ nested bootstrap may however significantly increase computational time. If
 \code{nested_bootstrap = FALSE}, \code{CP} bootstrapped data reuses
 \code{CP} matrix calculated from the original data.}
 
-\item{B.CP}{Number of bootstrap iterations to use for CP matrix estimation}
+\item{B.B}{Number of iterations to use in bootstrapping null distribution for
+either meanR or maxR statistics.}
 
 \item{cl}{If parallel computations are desired, \code{cl} should be a cluster
 object created by \code{\link[parallel]{makeCluster}}. If parallel

@@ -146,6 +146,8 @@ fitSurface <- function(data, fitResult,
   offAxisPredAll <- offAxisPred[idUnique]
   offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
                          "predicted" = offAxisPredAll)
+  offaxisZTable$effect <- with(transforms,
+                      PowerT(offaxisZTable$effect, compositeArgs))
   offAxisTable <- cbind(offaxisZTable,
                         "z.score" = with(offaxisZTable, (effect - predicted) / sigma0))
   occupancy = switch(null_model, "loewe" = generalizedLoewe(doseGrid,
@@ -209,7 +211,7 @@ fitSurface <- function(data, fitResult,
                           "data" = data, "fitResult" = fitResult,
                           "null_model" = null_model, "transforms" = transforms,
                           "doseGrid" = doseGrid, "reps" = reps, "R" = R,
-                          "idUnique" = idUnique)
+                          "idUnique" = idUnique, "B.B" = B.B)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
     statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))

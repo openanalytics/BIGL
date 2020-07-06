@@ -14,7 +14,6 @@ maxR(
   reps,
   nested_bootstrap = FALSE,
   B.B = NULL,
-  B.CP = NULL,
   cutoff = 0.95,
   cl = NULL,
   method = c("equal", "model", "unequal"),
@@ -71,8 +70,6 @@ nested bootstrap may however significantly increase computational time. If
 
 \item{B.B}{Number of iterations to use in bootstrapping null distribution for
 either meanR or maxR statistics.}
-
-\item{B.CP}{Number of bootstrap iterations to use for CP matrix estimation}
 
 \item{cutoff}{Cut-off to use in maxR procedure for declaring non-additivity
 (default is 0.95).}

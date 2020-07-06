@@ -4,6 +4,7 @@ getR = function(data, fitResult, doseGrid, null_model, idUnique, transforms){
     respS <- predictOffAxis(data = data, fitResult = fitResult,
                             transforms = transforms,
                             doseGrid = doseGrid, null_model = null_model)
+    data$effect <- with(transforms, PowerT(data$effect, compositeArgs))
     tapply(data$effect - respS[idUnique], data$d1d2, mean)
 }
 #'@inheritParams predictOffAxis
@@ -13,12 +14,17 @@ getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
         R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
                  null_model = null_model, doseGrid = doseGrid, transforms =transforms)
     }
-    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, R, n1)
+    A <- getA(data, fitResult, method, CP, reps, n1)
     FStat <- max(0, as.numeric(crossprod(R, solve(A)) %*% R / n1))
     return(FStat)
 }
-getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){
-    A <- getA(data, fitResult, method, CP, reps, transforms, null_model, R, n1)
+getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model,
+                    R, n1, idUnique, doseGrid){
+    if(missing(R)){
+        R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
+                 null_model = null_model, doseGrid = doseGrid, transforms =transforms)
+    }
+    A <- getA(data, fitResult, method, CP, reps, n1)
     E <- eigen(A)
     V <- E$values
     Q <- E$vectors
@@ -26,7 +32,7 @@ getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model, R
     RStud <- crossprod(R, Amsq)
     return(as.numeric(RStud))
 }
-getA = function(data, fitResult, method, CP, reps, transforms, null_model, R, n1){
+getA = function(data, fitResult, method, CP, reps, n1){
     MSE0 <- fitResult$sigma^2
     dat_off  <- data[data$d1 & data$d2, ]
     mse_off <- switch(method,

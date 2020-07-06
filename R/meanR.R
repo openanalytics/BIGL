@@ -39,7 +39,7 @@
 #'   additional element \code{"FDist"} (of class \code{"ecdf"}) is returned.
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
-                  nested_bootstrap = FALSE, B.CP = NULL,
+                  nested_bootstrap = FALSE, B.B = NULL,
                   cl = NULL, method = c("equal", "model", "unequal"),
                   bootStraps, paramsBootstrap, doseGrid, idUnique, ...) {
 
@@ -54,7 +54,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     n1 <- length(R)
     FStat <- getMeanRF(data, fitResult, method, CP, reps, transforms, null_model,
                        R, n1, idUnique)
-    if (is.null(bootStraps)) {
+    if (is.null(B.B)) {
         ans <- list("FStat" = FStat,
                     "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
                     "n1" = n1, "df0" = df0)

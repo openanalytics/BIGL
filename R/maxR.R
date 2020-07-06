@@ -31,7 +31,7 @@
 #'   effect would be classified as antagonism.
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
-                 CP, reps, nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
+                 CP, reps, nested_bootstrap = FALSE, B.B = NULL,
                  cutoff = 0.95, cl = NULL,
                  method = c("equal", "model", "unequal"), bootStraps, doseGrid,
                  idUnique,...) {
@@ -68,7 +68,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
             nestedBootstraps = lapply(integer(B.CP), bootFun, args = paramsBootstrap)
             CP = getCP(nestedBootstraps, null_model, transforms)
         }
-        getMaxRF(data = x$data, fitResult = x$simFit, method = method, CP = CP,
+        getMaxRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
                   n1 = n1, idUnique = idUnique, doseGrid = doseGrid)
         })
