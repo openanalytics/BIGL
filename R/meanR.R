@@ -71,7 +71,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
         }
         getMeanRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid)
+                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid, respS = x$respS)
     })
     pvalb <- mean(FStatb >= FStat)
     ans <- list("FStat" = FStat, "FDist" = ecdf(FStatb), "p.value" = pvalb,

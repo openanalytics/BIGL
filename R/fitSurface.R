@@ -136,23 +136,28 @@ fitSurface <- function(data, fitResult,
 
   #Off-axis data and predictions
   data_off = with(data, data[d1 & d2, , drop = FALSE])
-  uniqueDoses <- with(data_off, list("d1" = sort(unique(d1)),
+  uniqueDoses <- with(data, list("d1" = sort(unique(d1)),
      "d2" = sort(unique(d2))))
   doseGrid <- expand.grid(uniqueDoses)
   offAxisPred = predictOffAxis(fitResult, null_model = null_model,
                                doseGrid = doseGrid, transforms = transforms)
-  idUnique = match(data_off$d1d2,
-                   apply(doseGrid, 1, paste, collapse = "_"))
+  doseGridOff = doseGrid[with(doseGrid, d1 & d2),]
+  idUnique = match(data_off$d1d2, apply(doseGridOff, 1, paste, collapse = "_"))
   offAxisPredAll <- offAxisPred[idUnique]
   offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
                          "predicted" = offAxisPredAll)
-  offaxisZTable$effect <- with(transforms,
+  if(!is.null(transforms))
+    offaxisZTable$effect <- with(transforms,
                       PowerT(offaxisZTable$effect, compositeArgs))
   offAxisTable <- cbind(offaxisZTable,
                         "z.score" = with(offaxisZTable, (effect - predicted) / sigma0))
-  occupancy = switch(null_model, "loewe" = generalizedLoewe(doseGrid,
-                                                            fitResult$coef)$occupancy, NULL)
-
+  if(null_model == "loewe"){
+    loewefit = generalizedLoewe(doseGrid, fitResult$coef)
+    occupancy = loewefit$occupancy
+    startvalues = loewefit$oc
+  } else{
+    occupancy = startvalues = NULL
+  }
 ### Computation of MeanR/MaxR statistics
   ## Bootstrap sampling vector
   if (is.null(sampling_errors)) {
@@ -195,7 +200,8 @@ fitSurface <- function(data, fitResult,
                               "null_model" = null_model,
           "error" = error, "sampling_errors" = sampling_errors,
                              "wild_bootstrap" = wild_bootstrap,
-                              "method" = method, "doseGrid" = doseGrid)
+                              "method" = method, "doseGrid" = doseGrid,
+          "startvalues" = startvalues)
       bootStraps = if(is.null(clusterObj)) {
               lapply(integer(B), bootFun, args = paramsBootstrap)
           } else {

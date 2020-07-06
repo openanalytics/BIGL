@@ -5,7 +5,7 @@
 \title{Compute combined predicted response from drug doses according to standard or
 generalized Loewe model.}
 \usage{
-generalizedLoewe(doseInput, parmInput, asymptotes = 2, ...)
+generalizedLoewe(doseInput, parmInput, asymptotes = 2, startvalues = NULL, ...)
 }
 \arguments{
 \item{doseInput}{Dose-response dataframe containing \code{"d1"} and

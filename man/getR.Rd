@@ -4,7 +4,15 @@
 \alias{getR}
 \title{Helper functions for the test statistics}
 \usage{
-getR(data, fitResult, doseGrid, null_model, idUnique, transforms)
+getR(
+  data,
+  fitResult,
+  doseGrid,
+  null_model,
+  idUnique,
+  transforms,
+  respS = respS
+)
 }
 \arguments{
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by

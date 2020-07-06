@@ -43,7 +43,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
 
     FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
                       R, n1)
-    Ymean = data.frame(doseGrid,
+    Ymean = data.frame(doseGrid[doseGrid$d1 & doseGrid$d2,],
                        R = FStat, absR = abs(FStat), "effect - predicted" = R)
     df0 = fitResult$df
 
@@ -70,7 +70,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
         }
         getMaxRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid)
+                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid, respS = x$respS)
         })
         M <- apply(abs(Rnull), 2, max)
         q <- quantile(M, cutoff)

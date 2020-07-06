@@ -40,8 +40,7 @@ genData <- function(pars, reps, mult = c(1, -1)) {
   data$effect[d1null] <- L4(data$d2[d1null],
                             pars["h2"], pars["b"], pars["m2"], pars["e2"])
 
-  pred <- predictOffAxis(data, fitResult)$offaxisZTable
-  data$effect[!one_null] <- pred$predicted
+  data$effect[!one_null] <- predictOffAxis(data, fitResult)
 
   ## Create some replicates
   data <- data[rep(row.names(data), reps), ]

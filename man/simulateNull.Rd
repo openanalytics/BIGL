@@ -7,7 +7,9 @@
 simulateNull(
   data,
   fitResult,
+  doseGrid,
   transforms = fitResult$transforms,
+  startvalues,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
   ...
 )

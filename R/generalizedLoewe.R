@@ -10,24 +10,22 @@
 #'   as in standard Loewe model or \code{2} as in generalized Loewe model.
 #' @param ... Further arguments that are currently unused
 #' @importFrom nleqslv nleqslv
-generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
+generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
+                              startvalues = NULL,...) {
   stopifnot(asymptotes %in% c(1, 2))
-  stopifnot(identical(colnames(doseInput), c("d1", "d2")))
+  stopifnot(all(c("d1", "d2") %in% colnames(doseInput)))
   parmInput[c("h1", "h2")] = abs(parmInput[c("h1", "h2")])
   ## Need good accuracy here: solve for -logit(o)
   solver <- function(dose, par){
-    dose = as.numeric(dose)
     fun0 <- function(x){
-      logO1 <- dose[1] + x/par["h1"]
-      logO2 <- dose[2] + x/par["h2"]
-      res <- exp(logO1) + exp(logO2) - 1
+      res <- exp(dose[1] + x/par["h1"]) + exp(dose[2] + x/par["h2"]) - 1
       if(is.finite(res)) res else 1
     }
     gr0 = function(x){
       exp(dose[1] + x/par["h1"])/par["h1"] +
         exp(dose[2] + x/par["h2"])/par["h2"]
     }
-    nleqslv(fn = fun0, x = 0, jac = gr0)$x
+    nleqslv(fn = fun0, x = dose[3], jac = gr0)$x
   }
 
   ## Remove observations where both drugs are dosed at zero
@@ -43,15 +41,9 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   } else {
     parm <- parmInput
   }
-
-  increasing <- parm["m1"] >= parm["b"] && parm["m2"] >= parm["b"]
-  decreasing <- parm["m1"] <= parm["b"] && parm["m2"] <= parm["b"]
-  
-  ## If agonist and antagonist, give a warning
-  if (!(increasing || decreasing)) {
-    warning("Marginal curves are diverging. The synergy/antagonism calls may be reversed")
-  }  
-  
+  logDoseMinE = cbind(logDoseMinE,
+                      "start" = if(is.null(startvalues)) integer(nrow(logDoseMinE)) else
+                        startvalues)
   ## For each combination of Compound 1 and Compound 2, find transformed
   ## occupancy rate, i.e. -logit(o*), which satisfies Loewe model equation.
   oc <- apply(logDoseMinE, 1, solver, parmInput)
@@ -76,6 +68,6 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
     xf <- rv
   }
 
-  return(list("response" = xf,
+  return(list("response" = xf, "oc" = oc,
               "occupancy" = cbind(dose, "occupancy" = 1/(exp(oc)+1))))
 }

@@ -1,28 +1,30 @@
 #' Helper functions for the test statistics
 #'@inheritParams predictOffAxis
-getR = function(data, fitResult, doseGrid, null_model, idUnique, transforms){
-    respS <- predictOffAxis(data = data, fitResult = fitResult,
-                            transforms = transforms,
-                            doseGrid = doseGrid, null_model = null_model)
-    data$effect <- with(transforms, PowerT(data$effect, compositeArgs))
+getR = function(data, fitResult, doseGrid, null_model, idUnique, transforms,
+                respS = respS){
+    if(!is.null(transforms)){
+        data$effect <- with(transforms, PowerT(data$effect, compositeArgs))
+    }
     tapply(data$effect - respS[idUnique], data$d1d2, mean)
 }
 #'@inheritParams predictOffAxis
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
-                     R, n1, idUnique, doseGrid){
+                     R, n1, idUnique, doseGrid, respS){
     if(missing(R)){
         R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
-                 null_model = null_model, doseGrid = doseGrid, transforms =transforms)
+                 null_model = null_model, doseGrid = doseGrid,
+                 transforms = transforms, respS = respS)
     }
     A <- getA(data, fitResult, method, CP, reps, n1)
     FStat <- max(0, as.numeric(crossprod(R, solve(A)) %*% R / n1))
     return(FStat)
 }
 getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model,
-                    R, n1, idUnique, doseGrid){
+                    R, n1, idUnique, doseGrid, respS){
     if(missing(R)){
         R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
-                 null_model = null_model, doseGrid = doseGrid, transforms =transforms)
+                 null_model = null_model, doseGrid = doseGrid,
+                 transforms = transforms, respS = respS)
     }
     A <- getA(data, fitResult, method, CP, reps, n1)
     E <- eigen(A)

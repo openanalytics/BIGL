@@ -128,12 +128,8 @@ generateData <- function(pars, sigma, data = NULL,
 #' @return Estimated CP matrix
 getCP = function(bootStraps, null_model, transforms, sigma0, doseGrid){
     pred <- vapply(bootStraps,
-                   FUN.VALUE = double(nrow(doseGrid)),
-                   function(b) {
-      predictOffAxis(fitResult = b$simFit, transforms = transforms,
-                                      null_model = null_model,
-                                      doseGrid = doseGrid)/sigma0
-    })
+                   FUN.VALUE = bootStraps[[1]]$respS,
+                   function(b) {b$respS/sigma0})
    var(t(pred))
 }
 #' Simulate data from a given null model and monotherapy coefficients
@@ -150,8 +146,8 @@ getCP = function(bootStraps, null_model, transforms, sigma0, doseGrid){
 #'   ## Data must contain d1, d2 and effect columns
 #'   fitResult <- fitMarginals(data)
 #'   simulateNull(data, fitResult, null_model = "hsa")
-simulateNull <- function(data, fitResult,
-                         transforms = fitResult$transforms,
+simulateNull <- function(data, fitResult, doseGrid,
+                         transforms = fitResult$transforms, startvalues,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -199,7 +195,11 @@ simulateNull <- function(data, fitResult,
                  "to the marginal model."))
     if (!inherits(simFit, "try-error")) break
   }
-  return(list("data" = simData,
-              "simFit" = simFit))
+  #Also precalculate response surface, quite computation intensive
+  respS <- predictOffAxis(data = data, fitResult = simFit,
+                          transforms = transforms, startvalues = startvalues,
+                          doseGrid = doseGrid, null_model = null_model)
+
+  return(list("data" = simData, "simFit" = simFit, "respS" = respS))
 }
 bootFun = function(i, args) do.call(simulateNull, args) #Wrapper with index

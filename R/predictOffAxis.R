@@ -18,15 +18,16 @@
 #'     "d2" = sort(unique(data$d2))))
 #'     doseGrid <- expand.grid(uniqueDoses)
 #'   predictOffAxis(fitResult, null_model = "hsa", doseGrid = doseGrid)
-predictOffAxis <- function( doseGrid, fitResult, transforms,
-                           null_model = c("loewe", "hsa", "bliss", "loewe2"),
+predictOffAxis <- function( doseGrid, fitResult, transforms = fitResult$transforms,
+                           null_model = c("loewe", "hsa", "bliss", "loewe2"), startvalues = NULL,
                            ...) {
   out = switch(match.arg(null_model),
-         "loewe" = generalizedLoewe(doseGrid, fitResult$coef)$response,
+         "loewe" = generalizedLoewe(doseGrid, fitResult$coef,
+                                    startvalues = startvalues)$response,
          "hsa" = hsa(doseGrid, fitResult$coef),
          "bliss" = Blissindependence(doseGrid, fitResult$coef),
          "loewe2" = harbronLoewe(doseGrid, fitResult$coef)
-                      )
+                      )[doseGrid$d1 & doseGrid$d2]
   if (!is.null(transforms)) {
       CompositeT <- with(transforms,
                          function(y, args) PowerT(BiolT(y, args), args))
