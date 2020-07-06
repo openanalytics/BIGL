@@ -64,7 +64,7 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
-#'  @param progressBar A boolean, should progress of bootstraps be shown?
+#' @param progressBar A boolean, should progress of bootstraps be shown?
 #' @param method What assumption should be used for the variance of on- and
 #'   off-axis points. This argument can take one of the values from
 #'   \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
@@ -76,13 +76,14 @@
 #'   \code{"equal"} method can be chosen.
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
+#' @importFrom stats aggregate
 #' @return This function returns a \code{ResponseSurface} object with estimates
 #'   of the predicted surface. \code{ResponseSurface} object is essentially a
 #'   list with appropriately named elements.
 #'
 #'   Elements of the list include input data, monotherapy model coefficients and
 #'   transformation functions, null model used to construct the surface as well
-#'   as estimated CP matrix (see \code{\link{CPBootstrap}}), occupancy level at
+#'   as estimated CP matrix, occupancy level at
 #'   each dose combination according to the generalized Loewe model and
 #'   \code{"offAxisTable"} element which contains observed and predicted effects
 #'   as well as estimated z-scores for each dose combination.
@@ -159,8 +160,10 @@ fitSurface <- function(data, fitResult,
   ## NB: mean responses are taken
   R = with(respS$offaxisZTable, tapply(effect-predicted, d1d2, mean))
   reps <- with(respS$offaxisZTable, tapply(effect-predicted, d1d2, length))
-  ## Covariance matrix of the predictions
   stopifnot(length(R) == length(reps))
+  if (all(reps == 1) && method %in% c("model", "unequal")) {
+    stop("Replicates are required when choosing the method 'model' or 'unequal'")
+  }
 
   #If any bootstraps needed, do them first
   if(is.null(CP) | (!is.null(B.B))){
@@ -187,7 +190,7 @@ fitSurface <- function(data, fitResult,
           } else {
               parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
           }
-  } else {bootStraps = NULL}
+  } else {bootStraps = clusterObj = NULL}
 
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms, sigma0 = sigma0)

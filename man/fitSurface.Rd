@@ -21,7 +21,8 @@ fitSurface(
   sampling_errors = NULL,
   wild_bootstrap = FALSE,
   cutoff = 0.95,
-  parallel = TRUE,
+  parallel = FALSE,
+  progressBar = TRUE,
   method = c("equal", "model", "unequal")
 )
 }
@@ -103,13 +104,15 @@ be used or logical \code{TRUE/FALSE}. If \code{parallel = TRUE}, then
 \code{parallel = FALSE}, then a single thread is used and cluster object
 is not created.}
 
-\item{method}{What assumption should be used for the variance of on- and 
-off-axis points. This argument can take one of the values from 
+\item{progressBar}{A boolean, should progress of bootstraps be shown?}
+
+\item{method}{What assumption should be used for the variance of on- and
+off-axis points. This argument can take one of the values from
 \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
-default. \code{"equal"} assumes that both on- and off-axis points have the 
-same variance, \code{"unequal"} estimates a different parameter for on- and 
-off-axis points and \code{"model"} predicts variance based on the average 
-effect of an off-axis point. If no transformations are used the 
+default. \code{"equal"} assumes that both on- and off-axis points have the
+same variance, \code{"unequal"} estimates a different parameter for on- and
+off-axis points and \code{"model"} predicts variance based on the average
+effect of an off-axis point. If no transformations are used the
 \code{"model"} method is recommended. If transformations are used, only the
 \code{"equal"} method can be chosen.}
 }
@@ -120,7 +123,7 @@ This function returns a \code{ResponseSurface} object with estimates
 
   Elements of the list include input data, monotherapy model coefficients and
   transformation functions, null model used to construct the surface as well
-  as estimated CP matrix (see \code{\link{CPBootstrap}}), occupancy level at
+  as estimated CP matrix, occupancy level at
   each dose combination according to the generalized Loewe model and
   \code{"offAxisTable"} element which contains observed and predicted effects
   as well as estimated z-scores for each dose combination.

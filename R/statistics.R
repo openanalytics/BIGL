@@ -1,9 +1,11 @@
+#' Helper functions for the test statistics
+#'@inheritParams predictOffAxis
 getR = function(data, fitResult, transforms, null_model){
     respS <- predictOffAxis(data = data, fitResult = fitResult,
                             transforms = transforms, null_model = null_model)
     R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
 }
-#' A helper function to calculate the meanR statistic of data and a fit
+#'@inheritParams predictOffAxis
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
                      R, n1){
     if(missing(R)){

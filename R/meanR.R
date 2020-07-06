@@ -18,6 +18,8 @@
 #'   object created by \code{\link[parallel]{makeCluster}}. If parallel
 #'   computing is active, progress reporting messages are not necessarily
 #'   ordered as it should be expected.
+#' @param bootStraps precomputed bootstrap objects
+#' @param paramsBootstrap parameters for the nested bootstrap
 #' @param ... Further arguments that will be later passed to
 #'   \code{\link{generateData}} function during bootstrapping
 #' @inheritParams fitSurface
@@ -35,13 +37,6 @@
 #'   If \code{\link{meanR}} test is run with bootstrapping, then p-value
 #'   estimate is based on boostrapped null distribution of test statistic and an
 #'   additional element \code{"FDist"} (of class \code{"ecdf"}) is returned.
-#' @export
-#' @examples
-#'   data <- subset(directAntivirals, experiment == 2)
-#'   ## Data must contain d1, d2 and effect columns
-#'   fitResult <- fitMarginals(data)
-#'   CP <- CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
-#'   meanR(data, fitResult, null_model = "loewe", CP = CP)
 meanR <- function(data, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.CP = NULL,

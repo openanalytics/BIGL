@@ -1,4 +1,4 @@
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version-ago/BIGL)](https://cran.r-project.org/package=BIGL)
+# [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version-ago/BIGL)](https://cran.r-project.org/package=BIGL)
 
 # Biochemically Intuitive Generalized Loewe Model
 

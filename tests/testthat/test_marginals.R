@@ -31,14 +31,12 @@ test_that('marginals', {
   expect_equal(df.residual(fit1), df.residual(fit2))
   expect_equal(df.residual(fit1), df.residual(fit3))
 
-
   expect_equal(dataM[["effect"]], fitted(fit1) + residuals(fit1))
   expect_equal(dataM[["effect"]], fitted(fit2) + residuals(fit2))
   expect_equal(dataM[["effect"]], fitted(fit3) + residuals(fit3))
 
   expect_equal(fitMarginals(data, start = initPars, method = "nls")$coef,
                fitMarginals(data, start = initPars, method = "nlslm")$coef)
-
 })
 
 test_that('marginals-constraints', {
@@ -230,18 +228,17 @@ test_that('marginals-extraArgs', {
   ## Make sure extra arguments (lower, upper) are passed to the nls optimizers
   lowerBounds <- rep(0, 7)
   upperBounds <- c(1, rep(Inf, 6))
-  
-  fit1 <- fitMarginals(data, method = "nls", algorithm = "port", 
+
+  fit1 <- fitMarginals(data, method = "nls", algorithm = "port",
       lower = lowerBounds, upper = upperBounds)
-  fit2 <- fitMarginals(data, method = "nlslm", 
+  fit2 <- fitMarginals(data, method = "nlslm",
       lower = lowerBounds, upper = upperBounds)
-  
+
   expect_true(all(coef(fit1) >= 0))
   expect_true(all(coef(fit2) >= 0))
-  
+
   expect_equal(coef(fit1)[[1]], 1)
   expect_equal(coef(fit2)[[1]], 1)
-  
 })
 
 test_that('marginals-plots', {
@@ -253,3 +250,4 @@ test_that('marginals-plots', {
       expect_silent(plot(fitT, smooth = FALSE))
       expect_silent(plot(fitT, dataScale = TRUE))
     })
+

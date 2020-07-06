@@ -29,18 +29,11 @@
 #'   as \code{"Undefined"}. If both compounds act in the same direction, then a
 #'   stronger than individual effect is classified as synergy while a weaker
 #'   effect would be classified as antagonism.
-#' @export
-#' @examples
-#'   data <- subset(directAntivirals, experiment == 2)
-#'   ## Data must contain d1, d2 and effect columns
-#'   fitResult <- fitMarginals(data)
-#'   CP <- CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
-#'   maxR(data, fitResult, null_model = "loewe", CP = CP)
 maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                  cutoff = 0.95, cl = NULL,
-                 method = c("equal", "model", "unequal"), ...) {
+                 method = c("equal", "model", "unequal"), bootStraps,...) {
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
@@ -52,9 +45,6 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
         if (missing(R)) R <- with(respS$offaxisZTable, tapply(effect - predicted, d1d2, mean))
         if (missing(reps)) reps <- with(respS$offaxisZTable,
                                         tapply(effect - predicted, d1d2, length))
-    }
-    if (all(reps == 1) && method %in% c("model", "unequal")) {
-        stop("Replicates are required when choosing the method 'model' or 'unequal'")
     }
     n1 <- length(R)
 
