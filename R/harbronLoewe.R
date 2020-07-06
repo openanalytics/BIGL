@@ -52,8 +52,6 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   }
 
   solver <- function(dose, par) {
-    dose <- as.numeric(dose)
-
     fun0 <- function(y) {
       res <- doseRatio(y, dose[1], par["h1"], par["b"], par["m1"], par["e1"]) +
           doseRatio(y, dose[2], par["h2"], par["b"], par["m2"], par["e2"]) - 1
