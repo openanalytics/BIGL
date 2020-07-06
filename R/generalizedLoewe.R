@@ -9,7 +9,7 @@
 #' @param asymptotes Number of asymptotes. It can be either \code{1}
 #'   as in standard Loewe model or \code{2} as in generalized Loewe model.
 #' @param ... Further arguments that are currently unused
-#' @importFrom stats uniroot
+#' @importFrom nleqslv nleqslv
 generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
 
   stopifnot(asymptotes %in% c(1, 2))
@@ -17,14 +17,20 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
 
   ## Need good accuracy here: solve for -logit(o)
   solver <- function(dose, par){
+    par[c("h1", "h2")] = abs(par[c("h1", "h2")])
     dose <- as.numeric(dose)
     fun0 <- function(x){
-      logO1 <- log(dose[1]) - par["e1"] + x/abs(par["h1"])
-      logO2 <- log(dose[2]) - par["e2"] + x/abs(par["h2"])
+      logO1 <- log(dose[1]) - par["e1"] + x/par["h1"]
+      logO2 <- log(dose[2]) - par["e2"] + x/par["h2"]
       res <- exp(logO1) + exp(logO2) - 1
-      ifelse(is.finite(res), res, 1)
+      if(is.finite(res)) res else 1
     }
-    uniroot(fun0, c(-5000, 5000), tol = .Machine$double.eps)$root
+    gr0 = function(x){
+      exp(log(dose[1]) - par["e1"] + x/par["h1"])/par["h1"] +
+        exp(log(dose[2]) - par["e2"] + x/par["h2"])/par["h2"]
+    }
+    nleqslv(fn = fun0, x = 0,control = list(ftol = .Machine$double.eps),
+            jac = gr0)$x
   }
 
   ## Remove observations where both drugs are dosed at zero
