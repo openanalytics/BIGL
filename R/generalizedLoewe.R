@@ -12,8 +12,6 @@
 #' @importFrom nleqslv nleqslv
 generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
                               startvalues = NULL,...) {
-  stopifnot(asymptotes %in% c(1, 2))
-  stopifnot(all(c("d1", "d2") %in% colnames(doseInput)))
   parmInput[c("h1", "h2")] = abs(parmInput[c("h1", "h2")])
   ## Need good accuracy here: solve for -logit(o)
   solver <- function(dose, par){
@@ -67,7 +65,6 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
     rv[allZero] <- parm["b"]
     xf <- rv
   }
-
   return(list("response" = xf, "oc" = oc,
               "occupancy" = cbind(dose, "occupancy" = 1/(exp(oc)+1))))
 }

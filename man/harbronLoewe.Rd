@@ -4,7 +4,7 @@
 \alias{harbronLoewe}
 \title{Alternative Loewe generalization}
 \usage{
-harbronLoewe(doseInput, parmInput, asymptotes = 2, ...)
+harbronLoewe(doseInput, parmInput, asymptotes = 2, startvalues = NULL, ...)
 }
 \arguments{
 \item{doseInput}{Dose-response dataframe containing \code{"d1"} and

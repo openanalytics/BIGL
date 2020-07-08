@@ -155,7 +155,10 @@ fitSurface <- function(data, fitResult,
     loewefit = generalizedLoewe(doseGrid, fitResult$coef)
     occupancy = loewefit$occupancy
     startvalues = loewefit$oc
-  } else{
+  } else if(null_model == "loewe2"){
+    startvalues = harbronLoewe(doseGrid, fitResult$coef)
+    occupancy = NULL
+  } else {
     occupancy = startvalues = NULL
   }
 ### Computation of MeanR/MaxR statistics
