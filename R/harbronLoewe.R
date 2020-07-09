@@ -2,6 +2,9 @@
 invL4 <- function(y, h, b, m) {
   ((y-b)/(m-y))^(1/h)
 }
+invL4deriv <- function(y, h, b, m) {
+  ((y-b)/(m-y))^(-1/h-1)*(1/h*(1/(m-y)+(y-b)/(m-y)^2))
+}
 
 # calculation of d/D in the additivity/synergy equation
 doseRatio <- function(response, d, h, b, m, expe, lower, upper, exVal) {
@@ -14,9 +17,14 @@ doseRatio <- function(response, d, h, b, m, expe, lower, upper, exVal) {
   } else {
     return(d/(invL4(response, h, b, m)*expe))
   }
- }
-
-
+}
+doseRatioGr = function(response, d, h, b, m, expe, lower, upper, exVal){
+  if(!d || response < lower || response > upper){
+    return(0)
+  } else {
+    return(d/expe* (-invL4deriv(response, h, b, m)))#/invL4(response, h, b, m)^2
+  }
+}
 #' Alternative Loewe generalization
 #'
 #' @inheritParams generalizedLoewe
@@ -31,25 +39,27 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2,
   } else {
     parm <- parmInput
   }
-
   increasing <- parm["m1"] >= parm["b"] && parm["m2"] >= parm["b"]
   decreasing <- parm["m1"] <= parm["b"] && parm["m2"] <= parm["b"]
-
   ## If agonist and antagonist, give an error
   if (!(increasing || decreasing)) {
     stop("Alternative Loewe generalization does not work for diverging marginal curves.")
   }
   exVal = if (parm["b"] < parm["m1"]) 0 else Inf
   expE1 = exp(parm["e1"]);expE2 = exp(parm["e2"])
-  lower <- min(parm[c("b", "m1")])
-  upper <- max(parm[c("b", "m1")])
+  lower1 <- min(parm[c("b", "m1")]);upper1 <- max(parm[c("b", "m1")])
+  lower2 <- min(parm[c("b", "m2")]);upper2 <- max(parm[c("b", "m2")])
   solver <- function(dose, par) {
     fun0 <- function(y) {
-      res <- doseRatio(y, dose[1], par["h1"], par["b"], par["m1"], expE1, lower, upper, exVal) +
-          doseRatio(y, dose[2], par["h2"], par["b"], par["m2"], expE2, lower, upper, exVal) - 1
+      res <- doseRatio(y, dose[1], par["h1"], par["b"], par["m1"], expE1, lower1, upper1, exVal) +
+          doseRatio(y, dose[2], par["h2"], par["b"], par["m2"], expE2, lower2, upper2, exVal) - 1
       if(is.finite(res)) res else 1
     }
-    nleqslv(fn = fun0, x = dose[3],
+    gr0 = function(y){
+      doseRatioGr(y, dose[1], par["h1"], par["b"], par["m1"], expE1, lower1, upper1, exVal) +
+        doseRatioGr(y, dose[2], par["h2"], par["b"], par["m2"], expE2, lower2, upper2, exVal)
+    }
+    nleqslv(fn = fun0, x = dose[3], jac = gr0,
             control = list(ftol = .Machine$double.eps))$x
   }
 
