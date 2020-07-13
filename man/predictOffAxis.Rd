@@ -10,6 +10,7 @@ predictOffAxis(
   transforms = fitResult$transforms,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
   startvalues = NULL,
+  fit = NULL,
   ...
 )
 }

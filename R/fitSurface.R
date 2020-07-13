@@ -139,9 +139,13 @@ fitSurface <- function(data, fitResult,
   uniqueDoses <- with(data, list("d1" = sort(unique(d1)),
      "d2" = sort(unique(d2))))
   doseGrid <- expand.grid(uniqueDoses)
+  idOffDoseGrid = with(doseGrid, d1 & d2)
+  offAxisFit = fitOffAxis(fitResult, null_model = null_model,
+                               doseGrid = doseGrid)
   offAxisPred = predictOffAxis(fitResult, null_model = null_model,
-                               doseGrid = doseGrid, transforms = transforms)
-  doseGridOff = doseGrid[with(doseGrid, d1 & d2),]
+                                          doseGrid = doseGrid, transforms = transforms,
+                                          fit = offAxisFit)
+  doseGridOff = doseGrid[idOffDoseGrid,]
   idUnique = match(data_off$d1d2, apply(doseGridOff, 1, paste, collapse = "_"))
   offAxisPredAll <- offAxisPred[idUnique]
   offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
@@ -152,11 +156,10 @@ fitSurface <- function(data, fitResult,
   offAxisTable <- cbind(offaxisZTable,
                         "z.score" = with(offaxisZTable, (effect - predicted) / sigma0))
   if(null_model == "loewe"){
-    loewefit = generalizedLoewe(doseGrid, fitResult$coef)
-    occupancy = loewefit$occupancy
-    startvalues = loewefit$oc
+   occupancy = offAxisFit$occupancy
+    startvalues = offAxisFit$oc
   } else if(null_model == "loewe2"){
-    startvalues = harbronLoewe(doseGrid, fitResult$coef)
+    startvalues = offAxisFit
     occupancy = NULL
   } else {
     occupancy = startvalues = NULL
