@@ -227,8 +227,22 @@ fitSurface <- function(data, fitResult,
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
     statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
-  if (statistic %in% c("maxR", "both"))
+  if (statistic %in% c("maxR", "both")){
       statObj <- c(statObj, list("maxR" = do.call(maxR, paramsStatistics)))
+      #Confidence intervals
+      bootEffectSizes = vapply(integer(B.B), FUN.VALUE = c(R), function(bb){
+        dat_off_resam = within(dat_off, {
+          effect = Total$meaneffect + sample(sampling_erros)
+        })
+        getR(data = with(bb, data[data$d1& data$d2,]), fitResult = bb$simFit,
+             idUnique = idUnique, null_model = null_model, doseGrid = doseGrid,
+             transforms = transforms, respS = bb$respS)
+      })
+      A = getA(data, fitResult, method, CP, reps, n1)
+      bootEffectSizesStand = abs((bootEffectSizes-c(R))/sqrt(diag(A)))
+      effectSizeQuant = quantile(apply(bootEffectSizesStand, 2, max), cutoff)
+      Ymean$confInt = c(R) + outer( effectSizeQuant*sqrt(diag(A)), c(-1,1))
+  }
   retObj <- c(list("data" = data,
                    "fitResult" = fitResult, "transforms" = transforms,
                    "null_model" = null_model, "method" = method,
