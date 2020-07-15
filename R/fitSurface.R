@@ -113,7 +113,8 @@ fitSurface <- function(data, fitResult,
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
-                       method = c("equal", "model", "unequal"), confInt = FALSE) {
+                       method = c("equal", "model", "unequal"), confInt = FALSE,
+                       bootRS = TRUE) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -225,7 +226,7 @@ fitSurface <- function(data, fitResult,
                           "doseGrid" = doseGrid, "reps" = reps, "R" = R,
                           "idUnique" = idUnique, "B.B" = B.B,
                           "Total" = Total, "n1" = length(R), "method" = method,
-                          "respS" = offAxisPredAll)
+                          "respS" = offAxisPredAll, "bootRS" = bootRS)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
       statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
