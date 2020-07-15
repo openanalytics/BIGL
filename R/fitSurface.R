@@ -228,22 +228,19 @@ fitSurface <- function(data, fitResult,
                           "respS" = offAxisPredAll)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
-    statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
+      statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
   if (statistic %in% c("maxR", "both"))
       statObj <- c(statObj, list("maxR" = do.call(maxR, paramsStatistics)))
   if(confInt)
-    statObj <- c(statObj, list("confInt" = do.call(bootConfInt, paramsStatistics)))
+      statObj <- c(statObj, list("confInt" = do.call(bootConfInt, paramsStatistics)))
 
-  retObj <- c(list("data" = data,
-                   "fitResult" = fitResult, "transforms" = transforms,
-                   "null_model" = null_model, "method" = method,
-                   "offAxisTable" = offAxisTable,
+  retObj <- c(list("data" = data, "fitResult" = fitResult,
+                   "transforms" = transforms, "null_model" = null_model,
+                   "method" = method, "offAxisTable" = offAxisTable,
                    "occupancy" = occupancy, "CP" = CP), statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
   # add compound names from marginal fit
   retObj$names <- fitResult$names
-
   class(retObj) <- append(class(retObj), "ResponseSurface")
   return(retObj)
-
 }

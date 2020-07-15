@@ -1,7 +1,7 @@
 #' Obtain confidence intervals for the raw effect sizes
 bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
-                       CP, reps, n1, cutoff, R, ...){
+                       CP, reps, n1, cutoff, R, fitResult,...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
     bootEffectSizes = vapply(bootStraps, FUN.VALUE = c(R), function(bb){
@@ -18,6 +18,6 @@ bootConfInt = function(Total, idUnique, bootStraps,
     effectSizeQuant = quantile(maxEffectSizes, cutoff)
     confInt = c(R) + outer(effectSizeQuant*sqrt(diag(A)),
                            c("lower" = -1, "upper" = 1))
-    rownames(confInt) = names(R)
+    rownames(confInt) = rownames(bootEffectSizesStand)
     return(confInt)
 }

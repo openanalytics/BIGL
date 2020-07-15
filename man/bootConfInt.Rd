@@ -17,6 +17,7 @@ bootConfInt(
   n1,
   cutoff,
   R,
+  fitResult,
   ...
 )
 }
