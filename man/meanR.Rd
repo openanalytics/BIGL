@@ -20,6 +20,7 @@ meanR(
   paramsBootstrap,
   doseGrid,
   idUnique,
+  n1,
   ...
 )
 }

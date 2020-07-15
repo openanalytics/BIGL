@@ -34,12 +34,10 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL,
                  cutoff = 0.95, cl = NULL,
                  method = c("equal", "model", "unequal"), bootStraps, doseGrid,
-                 idUnique,...) {
+                 idUnique, n1,...) {
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
-
-    n1 <- length(R)
 
     FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
                       R, n1)

@@ -196,10 +196,11 @@ simulateNull <- function(data, fitResult, doseGrid,
     if (!inherits(simFit, "try-error")) break
   }
   #Also precalculate response surface, quite computation intensive
-  respS <- predictOffAxis(data = data, fitResult = simFit,
+  respS <- predictOffAxis(fitResult = simFit,
                           transforms = transforms, startvalues = startvalues,
                           doseGrid = doseGrid, null_model = null_model)
-
+  names(respS) = apply(doseGrid[doseGrid$d1 & doseGrid$d2, c("d1", "d2")], 1,
+                       paste, collapse = "_")
   return(list("data" = simData, "simFit" = simFit, "respS" = respS))
 }
 bootFun = function(i, args) do.call(simulateNull, args) #Wrapper with index

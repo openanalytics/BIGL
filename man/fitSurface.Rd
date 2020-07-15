@@ -23,7 +23,8 @@ fitSurface(
   cutoff = 0.95,
   parallel = FALSE,
   progressBar = TRUE,
-  method = c("equal", "model", "unequal")
+  method = c("equal", "model", "unequal"),
+  confInt = FALSE
 )
 }
 \arguments{

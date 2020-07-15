@@ -1,7 +1,6 @@
 #' Helper functions for the test statistics
 #'@inheritParams predictOffAxis
-getR = function(data, fitResult, doseGrid, null_model, idUnique, transforms,
-                respS = respS){
+getR = function(data, idUnique, transforms, respS){
     if(!is.null(transforms)){
         data$effect <- with(transforms, PowerT(data$effect, compositeArgs))
     }
@@ -11,9 +10,8 @@ getR = function(data, fitResult, doseGrid, null_model, idUnique, transforms,
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
                      R, n1, idUnique, doseGrid, respS){
     if(missing(R)){
-        R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
-                 null_model = null_model, doseGrid = doseGrid,
-                 transforms = transforms, respS = respS)
+        R = getR(data = data, idUnique = idUnique, transforms = transforms,
+                 respS = respS)
     }
     A <- getA(data, fitResult, method, CP, reps, n1)
     FStat <- max(0, as.numeric(crossprod(R, solve(A)) %*% R / n1))
@@ -22,9 +20,8 @@ getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
 getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model,
                     R, n1, idUnique, doseGrid, respS){
     if(missing(R)){
-        R = getR(data = data, fitResult = fitResult, idUnique = idUnique,
-                 null_model = null_model, doseGrid = doseGrid,
-                 transforms = transforms, respS = respS)
+        R = getR(data = data, idUnique = idUnique, transforms = transforms,
+                 respS = respS)
     }
     A <- getA(data, fitResult, method, CP, reps, n1)
     E <- eigen(A)
@@ -38,8 +35,7 @@ getA = function(data, fitResult, method, CP, reps, n1){
     MSE0 <- fitResult$sigma^2
     dat_off  <- data[data$d1 & data$d2, ]
     mse_off <- switch(method,
-                      "equal" = MSE0,
-                      "model" = modelVar(dat_off),
+                      "equal" = MSE0, "model" = modelVar(dat_off),
                       "unequal" = mean(with(dat_off, tapply(effect, d1d2, var)))
     )
     A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)

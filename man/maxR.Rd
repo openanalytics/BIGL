@@ -20,6 +20,7 @@ maxR(
   bootStraps,
   doseGrid,
   idUnique,
+  n1,
   ...
 )
 }

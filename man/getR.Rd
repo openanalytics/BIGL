@@ -4,34 +4,9 @@
 \alias{getR}
 \title{Helper functions for the test statistics}
 \usage{
-getR(
-  data,
-  fitResult,
-  doseGrid,
-  null_model,
-  idUnique,
-  transforms,
-  respS = respS
-)
+getR(data, idUnique, transforms, respS)
 }
 \arguments{
-\item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
-\code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
-list containing \code{df}, \code{sigma}, \code{coef},
-\code{shared_asymptote} and \code{method} elements for, respectively,
-marginal model degrees of freedom, residual standard deviation, named
-vector of coefficient estimates, logical value of whether shared asymptote
-is imposed and method for estimating marginal models during bootstrapping
-(see \code{\link{fitMarginals}}). If biological and power transformations
-were used in marginal model estimation, \code{fitResult} should contain
-\code{transforms} elements with these transformations. Alternatively, these
-can also be specified via \code{transforms} argument.}
-
-\item{null_model}{Specified null model for the expected response surface.
-Currently, allowed options are \code{"loewe"} for generalized Loewe model,
-\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
-and \code{"loewe2"} for the alternative Loewe generalization.}
-
 \item{transforms}{Transformation functions. If non-null, \code{transforms} is
 a list containing 5 elements, namely biological and power transformations
 along with their inverse functions and \code{compositeArgs} which is a list

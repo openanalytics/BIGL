@@ -113,7 +113,7 @@ fitSurface <- function(data, fitResult,
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
-                       method = c("equal", "model", "unequal")) {
+                       method = c("equal", "model", "unequal"), confInt = FALSE) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -148,6 +148,7 @@ fitSurface <- function(data, fitResult,
   doseGridOff = doseGrid[idOffDoseGrid,]
   idUnique = match(data_off$d1d2, apply(doseGridOff, 1, paste, collapse = "_"))
   offAxisPredAll <- offAxisPred[idUnique]
+  names(offAxisPredAll) = data_off$d1d2
   offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
                          "predicted" = offAxisPredAll)
   if(!is.null(transforms))
@@ -182,7 +183,6 @@ fitSurface <- function(data, fitResult,
   ## NB: mean responses are taken
   R = with(offaxisZTable, tapply(effect-predicted, d1d2, mean))
   reps <- with(offaxisZTable, tapply(effect-predicted, d1d2, length))
-  stopifnot(length(R) == length(reps))
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
@@ -223,26 +223,17 @@ fitSurface <- function(data, fitResult,
                           "data" = data, "fitResult" = fitResult,
                           "null_model" = null_model, "transforms" = transforms,
                           "doseGrid" = doseGrid, "reps" = reps, "R" = R,
-                          "idUnique" = idUnique, "B.B" = B.B)
+                          "idUnique" = idUnique, "B.B" = B.B,
+                          "Total" = Total, "n1" = length(R), "method" = method,
+                          "respS" = offAxisPredAll)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
     statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
-  if (statistic %in% c("maxR", "both")){
+  if (statistic %in% c("maxR", "both"))
       statObj <- c(statObj, list("maxR" = do.call(maxR, paramsStatistics)))
-      #Confidence intervals
-      bootEffectSizes = vapply(integer(B.B), FUN.VALUE = c(R), function(bb){
-        dat_off_resam = within(dat_off, {
-          effect = Total$meaneffect + sample(sampling_erros)
-        })
-        getR(data = with(bb, data[data$d1& data$d2,]), fitResult = bb$simFit,
-             idUnique = idUnique, null_model = null_model, doseGrid = doseGrid,
-             transforms = transforms, respS = bb$respS)
-      })
-      A = getA(data, fitResult, method, CP, reps, n1)
-      bootEffectSizesStand = abs((bootEffectSizes-c(R))/sqrt(diag(A)))
-      effectSizeQuant = quantile(apply(bootEffectSizesStand, 2, max), cutoff)
-      Ymean$confInt = c(R) + outer( effectSizeQuant*sqrt(diag(A)), c(-1,1))
-  }
+  if(confInt)
+    statObj <- c(statObj, list("confInt" = do.call(bootConfInt, paramsStatistics)))
+
   retObj <- c(list("data" = data,
                    "fitResult" = fitResult, "transforms" = transforms,
                    "null_model" = null_model, "method" = method,
