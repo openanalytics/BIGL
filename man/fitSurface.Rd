@@ -25,7 +25,7 @@ fitSurface(
   progressBar = TRUE,
   method = c("equal", "model", "unequal"),
   confInt = FALSE,
-  bootRS = TRUE
+  bootRS = FALSE
 )
 }
 \arguments{
