@@ -19,6 +19,7 @@ bootConfInt(
   R,
   fitResult,
   bootRS,
+  data_off,
   ...
 )
 }

@@ -5,7 +5,7 @@
 \title{Compute maxR statistic for each off-axis dose combination}
 \usage{
 maxR(
-  data,
+  data_off,
   fitResult,
   transforms = fitResult$transforms,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
@@ -18,15 +18,13 @@ maxR(
   cl = NULL,
   method = c("equal", "model", "unequal"),
   bootStraps,
-  doseGrid,
   idUnique,
   n1,
+  doseGridOff,
   ...
 )
 }
 \arguments{
-\item{data}{Dose-response dataframe.}
-
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
 \code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
 list containing \code{df}, \code{sigma}, \code{coef},

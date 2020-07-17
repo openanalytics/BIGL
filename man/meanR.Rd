@@ -5,7 +5,7 @@
 \title{Compute meanR statistic for the estimated model}
 \usage{
 meanR(
-  data,
+  data_off,
   fitResult,
   transforms = fitResult$transforms,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
@@ -18,15 +18,12 @@ meanR(
   method = c("equal", "model", "unequal"),
   bootStraps,
   paramsBootstrap,
-  doseGrid,
   idUnique,
   n1,
   ...
 )
 }
 \arguments{
-\item{data}{Dose-response dataframe.}
-
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
 \code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
 list containing \code{df}, \code{sigma}, \code{coef},

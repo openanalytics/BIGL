@@ -149,9 +149,9 @@ fitSurface <- function(data, fitResult,
   idOffDoseGrid = with(doseGrid, d1 & d2)
   doseGridOff = doseGrid[idOffDoseGrid,]
   d1d2off = apply(doseGridOff, 1, paste, collapse = "_")
+  rownames(doseGridOff) = d1d2off
   idUnique = d1d2off[match(data_off$d1d2, d1d2off)]
   offAxisPredAll <- offAxisPred[idUnique]
-  names(offAxisPredAll) = data_off$d1d2
   offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
                          "predicted" = offAxisPredAll)
   if(!is.null(transforms))
@@ -219,15 +219,17 @@ fitSurface <- function(data, fitResult,
   } else {bootStraps = clusterObj = NULL}
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms,
-                               sigma0 = sigma0, doseGrid = doseGrid)
+                               sigma0 = sigma0, doseGrid = doseGrid)[names(R), names(R)]
+  CP = CP[names(R), names(R)]
   #Calculate test statistics
   paramsStatistics = list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff,
-                          "data" = data, "fitResult" = fitResult,
+                          "data_off" = data, "fitResult" = fitResult,
                           "null_model" = null_model, "transforms" = transforms,
                           "doseGrid" = doseGrid, "reps" = reps, "R" = R,
                           "idUnique" = idUnique, "B.B" = B.B,
                           "Total" = Total, "n1" = length(R), "method" = method,
-                          "respS" = offAxisPredAll, "bootRS" = bootRS)
+                          "respS" = offAxisPredAll, "bootRS" = bootRS,
+                          "doseGridOff" = doseGridOff[names(R),])
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
       statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))

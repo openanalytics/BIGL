@@ -2,7 +2,7 @@
 bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,
-                       bootRS,...){
+                       bootRS, data_off,...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
     bootEffectSizes = vapply(bootStraps, FUN.VALUE = c(R), function(bb){
@@ -13,7 +13,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
         getR(data = dat_off_resam, idUnique = dat_off_resam$d1d2,
              transforms = NULL, respS = if(bootRS) bb$respS else respS)
     })
-    A = getA(data, fitResult, method, CP, reps, n1)
+    A = getA(data_off, fitResult, method, CP, reps, n1)
     bootEffectSizesStand = abs((bootEffectSizes-c(R))/sqrt(diag(A)))
     maxEffectSizes = apply(bootEffectSizesStand, 2, max)
     effectSizeQuant = quantile(maxEffectSizes, cutoff)

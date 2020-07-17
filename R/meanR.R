@@ -37,11 +37,11 @@
 #'   If \code{\link{meanR}} test is run with bootstrapping, then p-value
 #'   estimate is based on boostrapped null distribution of test statistic and an
 #'   additional element \code{"FDist"} (of class \code{"ecdf"}) is returned.
-meanR <- function(data, fitResult, transforms = fitResult$transforms,
+meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL,
                   cl = NULL, method = c("equal", "model", "unequal"),
-                  bootStraps, paramsBootstrap, doseGrid, idUnique, n1, ...) {
+                  bootStraps, paramsBootstrap, idUnique, n1, ...) {
 
     ## Argument matching
     null_model <- match.arg(null_model)
@@ -51,7 +51,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     if (all(reps == 1) && method %in% c("model", "unequal")) {
         stop("Replicates are required when choosing the method 'model' or 'unequal'")
     }
-    FStat <- getMeanRF(data, fitResult, method, CP, reps, transforms, null_model,
+    FStat <- getMeanRF(data_off, fitResult, method, CP, reps, transforms, null_model,
                        R, n1, idUnique)
     if (is.null(B.B)) {
         ans <- list("FStat" = FStat,
@@ -62,7 +62,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
     }
     FStatb <- sapply(bootStraps, function(x) {
         if(nested_bootstrap){
-            paramsBootstrap <- list("data"  =x$data,
+            paramsBootstrap <- list("data"  = x$data,
                                     "fitResult" = x$simFit, "transforms" = transforms,
                                     "null_model" = null_model)
             nestedBootstraps = lapply(integer(B.CP), bootFun, args = paramsBootstrap)
@@ -70,7 +70,7 @@ meanR <- function(data, fitResult, transforms = fitResult$transforms,
         }
         getMeanRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid, respS = x$respS)
+                  n1 = n1, idUnique = idUnique, respS = x$respS)
     })
     pvalb <- mean(FStatb >= FStat)
     ans <- list("FStat" = FStat, "FDist" = ecdf(FStatb), "p.value" = pvalb,

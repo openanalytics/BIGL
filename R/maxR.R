@@ -29,20 +29,20 @@
 #'   as \code{"Undefined"}. If both compounds act in the same direction, then a
 #'   stronger than individual effect is classified as synergy while a weaker
 #'   effect would be classified as antagonism.
-maxR <- function(data, fitResult, transforms = fitResult$transforms,
+maxR <- function(data_off, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL,
                  cutoff = 0.95, cl = NULL,
-                 method = c("equal", "model", "unequal"), bootStraps, doseGrid,
-                 idUnique, n1,...) {
+                 method = c("equal", "model", "unequal"), bootStraps,
+                 idUnique, n1, doseGridOff,...) {
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
 
-    FStat <- getMaxRF(data, fitResult, method, CP, reps, transforms, null_model,
-                      R, n1)
-    Ymean = data.frame(doseGrid[doseGrid$d1 & doseGrid$d2,],
-                       R = FStat, absR = abs(FStat), "effect - predicted" = R)
+    FStat <- getMaxRF(data_off, fitResult, method, CP, reps, transforms,
+                      null_model, R, n1)
+    Ymean = data.frame(doseGridOff, R = FStat, absR = abs(FStat),
+                       "effect - predicted" = R)
     df0 = fitResult$df
 
     ## Use normal approximation if B.B is not provided.
@@ -68,7 +68,7 @@ maxR <- function(data, fitResult, transforms = fitResult$transforms,
         }
         getMaxRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1, idUnique = idUnique, doseGrid = doseGrid, respS = x$respS)
+                  n1 = n1, idUnique = idUnique, respS = x$respS)
         })
         M <- apply(abs(Rnull), 2, max)
         q <- quantile(M, cutoff)

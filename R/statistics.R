@@ -8,7 +8,7 @@ getR = function(data, idUnique, transforms, respS){
 }
 #'@inheritParams predictOffAxis
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
-                     R, n1, idUnique, doseGrid, respS){
+                     R, n1, idUnique, respS){
     if(missing(R)){
         R = getR(data = data, idUnique = idUnique, transforms = transforms,
                  respS = respS)
@@ -18,7 +18,7 @@ getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
     return(FStat)
 }
 getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model,
-                    R, n1, idUnique, doseGrid, respS){
+                    R, n1, idUnique, respS){
     if(missing(R)){
         R = getR(data = data, idUnique = idUnique, transforms = transforms,
                  respS = respS)
@@ -31,9 +31,8 @@ getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model,
     RStud <- crossprod(R, Amsq)
     return(as.numeric(RStud))
 }
-getA = function(data, fitResult, method, CP, reps, n1){
+getA = function(data_off, fitResult, method, CP, reps, n1){
     MSE0 <- fitResult$sigma^2
-    dat_off  <- data[data$d1 & data$d2, ]
     mse_off <- switch(method,
                       "equal" = MSE0, "model" = modelVar(dat_off),
                       "unequal" = mean(with(dat_off, tapply(effect, d1d2, var)))
