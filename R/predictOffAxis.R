@@ -26,6 +26,7 @@ predictOffAxis <- function( doseGrid, fitResult, transforms = fitResult$transfor
     fit = fitOffAxis(doseGrid, fitResult, nm, startvalues)
   }
   out = (if(nm %in% c("loewe")) fit$response else fit)[doseGrid$d1 & doseGrid$d2]
+  names(out) = apply(doseGrid[doseGrid$d1 & doseGrid$d2, ], 1, paste, collapse = "_")
   if (!is.null(transforms)) {
       CompositeT <- with(transforms,
                          function(y, args) PowerT(BiolT(y, args), args))

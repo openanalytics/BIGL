@@ -140,14 +140,16 @@ fitSurface <- function(data, fitResult,
   uniqueDoses <- with(data, list("d1" = sort(unique(d1)),
      "d2" = sort(unique(d2))))
   doseGrid <- expand.grid(uniqueDoses)
-  idOffDoseGrid = with(doseGrid, d1 & d2)
   offAxisFit = fitOffAxis(fitResult, null_model = null_model,
                                doseGrid = doseGrid)
   offAxisPred = predictOffAxis(fitResult, null_model = null_model,
                                           doseGrid = doseGrid, transforms = transforms,
                                           fit = offAxisFit)
+  #Retrieve all off-axis points
+  idOffDoseGrid = with(doseGrid, d1 & d2)
   doseGridOff = doseGrid[idOffDoseGrid,]
-  idUnique = match(data_off$d1d2, apply(doseGridOff, 1, paste, collapse = "_"))
+  d1d2off = apply(doseGridOff, 1, paste, collapse = "_")
+  idUnique = d1d2off[match(data_off$d1d2, d1d2off)]
   offAxisPredAll <- offAxisPred[idUnique]
   names(offAxisPredAll) = data_off$d1d2
   offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
@@ -215,7 +217,6 @@ fitSurface <- function(data, fitResult,
               parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
           }
   } else {bootStraps = clusterObj = NULL}
-
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms,
                                sigma0 = sigma0, doseGrid = doseGrid)
