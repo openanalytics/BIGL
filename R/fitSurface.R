@@ -223,7 +223,7 @@ fitSurface <- function(data, fitResult,
   CP = CP[names(R), names(R)]
   #Calculate test statistics
   paramsStatistics = list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff,
-                          "data_off" = data, "fitResult" = fitResult,
+                          "data_off" = data_off, "fitResult" = fitResult,
                           "null_model" = null_model, "transforms" = transforms,
                           "doseGrid" = doseGrid, "reps" = reps, "R" = R,
                           "idUnique" = idUnique, "B.B" = B.B,

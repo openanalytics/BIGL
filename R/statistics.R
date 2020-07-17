@@ -31,10 +31,10 @@ getMaxRF = function(data, fitResult, method, CP, reps, transforms, null_model,
     RStud <- crossprod(R, Amsq)
     return(as.numeric(RStud))
 }
-getA = function(data_off, fitResult, method, CP, reps, n1){
+getA = function(dat_off, fitResult, method, CP, reps, n1){
     MSE0 <- fitResult$sigma^2
     mse_off <- switch(method,
-                      "equal" = MSE0, "model" = modelVar(dat_off),
+                      "equal" = MSE0, "model" = c(modelVar(dat_off)),
                       "unequal" = mean(with(dat_off, tapply(effect, d1d2, var)))
     )
     A <- MSE0*CP + mse_off*diag(1/reps, nrow = n1)
