@@ -146,6 +146,11 @@ df.residual.MarginalFit <- function(object, ...) {
 #' @inheritParams summary.MarginalFit
 #' @param ncol Number of plots per row
 #' @param logScale Whether x-axis should be plotted on a logarithmic scale
+#' @param smooth Whether to draw a smooth fitted curve (deafult), or 
+#'   line segments connecting predicted points only
+#' @param dataScale Whether to draw plot on original data scale in case when 
+#'   transformations were used for fitting. Default (FALSE) is to plot on the 
+#'   \code{coef(x)} scale
 #' @return Returns a \code{ggplot} object. It can be consequently modified by
 #'   using standard operations on \code{ggplot} objects (if \code{ggplot2}
 #'   package is loaded).
@@ -154,16 +159,9 @@ df.residual.MarginalFit <- function(object, ...) {
 #' @importFrom scales trans_new
 #' @importFrom stats fitted
 #' @export
-plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, ...) {
+plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataScale = FALSE, ...) {
 
   data <- x$data
-
-  ## Transformation object for ggplot2
-  log10eps_trans <- function() {
-    trans_new("log10eps",
-              function(z) log10(z + 0.5 * min(z[z != 0])),
-              function(z) 10^z - min(10^z)*1/3, domain = c(0, Inf))
-  }
 
   transformF <- function(z, comp) {
     eps <- tapply(z, comp, function(x) min(x[x != 0]))
@@ -176,16 +174,12 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, ...) {
     labnames <- unlist(attr(x$data, "orig.colnames"))
   }
 
-  ## Predict response for monotherapy observations only
-  data <-  data[!data$d1 | !data$d2, ]
-  data$predicted <- fitted(x)
-
   ## Reorder the data so that non-zero drug 1 observations are stacked
   ## above non-zero drug 2 observations
   dat <- rbind(data[!data$d2, ], data[!data$d1, ])
-  if (!is.null(x$transforms$PowerT)) {
+  if (!is.null(x$transforms$InvBiolT) & !dataScale) {
     dat$effect <- with(x$transforms,
-                       PowerT(dat$effect, compositeArgs))
+                       InvBiolT(dat$effect, compositeArgs))
   }
   ## Assign the appropriate Compound 1/2 label to the row scale the doses
   dat$comp <- rep(labnames[2:3], c(sum(!data$d2), sum(!data$d1)))
@@ -194,10 +188,58 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, ...) {
   dat$dose <- with(dat, ifelse(!d2, d1, d2))
   if (logScale) dat$dose <- with(dat, transformF(dose, comp))
 
-  p <- ggplot(dat, aes_string(x = "dose", y = "effect")) +
-    geom_line(aes_string(x = "dose", y = "predicted")) +
-    geom_point() +
+  # predicted smooth curve
+  curveDat <- unique(dat[, c("d1", "d2", "comp", "dose")])
+  if (smooth) {
+    # make finer grid for smooth prediction lines
+    makeGrid <- function(x, n = 100, log = TRUE) {
+      xRange <- range(x, na.rm = TRUE)
+      minNonZero <- min(x[x != 0], na.rm = TRUE)
+      if (log) {
+        c(if (xRange[1] == 0) 0 else NULL, 10^seq(from = log10(minNonZero), to = log10(xRange[2]), length.out = n))
+      } else 
+        c(seq(from = xRange[1], to = xRange[2], length.out = n))
+    }
+    
+    gridDat <- rbind(
+        expand.grid(d1 = makeGrid(curveDat$d1[curveDat$comp == labnames[2]], log = logScale), d2 = 0, comp = labnames[2]),
+        expand.grid(d1 = 0, d2 = makeGrid(curveDat$d2[curveDat$comp == labnames[3]], log = logScale), comp = labnames[3]))
+
+    gridDat$dose <- with(gridDat, ifelse(!d2, d1, d2))
+    if (logScale) gridDat$dose <- with(gridDat, transformF(dose, comp))
+    curveDat <- gridDat    
+  }
+  
+  curveDat$predicted <- predict(x, curveDat)
+  if (!is.null(x$transforms$InvPowerT)) {
+    curveDat$predicted <- with(x$transforms,
+        InvPowerT(curveDat$predicted, compositeArgs))
+  }
+  if (!is.null(x$transforms$InvBiolT) & !dataScale) {
+    curveDat$predicted <- with(x$transforms,
+        InvBiolT(curveDat$predicted, compositeArgs))
+  }
+  
+  # draw a dotted line from 0 to the first non-0 dose
+  curveDat$type <- FALSE
+  if (any(curveDat$d1 + curveDat$d2 == 0, na.rm = TRUE)) {
+    minD1 <- min(dat$d1[dat$d1 != 0], na.rm = TRUE)
+    minD2 <- min(dat$d2[dat$d2 != 0], na.rm = TRUE)
+    curveDat$type <- (curveDat$d1<=minD1 & curveDat$d2 == 0) | (curveDat$d2<=minD2 & curveDat$d1 == 0)
+    # for non-smooth curves, we need to duplicate first non-0 dose to avoid line
+    # breakage, as we are actually drawing 2 different lines 
+    if (!smooth) {
+      auxDat <- rbind(curveDat[curveDat$d1 == minD1, ], curveDat[curveDat$d2 == minD2, ])
+      auxDat$type <- !auxDat$type
+      curveDat <- rbind(curveDat, auxDat)
+    }
+  }
+
+  p <- ggplot() +
+    geom_line(data = curveDat, aes_string(x = "dose", y = "predicted", linetype = "type")) +
+    geom_point(data = dat, aes_string(x = "dose", y = "effect")) +
     facet_wrap(~ comp, ncol = ncol, scales = "free_x") +
+    scale_linetype_manual(values = c("TRUE" = "dotted", "FALSE" = "solid"), guide = "none") +
     xlab("Dose") + ylab("Effect") + theme_bw()
   if (logScale) p <- p + scale_x_log10()
 

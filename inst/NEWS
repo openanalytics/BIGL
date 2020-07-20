@@ -1,3 +1,6 @@
+1.5.1 (2020-07-02)
+  o show smooth prediction curve on the marginal fit plot
+  o show warning for agonist/antagonist combination when using generalized Loewe model
 1.4.3 (2020-01-30)
   o fixes for special case of 2 flat monotherapy profiles
 1.4.2 (2020-01-17)

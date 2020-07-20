@@ -36,11 +36,18 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   if (asymptotes == 1) {
     parm <- c(parmInput[1:4], parmInput[4], parmInput[5:6])
     names(parm)[4:5] <- c("m1", "m2")
-  }
-  else {
+  } else {
     parm <- parmInput
   }
 
+  increasing <- parm["m1"] >= parm["b"] && parm["m2"] >= parm["b"]
+  decreasing <- parm["m1"] <= parm["b"] && parm["m2"] <= parm["b"]
+  
+  ## If agonist and antagonist, give a warning
+  if (!(increasing || decreasing)) {
+    warning("Marginal curves are diverging. The synergy/antagonism calls may be reversed")
+  }  
+  
   ## For each combination of Compound 1 and Compound 2, find transformed
   ## occupancy rate, i.e. -logit(o*), which satisfies Loewe model equation.
   oc <- apply(dose, 1, solver, parmInput)
