@@ -59,5 +59,6 @@ Simulate data from a given null model and monotherapy coefficients
   data <- subset(directAntivirals, experiment == 1)
   ## Data must contain d1, d2 and effect columns
   fitResult <- fitMarginals(data)
-  simulateNull(data, fitResult, null_model = "hsa")
+  simDat = simulateNull(data, fitResult, expand.grid(d1 = data$d1, d2 = data$d2),
+  null_model = "hsa")
 }

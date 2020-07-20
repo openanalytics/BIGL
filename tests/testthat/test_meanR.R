@@ -14,16 +14,16 @@ test_that('statistics', {
   expect_true(MeanR$p.value <= 1)
 
   ## Try computation with random data
-  # reps <- sample(1:10, length(reps), replace = TRUE)
-  # R <- rnorm(length(reps))
-  # CP <- rWishart(1, length(reps), diag(1, length(reps)))[,,1]
-  #
-  # expect_silent(MeanR <- fitSurface(data, fit, transforms, "loewe",
-  #                              R, CP, reps)$meanR)
-  # expect_true(MeanR$FStat > 0)
-  # expect_true(MeanR$p.value >= 0)
-  # expect_true(MeanR$p.value <= 1)
-  #
-  # expect_silent(summary(MeanR))
+  reps <- sample(1:10, length(reps), replace = TRUE)
+  R <- rnorm(length(reps))
+  CP <- rWishart(1, length(reps), diag(1, length(reps)))[,,1]
+
+  expect_silent(MeanR <- fitSurface(data, fit, transforms, "loewe",
+                               R, CP, reps, statistic = "meanR")$meanR)
+  expect_true(MeanR$FStat > 0)
+  expect_true(MeanR$p.value >= 0)
+  expect_true(MeanR$p.value <= 1)
+
+  expect_silent(summary(MeanR))
 
 })

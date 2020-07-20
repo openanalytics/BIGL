@@ -149,7 +149,8 @@ getCP = function(bootStraps, null_model, transforms, sigma0, doseGrid){
 #'   data <- subset(directAntivirals, experiment == 1)
 #'   ## Data must contain d1, d2 and effect columns
 #'   fitResult <- fitMarginals(data)
-#'   simulateNull(data, fitResult, null_model = "hsa")
+#'   simDat = simulateNull(data, fitResult, expand.grid(d1 = data$d1, d2 = data$d2),
+#'   null_model = "hsa")
 simulateNull <- function(data, fitResult, doseGrid,
                          transforms = fitResult$transforms, startvalues,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {

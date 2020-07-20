@@ -129,9 +129,9 @@ fitSurface <- function(data, fitResult,
   }
 
   ## Verify column names of input dataframe
-  if (!all(c(effect, d1, d2) %in% colnames(data)))
+  if (!all(c("effect", "d1", "d2") %in% colnames(data)))
     stop("effect, d1 and d2 arguments must be column names of data")
-  id <- match(c(effect, d1, d2), colnames(data))
+  id <- match(c("effect", "d1", "d2"), colnames(data))
   colnames(data)[id] <- c("effect", "d1", "d2")
   data$d1d2 = apply(data[, c("d1", "d2")], 1, paste, collapse = "_")
   sigma0 <- fitResult$sigma

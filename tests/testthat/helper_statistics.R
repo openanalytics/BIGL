@@ -14,15 +14,9 @@ transforms <- list(
 
 fit <- fitMarginals(data, transforms = transforms, method = "nlslm")
 
-# offAxis <- predictOffAxis(data, fit)
-# reps <- aggregate(effect ~ d1 + d2,
-#                   data = offAxis$offaxisZTable, length)[["effect"]]
-# R <- aggregate(effect - predicted ~ d1 + d2,
-#                data = offAxis$offaxisZTable, mean)[["effect - predicted"]]
-
 rs <- fitSurface(data, fit, transforms = transforms,
                  B.CP = 2, B.B = NULL, parallel = FALSE,
                  statistic = "both")
+R = rs$maxR$Ymean$R
+reps <- with(rs$offAxisTable, tapply(effect, d1d2, length))
 
-# offAxisTable <- aggregate(effect - predicted ~ d1 + d2,
-#                           rs$offAxisTable, mean)
