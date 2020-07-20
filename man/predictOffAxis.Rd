@@ -41,7 +41,7 @@ and \code{"loewe2"} for the alternative Loewe generalization.}
 \item{...}{Further arguments that are currently unused}
 }
 \value{
-This functions returns a vector with predicted off-axis points
+This functions returns a named vector with predicted off-axis points
 }
 \description{
 Given a dataframe with dose-response data, this function uses coefficient

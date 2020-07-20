@@ -28,7 +28,11 @@ Imports:
     rgl,
     robustbase,
     scales,
-    nleqslv
+    nleqslv,
+    grDevices, 
+    graphics, 
+    stats, 
+    utils
 Suggests:
     knitr,
     rmarkdown,

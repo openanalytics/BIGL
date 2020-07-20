@@ -1,4 +1,10 @@
-#' Obtain confidence intervals for the raw effect sizes
+#' Obtain confidence intervals for the raw effect sizes on every off-axis point and overall
+#'
+#' @inheritParams fitSurface
+#' @inheritParams meanR
+#' @return A list with components
+#' \item{offAxis}{The off-axis bootstapped confidence intervals}
+#' \item{single}{A mean effect and percentile and studentized boostrap intervals}
 bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,

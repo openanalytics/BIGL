@@ -45,14 +45,15 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
                 data.frame("d1" = 0, "d2" = doses2, "effect" = resp2))
 
   ## Based on marginal data, generate null model predictions
-  predSurface <- predictOffAxis(data, x$fitResult,
-                                null_model = x$null_model)$predSurface
-
-  melt.surface <- data.frame("d1" = rep(doses1, length(doses2)),
-                             "d2" = rep(doses2, each = length(doses1)),
+  uniqueDoses <- with(data, list("d1" = sort(unique(d1)),
+                                 "d2" = sort(unique(d2))))
+  doseGrid <- expand.grid(uniqueDoses)
+  predSurface <- predictOffAxis(doseGrid, x$fitResult,
+                                null_model = x$null_model)
+  melt.surface <- data.frame(doseGrid[with(doseGrid, d1&d2),],
                              "effect" = as.numeric(predSurface))
 
-  labnames <- c("Response", 
+  labnames <- c("Response",
       if (!is.null(x$names)) x$names else c("Compound 1", "Compound 2"))
   if (!is.null(attr(x$data, "orig.colnames"))) {
     labnames <- unlist(attr(x$data, "orig.colnames"))
@@ -72,7 +73,7 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
 
   xBreaks <- unique(x$data$d1)
   yBreaks <- unique(x$data$d2)
-  
+
   if (logScale) {
     p <- p +
       scale_x_log10(breaks = xBreaks) +

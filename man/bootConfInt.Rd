@@ -2,7 +2,7 @@
 % Please edit documentation in R/bootConfInt.R
 \name{bootConfInt}
 \alias{bootConfInt}
-\title{Obtain confidence intervals for the raw effect sizes}
+\title{Obtain confidence intervals for the raw effect sizes on every off-axis point and overall}
 \usage{
 bootConfInt(
   Total,
@@ -23,6 +23,63 @@ bootConfInt(
   ...
 )
 }
+\arguments{
+\item{bootStraps}{precomputed bootstrap objects}
+
+\item{transforms}{Transformation functions. If non-null, \code{transforms} is
+a list containing 5 elements, namely biological and power transformations
+along with their inverse functions and \code{compositeArgs} which is a list
+with argument values shared across the 4 functions. See vignette for more
+information.}
+
+\item{B.B}{Number of iterations to use in bootstrapping null distribution for
+either meanR or maxR statistics.}
+
+\item{method}{What assumption should be used for the variance of on- and
+off-axis points. This argument can take one of the values from
+\code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
+default. \code{"equal"} assumes that both on- and off-axis points have the
+same variance, \code{"unequal"} estimates a different parameter for on- and
+off-axis points and \code{"model"} predicts variance based on the average
+effect of an off-axis point. If no transformations are used the
+\code{"model"} method is recommended. If transformations are used, only the
+\code{"equal"} method can be chosen.}
+
+\item{CP}{Prediction covariance matrix. If not specified, it will be estimated
+by bootstrap using \code{B.CP} iterations.}
+
+\item{reps}{Numeric vector containing number of replicates for each off-axis
+dose combination. If missing, it will be calculated automatically from output
+of \code{\link{predictOffAxis}} function.}
+
+\item{cutoff}{Cut-off to use in maxR procedure for declaring non-additivity
+(default is 0.95).}
+
+\item{R}{Numeric vector containing mean deviation of predicted response
+surface from the observed one at each of the off-axis points. If missing,
+it will be calculated automatically from output of
+\code{\link{predictOffAxis}} function.}
+
+\item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
+\code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
+list containing \code{df}, \code{sigma}, \code{coef},
+\code{shared_asymptote} and \code{method} elements for, respectively,
+marginal model degrees of freedom, residual standard deviation, named
+vector of coefficient estimates, logical value of whether shared asymptote
+is imposed and method for estimating marginal models during bootstrapping
+(see \code{\link{fitMarginals}}). If biological and power transformations
+were used in marginal model estimation, \code{fitResult} should contain
+\code{transforms} elements with these transformations. Alternatively, these
+can also be specified via \code{transforms} argument.}
+
+\item{...}{Further arguments that will be later passed to
+\code{\link{generateData}} function during bootstrapping}
+}
+\value{
+A list with components
+\item{offAxis}{The off-axis bootstapped confidence intervals}
+\item{single}{A mean effect and percentile and studentized boostrap intervals}
+}
 \description{
-Obtain confidence intervals for the raw effect sizes
+Obtain confidence intervals for the raw effect sizes on every off-axis point and overall
 }

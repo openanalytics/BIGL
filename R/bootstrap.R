@@ -84,18 +84,17 @@ generateData <- function(pars, sigma, data = NULL,
                  "hsa" = hsa(data[, c("d1", "d2")], pars),
                  "bliss" = Blissindependence(data[, c("d1", "d2")], pars),
                  "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars))
-  ySim <- with(transforms,
-               PowerT(BiolT(ySim, compositeArgs), compositeArgs))
+  ySim <- with(transforms, PowerT(BiolT(ySim, compositeArgs), compositeArgs))
 
   with(as.list(pars), {
     errors <- switch(as.character(error),
                      ## Normal
-                     "1" = { rnorm(length(ySim), 0, sigma) },
+                     "1" = {rnorm(length(ySim), 0, sigma)},
                      ## Two normals
-                     "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
+                     "2" = {ru <- sample(seq_len(2), replace = TRUE, size = length(ySim))
                      mus <- c(-sigma, sigma)
                      sigmas <- c(sigma/2, sigma/3)
-                     rnorm(length(ySim), mus[ru], sigmas[ru]) },
+                     rnorm(length(ySim), mus[ru], sigmas[ru])},
                      ## Distribution with right-tail outliers
                      "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
                      ## Resampling from defined vector

@@ -58,7 +58,7 @@ maxR <- function(data_off, fitResult, transforms = fitResult$transforms,
         Rnull <- NULL
 
     } else {
-        Rnull <- sapply(bootStraps, function(x){
+        Rnull <- vapply(bootStraps, FUN.VALUE = FStat, function(x){
             if(nested_bootstrap){
             paramsBootstrap <- list("data" = x$data, "fitResult" = x$simFit,
                                     "transforms" = transforms,

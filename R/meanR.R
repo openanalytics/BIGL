@@ -23,7 +23,6 @@
 #' @param ... Further arguments that will be later passed to
 #'   \code{\link{generateData}} function during bootstrapping
 #' @inheritParams fitSurface
-#' @importFrom parallel parSapply
 #' @importFrom progress progress_bar
 #' @importFrom stats ecdf pf
 #' @return This function returns a \code{meanR} object with estimates for the
@@ -60,7 +59,7 @@ meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
         class(ans) <- append("meanR", class(ans))
         return(ans)
     }
-    FStatb <- sapply(bootStraps, function(x) {
+    FStatb <- vapply(bootStraps, FUN.VALUE = FStat, function(x) {
         if(nested_bootstrap){
             paramsBootstrap <- list("data"  = x$data,
                                     "fitResult" = x$simFit, "transforms" = transforms,

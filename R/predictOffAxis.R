@@ -7,7 +7,7 @@
 #'
 #' @param ... Further arguments that are currently unused
 #' @inheritParams fitSurface
-#' @return This functions returns a vector with predicted off-axis points
+#' @return This functions returns a named vector with predicted off-axis points
 #' @export
 #' @examples
 #'   data <- subset(directAntivirals, experiment == 1)
