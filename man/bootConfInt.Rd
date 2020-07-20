@@ -20,10 +20,15 @@ bootConfInt(
   fitResult,
   bootRS,
   data_off,
+  posEffect = all(Total$effect >= 0),
   ...
 )
 }
 \arguments{
+\item{Total}{data frame with all effects and mean effects}
+
+\item{idUnique}{unique combinations of on-axis points, a character vector}
+
 \item{bootStraps}{precomputed bootstrap objects}
 
 \item{transforms}{Transformation functions. If non-null, \code{transforms} is
@@ -52,6 +57,8 @@ by bootstrap using \code{B.CP} iterations.}
 dose combination. If missing, it will be calculated automatically from output
 of \code{\link{predictOffAxis}} function.}
 
+\item{n1}{the number of off-axis points}
+
 \item{cutoff}{Cut-off to use in maxR procedure for declaring non-additivity
 (default is 0.95).}
 
@@ -71,6 +78,8 @@ is imposed and method for estimating marginal models during bootstrapping
 were used in marginal model estimation, \code{fitResult} should contain
 \code{transforms} elements with these transformations. Alternatively, these
 can also be specified via \code{transforms} argument.}
+
+\item{data_off}{data frame with off -axis information}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

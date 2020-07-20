@@ -20,6 +20,9 @@
 #'   ordered as it should be expected.
 #' @param bootStraps precomputed bootstrap objects
 #' @param paramsBootstrap parameters for the nested bootstrap
+#' @param idUnique unique combinations of on-axis points, a character vector
+#' @param n1 the number of off-axis points
+#' @param data_off data frame with off -axis information
 #' @param ... Further arguments that will be later passed to
 #'   \code{\link{generateData}} function during bootstrapping
 #' @inheritParams fitSurface
@@ -38,7 +41,7 @@
 #'   additional element \code{"FDist"} (of class \code{"ecdf"}) is returned.
 meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
-                  nested_bootstrap = FALSE, B.B = NULL,
+                  nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL, method = c("equal", "model", "unequal"),
                   bootStraps, paramsBootstrap, idUnique, n1, ...) {
 

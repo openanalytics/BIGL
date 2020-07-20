@@ -6,6 +6,7 @@
 #' antagonistic. These can be based either on normal approximation or a
 #' fully bootstrapped distribution of the statistics.
 #'
+#' @param doseGridOff dose grid for off-axis points
 #' @inheritParams fitSurface
 #' @inheritParams meanR
 #' @importFrom stats rt ecdf
@@ -32,7 +33,7 @@
 maxR <- function(data_off, fitResult, transforms = fitResult$transforms,
                  null_model = c("loewe", "hsa", "bliss", "loewe2"), R,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL,
-                 cutoff = 0.95, cl = NULL,
+                 cutoff = 0.95, cl = NULL, B.CP = NULL,
                  method = c("equal", "model", "unequal"), bootStraps,
                  idUnique, n1, doseGridOff,...) {
     ## Argument matching

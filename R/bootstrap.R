@@ -35,6 +35,7 @@
 #'   following Rademacher distribution. Argument is used only if \code{error = 4}.
 #' @param ... Further arguments
 #' @inheritParams fitSurface
+#' @inheritParams predictOffAxis
 #' @importFrom stats lm.fit
 #' @return Dose-response dataframe with generated data including \code{"effect"}
 #'   as well as \code{"d1"} and \code{"d2"} columns.

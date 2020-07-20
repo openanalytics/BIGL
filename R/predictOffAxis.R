@@ -5,6 +5,9 @@
 #' expected values of response at off-axis dose combinations using a provided
 #' null model.
 #'
+#' @param doseGrid A dose grid with unique combination of doses
+#' @param fit a pre-calculated off-axis fit
+#' @param startvalues starting values for the off-axis fit
 #' @param ... Further arguments that are currently unused
 #' @inheritParams fitSurface
 #' @return This functions returns a named vector with predicted off-axis points
@@ -18,7 +21,7 @@
 #'     "d2" = sort(unique(data$d2))))
 #'     doseGrid <- expand.grid(uniqueDoses)
 #'   predictOffAxis(fitResult, null_model = "hsa", doseGrid = doseGrid)
-predictOffAxis <- function( doseGrid, fitResult, transforms = fitResult$transforms,
+predictOffAxis <- function(doseGrid, fitResult, transforms = fitResult$transforms,
                            null_model = c("loewe", "hsa", "bliss", "loewe2"), startvalues = NULL,
                             fit = NULL,...) {
   nm = match.arg(null_model)

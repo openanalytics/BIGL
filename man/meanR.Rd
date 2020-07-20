@@ -14,6 +14,7 @@ meanR(
   reps,
   nested_bootstrap = FALSE,
   B.B = NULL,
+  B.CP = NULL,
   cl = NULL,
   method = c("equal", "model", "unequal"),
   bootStraps,
@@ -24,6 +25,8 @@ meanR(
 )
 }
 \arguments{
+\item{data_off}{data frame with off -axis information}
+
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
 \code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
 list containing \code{df}, \code{sigma}, \code{coef},
@@ -68,6 +71,8 @@ nested bootstrap may however significantly increase computational time. If
 \item{B.B}{Number of iterations to use in bootstrapping null distribution for
 either meanR or maxR statistics.}
 
+\item{B.CP}{Number of bootstrap iterations to use for CP matrix estimation}
+
 \item{cl}{If parallel computations are desired, \code{cl} should be a cluster
 object created by \code{\link[parallel]{makeCluster}}. If parallel
 computing is active, progress reporting messages are not necessarily
@@ -86,6 +91,10 @@ effect of an off-axis point. If no transformations are used the
 \item{bootStraps}{precomputed bootstrap objects}
 
 \item{paramsBootstrap}{parameters for the nested bootstrap}
+
+\item{idUnique}{unique combinations of on-axis points, a character vector}
+
+\item{n1}{the number of off-axis points}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

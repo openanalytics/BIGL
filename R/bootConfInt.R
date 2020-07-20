@@ -1,5 +1,6 @@
 #' Obtain confidence intervals for the raw effect sizes on every off-axis point and overall
 #'
+#' @param Total data frame with all effects and mean effects
 #' @inheritParams fitSurface
 #' @inheritParams meanR
 #' @return A list with components
@@ -8,16 +9,19 @@
 bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,
-                       bootRS, data_off, ...){
+                       bootRS, data_off, posEffect = all(Total$effect >= 0), ...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
     bootEffectSizes = vapply(bootStraps, FUN.VALUE = c(R), function(bb){
         #Do use bootstrapped response surface for complete mimicry of variability
         dat_off_resam = within(Total, {
             effect = meaneffect + sample(sampling_errors)
+            if(posEffect){
+                effect = abs(effect)
+            }
         })
         getR(data = dat_off_resam, idUnique = dat_off_resam$d1d2,
-             transforms = NULL, respS = if(bootRS) bb$respS else respS)
+             transforms = transforms, respS = if(bootRS) bb$respS else respS)
     })
     A = getA(data_off, fitResult, method, CP, reps, n1)
     #Off axis confidence interval

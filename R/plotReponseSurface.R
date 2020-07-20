@@ -15,7 +15,7 @@
 #'   \code{expand.grid(uniqueDoses)}. If not supplied, it will be computed
 #'   with \code{\link{predictOffAxis}} function.
 #' @param null_model If \code{predSurface} is not supplied, it is computed using
-#'   one of the available null models, i.e. \code{"loewe"}, \code{"hsa"}, 
+#'   one of the available null models, i.e. \code{"loewe"}, \code{"hsa"},
 #'   \code{"bliss"} and \code{"loewe2"}. See also \code{\link{fitSurface}}.
 #' @param breaks Numeric vector with numerical breaks. To be used in conjunction
 #'   with \code{colorPalette} argument.
@@ -119,14 +119,12 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ## If marginal fit information is provided, response surface can be
   ## automatically calculated.
   if (is.null(predSurface)) {
-    respSurface <- predictOffAxis(data, fitResult,
-                                  null_model = null_model,
+    respSurface <- predictResponseSurface(doseGrid, fitResult,
+                                  nullmodel = null_model,
                                   transforms = transforms)
     if (!is.null(transforms)) {
       predSurface <- with(transforms,
-                          InvPowerT(respSurface$predSurface, compositeArgs))
-    } else {
-      predSurface <- respSurface$predSurface
+                          InvPowerT(respSurface, compositeArgs))
     }
     zGrid <- predSurface
   }
@@ -208,7 +206,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ##
   ## 3-dimensional surface plotting
   ##
-  labnames <- c("Response", if (!is.null(fitResult$names)) 
+  labnames <- c("Response", if (!is.null(fitResult$names))
             fitResult$names else c("Compound 1", "Compound 2"))
   if (!is.null(attr(data, "orig.colnames")))
     labnames <- attr(data, "orig.colnames")

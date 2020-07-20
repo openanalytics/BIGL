@@ -53,7 +53,7 @@ information.}
 with \code{\link{predictOffAxis}} function.}
 
 \item{null_model}{If \code{predSurface} is not supplied, it is computed using
-one of the available null models, i.e. \code{"loewe"}, \code{"hsa"}, 
+one of the available null models, i.e. \code{"loewe"}, \code{"hsa"},
 \code{"bliss"} and \code{"loewe2"}. See also \code{\link{fitSurface}}.}
 
 \item{colorPalette}{Vector of color names for surface}

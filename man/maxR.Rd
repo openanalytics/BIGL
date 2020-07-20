@@ -16,6 +16,7 @@ maxR(
   B.B = NULL,
   cutoff = 0.95,
   cl = NULL,
+  B.CP = NULL,
   method = c("equal", "model", "unequal"),
   bootStraps,
   idUnique,
@@ -25,6 +26,8 @@ maxR(
 )
 }
 \arguments{
+\item{data_off}{data frame with off -axis information}
+
 \item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
 \code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
 list containing \code{df}, \code{sigma}, \code{coef},
@@ -78,6 +81,8 @@ object created by \code{\link[parallel]{makeCluster}}. If parallel
 computing is active, progress reporting messages are not necessarily
 ordered as it should be expected.}
 
+\item{B.CP}{Number of bootstrap iterations to use for CP matrix estimation}
+
 \item{method}{What assumption should be used for the variance of on- and
 off-axis points. This argument can take one of the values from
 \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
@@ -89,6 +94,12 @@ effect of an off-axis point. If no transformations are used the
 \code{"equal"} method can be chosen.}
 
 \item{bootStraps}{precomputed bootstrap objects}
+
+\item{idUnique}{unique combinations of on-axis points, a character vector}
+
+\item{n1}{the number of off-axis points}
+
+\item{doseGridOff}{dose grid for off-axis points}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}
