@@ -120,7 +120,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ## automatically calculated.
   if (is.null(predSurface)) {
     respSurface <- predictResponseSurface(doseGrid, fitResult,
-                                  nullmodel = null_model,
+                                  null_model = null_model,
                                   transforms = transforms)
     if (!is.null(transforms)) {
       predSurface <- with(transforms,

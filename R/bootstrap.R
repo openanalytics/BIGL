@@ -122,6 +122,7 @@ generateData <- function(pars, sigma, data = NULL,
 #'
 #' @param bootStraps the bootstraps carried out already
 #' @param sigma0 standard deviation of the null model on the real data
+#' @param doseGrid a grid of dose combinations
 #' @inheritParams fitSurface
 #' @inheritParams generateData
 #' @importFrom stats lm.fit var
@@ -136,6 +137,9 @@ getCP = function(bootStraps, null_model, transforms, sigma0, doseGrid){
 #'
 #' @param ... Further parameters that will be passed to
 #'   \code{\link{generateData}}
+#' @param doseGrid A grid of dose combinations
+#' @param startvalues Starting values for the non-linear equation,
+#'   from the observed data
 #' @inheritParams fitSurface
 #' @inheritParams generateData
 #' @return List with \code{data} element containing simulated data and

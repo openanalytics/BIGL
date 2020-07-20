@@ -17,6 +17,9 @@ parameter inputs. Typically, it will be coefficients from a
 \item{asymptotes}{Number of asymptotes. It can be either \code{1}
 as in standard Loewe model or \code{2} as in generalized Loewe model.}
 
+\item{startvalues}{Starting values for the non-linear equation,
+from the observed data}
+
 \item{...}{Further arguments that are currently unused}
 }
 \description{

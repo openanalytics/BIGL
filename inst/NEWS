@@ -1,3 +1,6 @@
+1.6.0 (2020-08-??)
+  o With bootstrapped confidence intervals for point-by-point and overall effect sizes
+  o Internal redesign for speed-up, using "d1d2" identifiers
 1.5.2 (2020-07-24)
   o fix issue with smooth monotherapy plot when dotted line was not shown due to numeric inaccuracies
 1.5.1 (2020-07-02)

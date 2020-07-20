@@ -37,6 +37,8 @@ along with their inverse functions and \code{compositeArgs} which is a list
 with argument values shared across the 4 functions. See vignette for more
 information.}
 
+\item{respS}{the observed response surface}
+
 \item{B.B}{Number of iterations to use in bootstrapping null distribution for
 either meanR or maxR statistics.}
 
@@ -79,7 +81,12 @@ were used in marginal model estimation, \code{fitResult} should contain
 \code{transforms} elements with these transformations. Alternatively, these
 can also be specified via \code{transforms} argument.}
 
+\item{bootRS}{a boolean, should bootstrapped response surfaces be used in the
+calculation of the confidence intervals?}
+
 \item{data_off}{data frame with off -axis information}
+
+\item{posEffect}{a boolean, are effects restricted to be positive}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

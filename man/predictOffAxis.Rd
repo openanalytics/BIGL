@@ -35,6 +35,11 @@ along with their inverse functions and \code{compositeArgs} which is a list
 with argument values shared across the 4 functions. See vignette for more
 information.}
 
+\item{null_model}{Specified null model for the expected response surface.
+Currently, allowed options are \code{"loewe"} for generalized Loewe model,
+\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
+and \code{"loewe2"} for the alternative Loewe generalization.}
+
 \item{startvalues}{starting values for the off-axis fit}
 
 \item{fit}{a pre-calculated off-axis fit}

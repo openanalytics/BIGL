@@ -1,4 +1,7 @@
 #' Helper functions for the test statistics
+#' @param idUnique id of unique off axis points
+#' @param data the datasets
+#' @param respS the evaluated response surface
 #'@inheritParams predictOffAxis
 getR = function(data, idUnique, transforms, respS){
     if(!is.null(transforms)){
@@ -7,6 +10,7 @@ getR = function(data, idUnique, transforms, respS){
     tapply(data$effect - respS[idUnique], data$d1d2, mean)
 }
 #'@inheritParams predictOffAxis
+#'@inheritParams getR
 getMeanRF = function(data, fitResult, method, CP, reps, transforms, null_model,
                      R, n1, idUnique, respS){
     if(missing(R)){

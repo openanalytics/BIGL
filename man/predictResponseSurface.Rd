@@ -8,7 +8,7 @@ the result as a matrix. For plotting purposes.}
 predictResponseSurface(
   doseGrid,
   fitResult,
-  nullmodel,
+  null_model,
   transforms = fitResult$transforms
 )
 }
@@ -26,6 +26,11 @@ is imposed and method for estimating marginal models during bootstrapping
 were used in marginal model estimation, \code{fitResult} should contain
 \code{transforms} elements with these transformations. Alternatively, these
 can also be specified via \code{transforms} argument.}
+
+\item{null_model}{Specified null model for the expected response surface.
+Currently, allowed options are \code{"loewe"} for generalized Loewe model,
+\code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
+and \code{"loewe2"} for the alternative Loewe generalization.}
 
 \item{transforms}{Transformation functions. If non-null, \code{transforms} is
 a list containing 5 elements, namely biological and power transformations

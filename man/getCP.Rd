@@ -21,6 +21,8 @@ with argument values shared across the 4 functions. See vignette for more
 information.}
 
 \item{sigma0}{standard deviation of the null model on the real data}
+
+\item{doseGrid}{a grid of dose combinations}
 }
 \value{
 Estimated CP matrix

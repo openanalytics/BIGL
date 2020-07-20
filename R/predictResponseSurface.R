@@ -1,10 +1,11 @@
 #' Predict the entire response surface, so including on-axis points, and return
 #' the result as a matrix. For plotting purposes.
 #' @inheritParams predictOffAxis
-predictResponseSurface = function(doseGrid, fitResult, nullmodel,
+#' @inheritParams fitSurface
+predictResponseSurface = function(doseGrid, fitResult, null_model,
                                   transforms = fitResult$transforms){
-    fit = fitOffAxis(doseGrid, fitResult, nullmodel, startvalues = NULL)
-    vec = (if(nullmodel %in% c("loewe")) fit$response else fit)
+    fit = fitOffAxis(doseGrid, fitResult, null_model, startvalues = NULL)
+    vec = (if(null_model %in% c("loewe")) fit$response else fit)
     names(vec) = getd1d2(doseGrid)
     if (!is.null(transforms)) {
         CompositeT <- with(transforms,

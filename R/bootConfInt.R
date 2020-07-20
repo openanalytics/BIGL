@@ -3,6 +3,8 @@
 #' @param Total data frame with all effects and mean effects
 #' @inheritParams fitSurface
 #' @inheritParams meanR
+#' @param posEffect a boolean, are effects restricted to be positive
+#' @param respS the observed response surface
 #' @return A list with components
 #' \item{offAxis}{The off-axis bootstapped confidence intervals}
 #' \item{single}{A mean effect and percentile and studentized boostrap intervals}

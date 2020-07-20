@@ -9,6 +9,7 @@
 #' @param asymptotes Number of asymptotes. It can be either \code{1}
 #'   as in standard Loewe model or \code{2} as in generalized Loewe model.
 #' @param ... Further arguments that are currently unused
+#' @inheritParams simulateNull
 #' @importFrom nleqslv nleqslv
 generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
                               startvalues = NULL,...) {

@@ -74,6 +74,9 @@
 #'   effect of an off-axis point. If no transformations are used the
 #'   \code{"model"} method is recommended. If transformations are used, only the
 #'   \code{"equal"} method can be chosen.
+#' @param confInt a boolean, should confidence intervals be returned?
+#' @param bootRS a boolean, should bootstrapped response surfaces be used in the
+#'  calculation of the confidence intervals?
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
 #' @importFrom stats aggregate

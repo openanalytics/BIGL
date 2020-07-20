@@ -7,11 +7,17 @@
 getR(data, idUnique, transforms, respS)
 }
 \arguments{
+\item{data}{the datasets}
+
+\item{idUnique}{id of unique off axis points}
+
 \item{transforms}{Transformation functions. If non-null, \code{transforms} is
 a list containing 5 elements, namely biological and power transformations
 along with their inverse functions and \code{compositeArgs} which is a list
 with argument values shared across the 4 functions. See vignette for more
 information.}
+
+\item{respS}{the evaluated response surface}
 }
 \description{
 Helper functions for the test statistics

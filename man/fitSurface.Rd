@@ -117,6 +117,11 @@ off-axis points and \code{"model"} predicts variance based on the average
 effect of an off-axis point. If no transformations are used the
 \code{"model"} method is recommended. If transformations are used, only the
 \code{"equal"} method can be chosen.}
+
+\item{confInt}{a boolean, should confidence intervals be returned?}
+
+\item{bootRS}{a boolean, should bootstrapped response surfaces be used in the
+calculation of the confidence intervals?}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates
