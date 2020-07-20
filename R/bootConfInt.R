@@ -14,7 +14,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
              transforms = NULL, respS = if(bootRS) bb$respS else respS)
     })
     A = getA(data_off, fitResult, method, CP, reps, n1)
-    #Off axis confidence inteval
+    #Off axis confidence interval
     bootEffectSizesStand = abs((bootEffectSizes-c(R))/sqrt(diag(A)))
     maxEffectSizes = apply(bootEffectSizesStand, 2, max)
     effectSizeQuant = quantile(maxEffectSizes, cutoff)
@@ -29,7 +29,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
     studentizedCI = singleMeasure + effectSizeQuant*sd(bootR)*
                                  c("lower" = -1, "upper" = 1)
     return(list("offAxis" = confInt,
-                "single" = rbind("meanEffect" = singleMeasure,
-                                 "percentile" = percentileCI,
-                                 "studentized" = studentizedCI)))
+                "single" = list("meanEffect" = singleMeasure,
+                                "confIntMeanEffect" =
+                                    rbind("percentile" = percentileCI,
+                                 "studentized" = studentizedCI))))
 }
