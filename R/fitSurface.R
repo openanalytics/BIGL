@@ -113,8 +113,8 @@ fitSurface <- function(data, fitResult,
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
-                       method = c("equal", "model", "unequal"), confInt = FALSE,
-                       bootRS = FALSE) {
+                       method = c("equal", "model", "unequal"), confInt = TRUE,
+                       bootRS = TRUE) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
