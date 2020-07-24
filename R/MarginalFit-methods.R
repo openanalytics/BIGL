@@ -161,7 +161,7 @@ df.residual.MarginalFit <- function(object, ...) {
 #' @export
 plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataScale = FALSE, ...) {
 
-  data <- x$data
+  data <- as.data.frame(x$data)
 
   transformF <- function(z, comp) {
     eps <- tapply(z, comp, function(x) min(x[x != 0]))
@@ -192,14 +192,6 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
   curveDat <- unique(dat[, c("d1", "d2", "comp", "dose")])
   if (smooth) {
     # make finer grid for smooth prediction lines
-    makeGrid <- function(x, n = 100, log = TRUE) {
-      xRange <- range(x, na.rm = TRUE)
-      minNonZero <- min(x[x != 0], na.rm = TRUE)
-      if (log) {
-        c(if (xRange[1] == 0) 0 else NULL, 10^seq(from = log10(minNonZero), to = log10(xRange[2]), length.out = n))
-      } else 
-        c(seq(from = xRange[1], to = xRange[2], length.out = n))
-    }
     
     gridDat <- rbind(
         expand.grid(d1 = makeGrid(curveDat$d1[curveDat$comp == labnames[2]], log = logScale), d2 = 0, comp = labnames[2]),
@@ -244,4 +236,13 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
   if (logScale) p <- p + scale_x_log10()
 
   p
+}
+
+makeGrid <- function(x, n = 100, log = TRUE) {
+  xRange <- range(x, na.rm = TRUE)
+  minNonZero <- min(x[x != 0], na.rm = TRUE)
+  if (log) {
+    c(if (xRange[1] == 0) 0 else NULL, 10^seq(from = log10(minNonZero), to = log10(xRange[2]), length.out = n))
+  } else 
+    c(seq(from = xRange[1], to = xRange[2], length.out = n))
 }
