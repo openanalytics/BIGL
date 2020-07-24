@@ -1,3 +1,5 @@
+1.5.2 (2020-07-24)
+  o fix issue with smooth monotherapy plot when dotted line was not shown due to numeric inaccuracies
 1.5.1 (2020-07-02)
   o show smooth prediction curve on the marginal fit plot
   o show warning for agonist/antagonist combination when using generalized Loewe model
