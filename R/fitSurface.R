@@ -79,6 +79,7 @@
 #'  calculation of the confidence intervals?
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
+#' @importFrom progress progress_bar
 #' @importFrom stats aggregate
 #' @return This function returns a \code{ResponseSurface} object with estimates
 #'   of the predicted surface. \code{ResponseSurface} object is essentially a
@@ -206,6 +207,13 @@ fitSurface <- function(data, fitResult,
           clusterObj <- NULL
       }
       B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
+
+      #Progess bar
+      if(progressBar){
+      pb <- progress_bar$new(format = "(bootstraps): [:bar]:percent",
+                             total = B, width = 60)
+      pb$tick(0)
+      } else {pb = NULL}
      #Start bootstrapping
        paramsBootstrap <- list("data"  =data,
           "fitResult" = fitResult, "transforms" = transforms,
@@ -213,7 +221,9 @@ fitSurface <- function(data, fitResult,
           "error" = error, "sampling_errors" = sampling_errors,
                              "wild_bootstrap" = wild_bootstrap,
                               "method" = method, "doseGrid" = doseGrid,
-          "startvalues" = startvalues)
+          "startvalues" = startvalues, "pb" = pb, "progressBar" = progressBar)
+
+
       bootStraps = if(is.null(clusterObj)) {
               lapply(integer(B), bootFun, args = paramsBootstrap)
           } else {

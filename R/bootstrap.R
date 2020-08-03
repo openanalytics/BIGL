@@ -206,4 +206,7 @@ simulateNull <- function(data, fitResult, doseGrid,
                           doseGrid = doseGrid, null_model = null_model)
   return(list("data" = simData, "simFit" = simFit, "respS" = respS))
 }
-bootFun = function(i, args) do.call(simulateNull, args) #Wrapper with index
+bootFun = function(i, args) {
+  if(args$progressBar) args$pb$tick()
+  do.call(simulateNull, args)
+  }#Wrapper with index
