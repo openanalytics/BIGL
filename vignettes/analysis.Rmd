@@ -212,7 +212,7 @@ Five types of null models are available for calculating expected response surfac
 
 * Generalized Loewe model is used if maximal responses are not constrained to be equal, i.e. `shared_asymptote = FALSE`, in the marginal fitting procedure and `null_model = "loewe"` in response calculation.
 * Classical Loewe model is used if constraints are such that `shared_asymptote = TRUE` in the marginal fitting procedure and `null_model = "loewe"` in response calculation.
-* Highest Single Agent is used if `null_model = "hsa"` irrespectively of the value of `shared_asymptote`.
+* Highest Single Agent is used if `null_model = "hsa"` irrespective of the value of `shared_asymptote`.
 * Bliss independence model is used when `null_model = "bliss"`. In the situations when maximal responses are constrained to be equal, the classical Bliss independence approach is used, when they are not equal, the Bliss independence calculation is performed on responses rescaled to the maximum range (i.e. absolute difference between baseline and maximal response).	
 * Alternative Loewe Generalization is used when `null_model = "loewe2"`. If the asymptotes are constrained to be equal, this reduces to the classical Loewe. Note that if `shared_asymptote = TRUE` constraints are used, this also reduces to classical Loewe model.
 
@@ -222,7 +222,6 @@ If transformation functions were estimated using `fitMarginals`, these will be a
 
 ```{r analysis, message=FALSE, comment = NA}
 rs <- fitSurface(data, marginalFit,
-##               transforms = transforms,
                  null_model = "loewe",
                  B.CP = 50, statistic = "none", parallel = FALSE)
 summary(rs)
