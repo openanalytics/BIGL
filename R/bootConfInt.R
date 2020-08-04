@@ -14,7 +14,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
                        bootRS, data_off, posEffect = all(Total$effect >= 0), ...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
-    bootEffectSizes = vapply(bootStraps, FUN.VALUE = c(R), function(bb){
+    A = getA(data_off, fitResult, method, CP, reps, n1)
+    bootEffectSizesList = lapply(bootStraps, function(bb){
         #Do use bootstrapped response surface for complete mimicry of variability
         dat_off_resam = within(Total, {
             effect = meaneffect + sample(sampling_errors)
@@ -22,12 +23,17 @@ bootConfInt = function(Total, idUnique, bootStraps,
                 effect = abs(effect)
             }
         })
-        getR(data = dat_off_resam, idUnique = dat_off_resam$d1d2,
-             transforms = transforms, respS = if(bootRS) bb$respS else respS)
+        #Transforms have occurred in Total already
+        bootR = getR(data = dat_off_resam, idUnique = dat_off_resam$d1d2,
+             transforms = NULL, respS = if(bootRS) bb$respS else respS)
+        bootA = switch(method, "equal" = A,
+                       getA(dat_off_resam, fitResult, method, CP, reps, n1))
+        list("R" = bootR, "A" = bootA)
     })
-    A = getA(data_off, fitResult, method, CP, reps, n1)
+    bootEffectSizes = vapply(bootEffectSizesList, FUN.VALUE = c(R), function(x) x$R)
+    bootAs = vapply(bootEffectSizesList, FUN.VALUE = diag(A), function(x) sqrt(diag(x$A)))
     #Off axis confidence interval
-    bootEffectSizesStand = abs((bootEffectSizes-c(R))/sqrt(diag(A)))
+    bootEffectSizesStand = abs(bootEffectSizes-c(R))/bootAs
     maxEffectSizes = apply(bootEffectSizesStand, 2, max)
     effectSizeQuant = quantile(maxEffectSizes, cutoff)
     confInt = c(R) + outer(effectSizeQuant*sqrt(diag(A)),
@@ -36,10 +42,13 @@ bootConfInt = function(Total, idUnique, bootStraps,
     #Single measure of effect size
     singleMeasure = mean(R)
     bootR = colMeans(bootEffectSizes)
+    bootRstand = (bootR-singleMeasure)/vapply(bootEffectSizesList, FUN.VALUE = double(1), function(x) mean(x$A))
     percentileCI = quantile(bootR, c("lower" = (1-cutoff)/2,
                                      "upper" = (1+cutoff)/2))
-    studentizedCI = singleMeasure + effectSizeQuant*sd(bootR)*
-                                 c("lower" = -1, "upper" = 1)
+    sdA = mean(A)
+    studentizedCI = singleMeasure + sdA*
+                            quantile(bootRstand, c("lower" = (1-cutoff)/2,
+                                                   "upper" = (1+cutoff)/2))
     return(list("offAxis" = confInt,
                 "single" = list("meanEffect" = singleMeasure,
                                 "confIntMeanEffect" =

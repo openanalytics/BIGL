@@ -12,5 +12,8 @@ test_that('confidence intervals', {
     # Single measure confidence intervals
     expect_true(all(confInt$single$confIntMeanEffect[,1] <
                         confInt$single$confIntMeanEffect[, 2]))
-
+    expect_true(all(confInt$single$confIntMeanEffect[,1] <
+                        confInt$single$meanEffect))
+    expect_true(all(confInt$single$confIntMeanEffect[,2] >
+                    confInt$single$meanEffect))
 })
