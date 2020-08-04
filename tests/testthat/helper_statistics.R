@@ -13,7 +13,6 @@ transforms <- list(
 )
 
 fit <- fitMarginals(data, transforms = transforms, method = "nlslm")
-
 rs <- fitSurface(data, fit, transforms = transforms,
                  B.CP = 2, B.B = NULL, parallel = FALSE,
                  statistic = "both")
