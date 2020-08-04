@@ -6,7 +6,7 @@
 #' @param posEffect a boolean, are effects restricted to be positive
 #' @param respS the observed response surface
 #' @return A list with components
-#' \item{offAxis}{The off-axis bootstapped confidence intervals}
+#' \item{offAxis}{The off-axis bootstrapped confidence intervals}
 #' \item{single}{A mean effect and percentile and studentized boostrap intervals}
 bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
@@ -26,8 +26,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
         #Transforms have occurred in Total already
         bootR = getR(data = dat_off_resam, idUnique = dat_off_resam$d1d2,
              transforms = NULL, respS = if(bootRS) bb$respS else respS)
-        bootA = switch(method, "equal" = A,
-                       getA(dat_off_resam, fitResult, method, CP, reps, n1))
+        bootA = getA(dat_off_resam, bb$simFit, method, CP, reps, n1)
         list("R" = bootR, "A" = bootA)
     })
     bootEffectSizes = vapply(bootEffectSizesList, FUN.VALUE = c(R), function(x) x$R)
