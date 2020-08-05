@@ -93,7 +93,7 @@ calculation of the confidence intervals?}
 }
 \value{
 A list with components
-\item{offAxis}{The off-axis bootstapped confidence intervals}
+\item{offAxis}{The off-axis bootstrapped confidence intervals}
 \item{single}{A mean effect and percentile and studentized boostrap intervals}
 }
 \description{

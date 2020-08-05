@@ -36,7 +36,7 @@
 #' @param ... Further arguments
 #' @inheritParams fitSurface
 #' @inheritParams predictOffAxis
-#' @importFrom stats lm.fit
+#' @importFrom stats lm.fit rnorm rchisq rbinom
 #' @return Dose-response dataframe with generated data including \code{"effect"}
 #'   as well as \code{"d1"} and \code{"d2"} columns.
 #' @export
