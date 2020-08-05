@@ -18,7 +18,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
     bootEffectSizesList = lapply(bootStraps, function(bb){
         #Do use bootstrapped response surface for complete mimicry of variability
         dat_off_resam = within(Total, {
-            effect = meaneffect + sample(sampling_errors)
+            effect = meaneffect + sample(sampling_errors, replace = TRUE)
+            #Sample with replacement
             if(posEffect){
                 effect = abs(effect)
             }
