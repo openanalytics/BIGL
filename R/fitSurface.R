@@ -248,6 +248,10 @@ fitSurface <- function(data, fitResult,
       statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
   if (statistic %in% c("maxR", "both"))
       statObj <- c(statObj, list("maxR" = do.call(maxR, paramsStatistics)))
+  if(confInt && is.null(B.B) && is.null(B.CP)){
+    warning("Confidence intervals only available with the bootstrap")
+    confInt = FALSE
+  }
   if(confInt)
       statObj <- c(statObj, list("confInt" = do.call(bootConfInt, paramsStatistics)))
 

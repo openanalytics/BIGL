@@ -46,7 +46,7 @@ genData <- function(pars, reps, mult = c(1, -1)) {
   data <- data[rep(row.names(data), reps), ]
   ## Add noise to data and synergistic/antagonistic effect to off-axis
   data$effect[!one_null] <- data$effect[!one_null] +
-    mult * rnorm(sum(!one_null), 0.3, 0.1)
+    mult * rnorm(sum(!one_null)*reps, 0.3, 0.1)
 
   return(list("data" = data, "pars" = fitResult))
 }
