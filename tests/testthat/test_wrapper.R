@@ -49,3 +49,9 @@ test_that("plots", {
             rgl.close()
           })
     })
+
+test_that("Error and warnings", {
+  expect_error(fitSurface(data, fit, transforms = transforms,
+                          B.CP = NULL, B.B = NULL, parallel = FALSE,
+                          statistic = "both"))
+})

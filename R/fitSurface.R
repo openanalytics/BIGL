@@ -194,8 +194,11 @@ fitSurface <- function(data, fitResult,
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
 
+  B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
   #If any bootstraps needed, do them first
-  if(is.null(CP) | (!is.null(B.B))){
+  if(is.null(CP) && (is.null(B))){
+    stop("No covariance matrix supplied, and no bootstraps required.\n Please provide either of both!")
+  } else if(!is.null(B)){
       ## Setup parallel computation
       if ((is.logical(parallel) & parallel) | is.numeric(parallel)) {
           nCores <- ifelse(is.logical(parallel),
@@ -206,10 +209,9 @@ fitSurface <- function(data, fitResult,
       } else {
           clusterObj <- NULL
       }
-      B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
 
       #Progess bar
-      if(progressBar){
+      if(progressBar && !is.null(B)){
       pb <- progress_bar$new(format = "(bootstraps): [:bar]:percent",
                              total = B, width = 60)
       pb$tick(0)
@@ -232,7 +234,7 @@ fitSurface <- function(data, fitResult,
   } else {bootStraps = clusterObj = NULL}
   ## If not provided, compute prediction covariance matrix by bootstrap
   if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms,
-                               sigma0 = sigma0, doseGrid = doseGrid)[names(R), names(R)]
+                               sigma0 = sigma0, doseGrid = doseGrid)
   CP = CP[names(R), names(R)]
   #Calculate test statistics
   paramsStatistics = list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff,
