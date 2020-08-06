@@ -10,8 +10,8 @@ test_that('confidence intervals', {
     expect_true(all(with(confInt, offAxis[,1] < offAxis[,2])))
 
     # Single measure confidence intervals
-    expect_true(all(confInt$single$confIntMeanEffect[,1] <=
-                        confInt$single$confIntMeanEffect[, 2]))
+    expect_true(confInt$single$confIntMeanEffect[1] <=
+                        confInt$single$confIntMeanEffect[2])
     #Only confidence interval with bootstrap
     CP = diag(with(data, sum(d1&d2)))
     colnames(CP) = rownames(CP) = getd1d2(data)[with(data, d1&d2)]
