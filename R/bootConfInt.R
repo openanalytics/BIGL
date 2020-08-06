@@ -43,8 +43,6 @@ bootConfInt = function(Total, idUnique, bootStraps,
     singleMeasure = mean(R)
     bootR = colMeans(bootEffectSizes)
     bootRstand = (bootR-singleMeasure)/vapply(bootEffectSizesList, FUN.VALUE = double(1), function(x) mean(x$A))
-    percentileCI = quantile(bootR, c("lower" = (1-cutoff)/2,
-                                     "upper" = (1+cutoff)/2))
     sdA = mean(A)
     studentizedCI = singleMeasure + sdA*
                             quantile(bootRstand, c("lower" = (1-cutoff)/2,
@@ -52,6 +50,5 @@ bootConfInt = function(Total, idUnique, bootStraps,
     return(list("offAxis" = confInt,
                 "single" = list("meanEffect" = singleMeasure,
                                 "confIntMeanEffect" =
-                                    rbind("percentile" = percentileCI,
-                                 "studentized" = studentizedCI))))
+                                    studentizedCI)))
 }
