@@ -13,9 +13,9 @@ doseRatio <- function(response, d, h, b, m, expe, lower, upper) {
   if(!d){
     return(0)
   } else if(response <= lower){
-    return(if(b < m) 0 else Inf)
-  } else if (response >= upper){
     return(if(b < m) Inf else 0)
+  } else if (response >= upper){
+    return(if(b < m) 0 else Inf)
   } else {
     return(d/(invL4(response, h, b, m)*expe))
   }
