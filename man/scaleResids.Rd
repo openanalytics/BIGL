@@ -7,7 +7,7 @@
 scaleResids(sampling_errors, means, model)
 }
 \arguments{
-\item{sampling_errors, scaledResids}{A vector of raw or scaled residuals}
+\item{sampling_errors}{A vector of raw  residuals}
 
 \item{means}{a vector of means}
 

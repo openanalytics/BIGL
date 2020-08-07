@@ -7,7 +7,13 @@
 addResids(means, sampling_errors, method, model)
 }
 \arguments{
+\item{means}{a vector of means}
+
+\item{sampling_errors}{A vector of raw  residuals}
+
 \item{method}{a variance method, see \code{\link{fitSurface}}}
+
+\item{model}{coefficients of a fitted mean-variance trend}
 }
 \description{
 Add residuals by adding to mean effects
