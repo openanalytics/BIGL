@@ -63,7 +63,7 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2,
     }
     out = nleqslv(fn = fun0, x = dose[3], jac = gr0,
             control = list(ftol = .Machine$double.eps))$x
-    #out = if(out <= lower) {lower} else if(out >= upper) {upper} else {out}
+    out = if(out <= lower) {lower} else if(out >= upper) {upper} else {out}
     return(out)
   }
 
