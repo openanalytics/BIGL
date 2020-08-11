@@ -7,10 +7,15 @@
 \method{plot}{BIGLconfInt}(x, ...)
 }
 \arguments{
-\item{x}{Output from \code{\link{BIGLconfInt}}}
+\item{x}{off axis confidence intervals, a data frame}
 
-\item{...}{Further arguments}
+\item{...}{additional arguments, currently ignored}
+
+\item{digits}{the number of digits to plot}
 }
 \description{
 Plot confidence intervals in a contour plot
+}
+\note{
+after contour in the \code{drugCombo} package
 }
