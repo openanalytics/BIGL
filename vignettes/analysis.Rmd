@@ -376,6 +376,20 @@ view3d(0, -75)
 rglwidget()
 ```
 
+### Effect sizes and confidence interval
+
+The BIGL package also yields effect sizes and corresponding confidence intervals with respect to any response surface. The overall effect size and confidence interval is output in the summary of the `ResponseSurface`, but can also be called directly
+
+```{r summarySingleConfInt}
+summary(maxR_B$confInt)
+```
+
+In addition, a contour plot can be made with pointwise confidence intervals, similar to the `drugCombo` package.
+
+```{r plotSingleConfInt}
+plotConfInt(maxR_B)
+```
+
 # Analysis in case of variance heterogeneity
 
 Starting from the package version `1.2.0` the variance can be estimated

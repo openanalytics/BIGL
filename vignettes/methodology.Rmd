@@ -246,3 +246,5 @@ the type I error rate far better, with slightly better results obtained by the
 Furthermore, the sensitivity and specificity of the `maxR` test statistics are
 higher with the methods assuming variance heterogeneity compared to the methods
 where equal variances are assumed.
+
+## Effect sizes and confidence intervals

@@ -4,6 +4,8 @@ test_that('confidence intervals', {
 
     ## Try computation and check that all values are coherent
     expect_silent(confInt <- rs$confInt)
+    #Check plot
+    expect_silent(plotConfInt(rs))
 
     # Off axis confidence intervals
     expect_true(all(with(confInt, offAxis[,"lower"] < offAxis[,"upper"])))
