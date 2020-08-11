@@ -25,7 +25,7 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy"), .
   ## Blue is synergy, red is antagonism
   if(!exists("colorPalette", inputs)) {
     inputs$colorPalette <- c("red", rep("grey70", 2), "blue")
-    if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] && 
+    if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] &&
         x$fitResult$coef["b"] >= x$fitResult$coef["m2"]) {
       inputs$colorPalette <- rev(inputs$colorPalette)
     }
@@ -74,21 +74,21 @@ contour.ResponseSurface <- function(x, ...) {
     args$xlab <- paste0("Dose (", cpdNames[[1]], ")")
   if (!exists("ylab", args))
     args$ylab <- paste0("Dose (", cpdNames[[2]], ")")
-  
+
   ## Blue is synergy, red is antagonism
   if(!exists("colorPalette", args)) {
     args$colorPalette <- c("red", "white", "blue")
-    if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] && 
+    if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] &&
         x$fitResult$coef["b"] >= x$fitResult$coef["m2"]) {
       args$colorPalette <- rev(args$colorPalette)
     }
     # TODO: what to do in the 'undefined' case - agonist+antagonist or both flat?
   }
-  
+
   args$x <- x$maxR
-  
+
   do.call(plot, args)
-  
+
 }
 
 #' Summary of \code{ResponseSurface} object
@@ -108,6 +108,8 @@ summary.ResponseSurface <- function(object, ...) {
 
   ans$occup <- if (!is.null(object$occupancy)) mean(object$occupancy$occupancy) else NULL
   ans$method <- object$method
+  object$confInt$cutoff = object$cutoff
+  ans$CI = summary(object$confInt)
 
   class(ans) <- "summary.ResponseSurface"
   ans
@@ -156,6 +158,11 @@ print.summary.ResponseSurface <- function(x, ...) {
   if (is.null(x$meanR) & is.null(x$maxR)) {
     cat("\n\n")
     cat("No test statistics were computed.")
+  }
+
+  if(!is.null(x$CI)) {
+    cat("\nCONFIDENCE INTERVALS\n")
+    print(x$CI)
   }
 
   cat("\n")

@@ -43,16 +43,62 @@ bootConfInt = function(Total, idUnique, bootStraps,
     confInt = c(R) + outer(effectSizeQuant*sqrt(diag(A)),
                            c("lower" = -1, "upper" = 1))
     rownames(confInt) = rownames(bootEffectSizesStand)
+
+    coefFit = fitResult$coef
+    eq  <- coefFit["m1"] == coefFit["b"] && coefFit["m2"] == coefFit["b"]
+    inc <- coefFit["m1"] >= coefFit["b"] && coefFit["m2"] >= coefFit["b"]
+    dec <- coefFit["m1"] <= coefFit["b"] && coefFit["m2"] <= coefFit["b"]
+
+    call = rep("Add", length(R))
+    call[confInt[, "lower"] >= 0] <- if (eq) {
+        "Undefined"
+    } else if (inc) {
+        "Syn"
+    } else if (dec) {
+        "Ant"
+    } else "Undefined"
+    call[confInt[, "upper"] <= 0] <- if (eq) {
+        "Undefined"
+    } else if (inc) {
+        "Ant"
+    } else if (dec) {
+        "Syn"
+    } else "Undefined"
+    confInt = data.frame("estimate" = R, confInt, "call" = call)
+
     #Single measure of effect size
     singleMeasure = mean(R)
     bootR = colMeans(bootEffectSizes)
     bootRstand = (bootR-singleMeasure)/vapply(bootEffectSizesList, FUN.VALUE = double(1), function(x) mean(x$A))
     sdA = mean(A)
     studentizedCI = singleMeasure + sdA*
-                            quantile(bootRstand, c("lower" = (1-cutoff)/2,
-                                                   "upper" = (1+cutoff)/2))
-    return(list("offAxis" = confInt,
+        quantile(bootRstand, c("lower" = (1-cutoff)/2,
+                               "upper" = (1+cutoff)/2))
+    names(studentizedCI) = c("upper", "lower")
+    overallCall = if (eq) {
+        "Undefined"
+    } else {
+        if(studentizedCI["lower"] > 0){
+            if (inc) {
+                "Syn"
+            } else if (dec) {
+                "Ant"
+            } else "Undefined"
+        } else if(studentizedCI["upper"] < 0) {
+            if (inc) {
+                 "Ant"
+            } else if (dec) {
+                "Syn"
+             } else "Undefined"
+        } else {
+            "Add"
+        }
+    }
+
+    ans  = list("offAxis" = confInt,
                 "single" = list("meanEffect" = singleMeasure,
-                                "confIntMeanEffect" =
-                                    studentizedCI)))
+                                "confIntMeanEffect" = studentizedCI,
+                                "Call" = overallCall))
+    class(ans) <- append("BIGLconfInt", class(ans))
+    return(ans)
 }

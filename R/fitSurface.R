@@ -260,7 +260,7 @@ fitSurface <- function(data, fitResult,
   retObj <- c(list("data" = data, "fitResult" = fitResult,
                    "transforms" = transforms, "null_model" = null_model,
                    "method" = method, "offAxisTable" = offAxisTable,
-                   "occupancy" = occupancy, "CP" = CP), statObj)
+                   "occupancy" = occupancy, "CP" = CP, "cutoff" = cutoff), statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
   # add compound names from marginal fit
   retObj$names <- fitResult$names
