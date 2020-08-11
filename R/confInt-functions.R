@@ -45,7 +45,7 @@ print.summary.BIGLconfInt <- function(x, ...) {
 
 #' Plot confidence intervals in a contour plot
 #'
-#' @param x Output from \code{\link{BIGLconfInt}}
+#' @param x Output from \code{\link{fitSurface}}
 #' @inheritParams summary.BIGLconfInt
 #' @export
 plot.BIGLconfInt <- function(x, ...) {
