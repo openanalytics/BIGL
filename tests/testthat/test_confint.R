@@ -6,8 +6,9 @@ test_that('confidence intervals', {
     expect_silent(confInt <- rs$confInt)
 
     # Off axis confidence intervals
-    expect_type(confInt$offAxis, "double")
-    expect_true(all(with(confInt, offAxis[,1] < offAxis[,2])))
+    expect_true(all(with(confInt, offAxis[,"lower"] < offAxis[,"upper"])))
+    expect_true(all(with(confInt, offAxis[,"estimate"] < offAxis[,"upper"])))
+    expect_true(all(with(confInt, offAxis[,"lower"] < offAxis[,"estimate"])))
 
     # Single measure confidence intervals
     expect_true(confInt$single$confIntMeanEffect[1] <=

@@ -56,3 +56,11 @@ plot.BIGLconfInt <- function(x, ...) {
         stop("CDF plotting only available for bootstrapped BIGLconfInt.")
 
 }
+#' Plot confidence intervals from BIGL object in a contour plot
+#'
+#' @param BIGLobj Output from \code{\link{fitSurface}}
+#' @inheritParams summary.BIGLconfInt
+#' @export
+plotConfInt <- function(BIGLobj, ...) {
+    plot(BIGLobj$confInt, ...)
+}
