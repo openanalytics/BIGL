@@ -15,5 +15,5 @@
 Plot confidence intervals in a contour plot
 }
 \note{
-after contour in the \code{drugCombo} package
+written after the contour() function in the \code{drugCombo} package
 }

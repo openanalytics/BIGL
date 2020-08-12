@@ -49,7 +49,7 @@ print.summary.BIGLconfInt <- function(x, ...) {
 #' @param ... additional arguments, currently ignored
 #' @importFrom stats setNames
 #' @export
-#' @note after contour in the \code{drugCombo} package
+#' @note written after the contour() function in the \code{drugCombo} package
 plot.BIGLconfInt <- function(x, ...) {
         x = x$offAxis
         # prepare fill legend

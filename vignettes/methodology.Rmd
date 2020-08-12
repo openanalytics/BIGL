@@ -248,3 +248,79 @@ higher with the methods assuming variance heterogeneity compared to the methods
 where equal variances are assumed.
 
 ## Effect sizes and confidence intervals
+
+### Effect size for off-axis points
+
+As with many statistical tests, the researcher may not only be interested in a measure of significance (e.g. a p-value), but also in a measure of effect size, and a measure of uncertainty around it. Here we find confidence intervals for the mean raw residual (the average observed departure from the expected response surface under additivity) $E_{i} = \frac{1}{n_j}\sum_{j=1}^{n_j}(R_{ij}-\hat{R}_i)$ with $j=1, ..., n_j$, for every off-axis point $i=1, ..., n_1$, whereby we strive to achieve a simultaneous coverage for all off-axis points of 95\%.
+
+#### Confidence interval
+
+Call $e_i$ the true effect size (mean raw residual with respect to the additivity surface) on off axis point $i$, and call $E_{i}$ its estimate based on the data. A regular, asymptotic confidence interval would be formed as the set:
+
+\begin{equation}
+  \left\{ e: \left\vert \frac{E_{i}-e_i}{\hat{s}_i} \right\vert < t_\alpha \right\}
+\end{equation}
+
+with $\hat{s}_i$ the estimated standard error on $e_i$, and $t_\alpha$ some threshold value based on the asymptotic distribution.
+
+We know, however, from the meanR and maxR test that the asymptotic distributions provide poor approximation. Therefore, we use the bootstrap here too to build the confidence intervals. Yet the distribution of the test statistics may be different under the null hypothesis of additivity than under the alternative hypothesis, e.g. because of heteroscedasticity. For this reason we need a new bootstrap procedure, one under the alternative hypothesis.
+
+If there are $n_j$ replicates at a given off-axis point, then $a_{ij} = R_{ij} - \bar{R}_i$ are the pointwise residuals $j = 1, ..., n_j$, with $R_{ij}$ the observed value (considering $\bar{R}_i$ as the best estimate of the true response surface). These residuals may be rescaled to render them exchangeable, resampled, scaled back, and added to the estimated effect sizes to obtain boostrapped observations under the alternative hypothesis $R_{ij}^b = \bar{R}_i + a_{ij}^b$, with $b = 1, ...,B$ denoting the bootstrap instance. This leads to the bootstrap effect sizes $E^b_i$ and test statistic $\left\vert \frac{E^b_i -E_i}{\hat{s}^b_j} \right\vert$, using the standard deviation from the bootstrap (see below).
+
+Over all bootstrap instances, then find the distribution of
+
+\begin{equation}
+  T = \max_i \left\vert \frac{E^b_i -E_i}{\hat{s}^b_j} \right\vert
+\end{equation}
+
+Call $t_\alpha$ the threshold such that
+\begin{equation}
+  \prob{T>t_\alpha} = \alpha
+\end{equation}
+
+Finally, we find for every off-axis point the confidence interval as the collection:
+
+\begin{equation}
+ \{ e: \left\vert \frac{E^b_i -E_i}{\hat{s}^b_j} \right\vert < t_\alpha \}
+\end{equation}
+
+#### Standard error
+
+As an estimate of the standard error we use
+
+\begin{equation}
+    \hat{s}_j^b = \sqrt{\text{diag}(\MSE_1^b\mb{D}+\MSE_0^b \mb{C}_p)_j}.
+    \label{eq:confIntSe}
+\end{equation}
+
+ By using only the diagonal elements we ignore the covariance between test statistics, unlike in the meanR and maxR statistics. Yet we are still using the max-concept, so control of the FWER is still guaranteed. For the covariance matrix $\mb{C}_p$ we use the one estimated for the observed data, since it is quite stable; $MSE_0^b$ is re-estimated based on the bootstrap sample of the on-axis points. $MSE_1^b$ is also re-estimated based on the bootstrapped data according to the mean-variance model specified.
+
+### Single effect measure
+
+Additionally, researchers may want a single measure for the strength of the synergy for every experiment, in view of e.g. ranking component combinations according to synergistic effect. For this we take the average raw residual over all off-axis points $\bar{E} = \frac{1}{\sum_{i= 1}^{n_1}n_i }\sum_{i=1}^{n_1}\sum_{j= 1}^{n_i}(R_{ij}-\bar{R}_i)$ (a measure of the "volume" between the expected and observed response surfaces) as a measure of effect size. Note that this may cause synergistic and antagonistic points to cancel each other out, but we believe this scenario is unlikely. As before we would like a measure of uncertainty for this measure, although this may cut across the demand for ranking. Yet what we do here is provide a toolkit of methods, and it is up to the researcher to use them wisely.
+
+#### Confidence interval
+
+Call $\mb{S} = \MSE_1^b\mb{D}+\MSE_0^b \mb{C}_p$ the covariance matrix of the raw residuals, then the standard error of $\bar{E}$ is $se(\bar{E}) = \frac{1}{n_1}\sqrt{\sum_{s \in \mb{S}} s}$. Obtain bootstrapped data by resampling pointwise residuals for on- and off-axis points for bootstrap instances $b=1, ..., B$ as above. Calculate corresponding mean residual and standard error $\bar{E}_b$ and $se(\bar{E}_b)$. Then define the statistic
+
+\begin{equation}
+    Q_b = \frac{\bar{E}_b-\bar{E}}{se(\bar{E}_b)}
+    \label{eq:confIntSingle}
+\end{equation}
+
+Note that $se(\bar{E}_b)$ relies on the bootstrap covariance matrix $\mb{S}^b$. Call ($q_{\alpha/2}$, $q_{1-\alpha/2}$) the thresholds such that
+\begin{equation}
+  \prob{Q<q_{\alpha/2}} = \prob{Q>q_{1-\alpha/2} } = \alpha/2
+\end{equation}
+
+Finally, we find the confidence interval as:
+
+\begin{equation} 
+ \bar{E} - se(\bar{E}_b)q_{\alpha/2}, \bar{E} + se(\bar{E}_b)q_{1-\alpha/2}
+\end{equation}
+
+Of course, this procedure can easily be adapted to find the sum of all raw residuals, but the mean may be better comparable across experiments with different designs.
+
+### On resampling residuals
+
+Depending on the mean-variance structure in the data, residuals are resampled differently. In case of constant variability within the off-axis points, the pointwise residuals $a_{ij}$ can simply be resampled. When a linear mean-variance structure is assumed, the pointwise residuals are first rescaled to $b_{ij} = \frac{a_{ij}}{\sqrt{\beta_0+\beta_1\mu_i}}$, then resampled, and scaled back to $b_{ij}\sqrt{\beta_0+\beta_1\mu_i}$ according to their new position $i$.
