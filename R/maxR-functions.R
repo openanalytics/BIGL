@@ -40,7 +40,6 @@ print.summary.maxR <- function(x, ...) {
   }
 }
 
-
 #' Plot of maxR object
 #'
 #' @param x Output of \code{\link{maxR}}. This can also be \code{"maxR"}

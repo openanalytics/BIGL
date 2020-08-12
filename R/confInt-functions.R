@@ -16,7 +16,7 @@ ans$confInt[, c("estimate", "lower", "upper")] = round(ans$confInt[, c("estimate
 ans$totals <- data.frame("Syn" = sum(object$offAxis$call == "Syn"),
                          "Ant" = sum(object$offAxis$call == "Ant"),
                          "Total" = nrow(object$offAxis))
-rownames(ans$totals) = NULL
+rownames(ans$totals) = ""
 
 class(ans) <- append("summary.BIGLconfInt", class(ans))
 ans

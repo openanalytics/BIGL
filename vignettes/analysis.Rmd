@@ -386,7 +386,7 @@ summary(maxR_B$confInt)
 
 In addition, a contour plot can be made with pointwise confidence intervals, similar to the `drugCombo` package.
 
-```{r plotSingleConfInt}
+```{r plotSingleConfInt, fig.height=5, fig.width=6}
 plotConfInt(maxR_B)
 ```
 
