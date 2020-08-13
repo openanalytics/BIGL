@@ -19,6 +19,6 @@ plotMeanVarFit = function(data, trans = "identity",
     if(any(predVar<0))
         warning("Negative variances modelled!\n")
     plot(off_mean, off_var, log = switch(trans, "identity" = "", "log" = "y", ""),
-         ylab = "Variance", xlab ="Mean",...)
+         ylab = "Variance", xlab ="Mean", main = paste(trans, "link"),...)
     lines(off_mean, predVar)
 }
