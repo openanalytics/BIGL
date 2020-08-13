@@ -21,6 +21,8 @@ meanR(
   paramsBootstrap,
   idUnique,
   n1,
+  transFun,
+  invTransFun,
   ...
 )
 }
@@ -95,6 +97,8 @@ effect of an off-axis point. If no transformations are used the
 \item{idUnique}{unique combinations of on-axis points, a character vector}
 
 \item{n1}{the number of off-axis points}
+
+\item{transFun, invTransFun}{the transformation and inverse transformation functions for the variance}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

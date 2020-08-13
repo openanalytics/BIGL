@@ -21,6 +21,8 @@ bootConfInt(
   bootRS,
   data_off,
   posEffect = all(Total$effect >= 0),
+  transFun,
+  invTransFun,
   ...
 )
 }
@@ -87,6 +89,10 @@ calculation of the confidence intervals?}
 \item{data_off}{data frame with off -axis information}
 
 \item{posEffect}{a boolean, are effects restricted to be positive}
+
+\item{transFun}{the transformation and inverse transformation functions for the variance}
+
+\item{invTransFun}{the transformation and inverse transformation functions for the variance}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

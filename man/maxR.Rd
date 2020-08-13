@@ -22,6 +22,8 @@ maxR(
   idUnique,
   n1,
   doseGridOff,
+  transFun,
+  invTransFun,
   ...
 )
 }
@@ -100,6 +102,10 @@ effect of an off-axis point. If no transformations are used the
 \item{n1}{the number of off-axis points}
 
 \item{doseGridOff}{dose grid for off-axis points}
+
+\item{transFun}{the transformation and inverse transformation functions for the variance}
+
+\item{invTransFun}{the transformation and inverse transformation functions for the variance}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

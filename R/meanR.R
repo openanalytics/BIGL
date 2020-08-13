@@ -23,6 +23,7 @@
 #' @param idUnique unique combinations of on-axis points, a character vector
 #' @param n1 the number of off-axis points
 #' @param data_off data frame with off -axis information
+#' @param transFun,invTransFun the transformation and inverse transformation functions for the variance
 #' @param ... Further arguments that will be later passed to
 #'   \code{\link{generateData}} function during bootstrapping
 #' @inheritParams fitSurface
@@ -43,7 +44,7 @@ meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL, method = c("equal", "model", "unequal"),
-                  bootStraps, paramsBootstrap, idUnique, n1, ...) {
+                  bootStraps, paramsBootstrap, idUnique, n1, transFun, invTransFun, ...) {
 
     ## Argument matching
     null_model <- match.arg(null_model)
@@ -54,7 +55,7 @@ meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
         stop("Replicates are required when choosing the method 'model' or 'unequal'")
     }
     FStat <- getMeanRF(data_off, fitResult, method, CP, reps, transforms, null_model,
-                       R, n1, idUnique)
+                       R, n1, idUnique, transFun = transFun, invTransFun = invTransFun)
     if (is.null(B.B)) {
         ans <- list("FStat" = FStat,
                     "p.value" = pf(FStat, n1, df0, lower.tail = FALSE),
@@ -72,7 +73,8 @@ meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
         }
         getMeanRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
                   reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1, idUnique = idUnique, respS = x$respS)
+                  n1 = n1, idUnique = idUnique, respS = x$respS,
+                  transFun = transFun, invTransFun = invTransFun)
     })
     pvalb <- mean(FStatb >= FStat)
     ans <- list("FStat" = FStat, "FDist" = ecdf(FStatb), "p.value" = pvalb,

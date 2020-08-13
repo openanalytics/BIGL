@@ -400,8 +400,7 @@ argument to `fitSurface`. The possible values for
 * `"equal"`, equal variances assumed (as above, default),
 * `"unequal"`, variance is estimated separately for on-axis and off-axis
   points,
-* `"model"`, variance is estimated separately for on-axis points and
-  each off-axis point.
+* `"model"`, the variance is modelled as a function of the mean.
 
 Please see the [methodology vignette](methodology.html) for details. Below we
 show an example analysis in such case. Note that transformations are not
@@ -411,14 +410,24 @@ possible if variances are not assumed equal.
 marginalFit <- fitMarginals(data, transforms = NULL)
 summary(marginalFit)
 
-resM <- fitSurface(data, marginalFit, method = "model", 
-    statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
-
 resU <- fitSurface(data, marginalFit, method = "unequal", 
     statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
-
-summary(resM) 
 summary(resU)
+```
+
+For the variance model, an exploratory plotting function is available.
+
+```{r modelVariancePlot, fig.width=6, fig.height=5}
+plotMeanVarFit(data)
+plotMeanVarFit(data, trans ="log")
+```
+
+The linear fit seems fine in this case.
+
+```{r modelVarianceSum, fig.width=6, fig.height=5}
+resM <- fitSurface(data, marginalFit, method = "model", 
+    statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
+summary(resM) 
 ```
 
 # Analysis of multiple experiments

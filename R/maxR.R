@@ -35,13 +35,14 @@ maxR <- function(data_off, fitResult, transforms = fitResult$transforms,
                  CP, reps, nested_bootstrap = FALSE, B.B = NULL,
                  cutoff = 0.95, cl = NULL, B.CP = NULL,
                  method = c("equal", "model", "unequal"), bootStraps,
-                 idUnique, n1, doseGridOff,...) {
+                 idUnique, n1, doseGridOff, transFun, invTransFun, ...) {
     ## Argument matching
     null_model <- match.arg(null_model)
     method <- match.arg(method)
 
     FStat <- getMaxRF(data_off, fitResult, method, CP, reps, transforms,
-                      null_model, R, n1)
+                      null_model, R, n1, transFun = transFun,
+                      invTransFun = invTransFun)
     Ymean = data.frame(doseGridOff, R = FStat, absR = abs(FStat),
                        "effect - predicted" = R)
     df0 = fitResult$df
@@ -67,9 +68,10 @@ maxR <- function(data_off, fitResult, transforms = fitResult$transforms,
             nestedBootstraps = lapply(integer(B.CP), bootFun, args = paramsBootstrap)
             CP = getCP(nestedBootstraps, null_model, transforms)
         }
-        getMaxRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit, method = method, CP = CP,
-                  reps = reps, transforms = transforms, null_model = null_model,
-                  n1 = n1, idUnique = idUnique, respS = x$respS)
+        getMaxRF(data = x$data[x$data$d1 & x$data$d2,], fitResult = x$simFit,
+                 method = method, CP = CP, reps = reps, transforms = transforms,
+                 null_model = null_model, n1 = n1, idUnique = idUnique,
+                 respS = x$respS, transFun = transFun, invTransFun = invTransFun)
         })
         M <- apply(abs(Rnull), 2, max)
         q <- quantile(M, cutoff)

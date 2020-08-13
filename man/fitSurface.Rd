@@ -25,7 +25,9 @@ fitSurface(
   progressBar = TRUE,
   method = c("equal", "model", "unequal"),
   confInt = TRUE,
-  bootRS = TRUE
+  bootRS = TRUE,
+  trans = "identity",
+  invtrans = switch(trans, identity = "identity", log = "exp")
 )
 }
 \arguments{
@@ -122,6 +124,9 @@ effect of an off-axis point. If no transformations are used the
 
 \item{bootRS}{a boolean, should bootstrapped response surfaces be used in the
 calculation of the confidence intervals?}
+
+\item{trans, invtrans}{the transformation function for the variance and its
+inverse, possibly as strings}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates

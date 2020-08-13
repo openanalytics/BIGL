@@ -11,10 +11,12 @@
 bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,
-                       bootRS, data_off, posEffect = all(Total$effect >= 0), ...){
+                       bootRS, data_off, posEffect = all(Total$effect >= 0),
+                       transFun, invTransFun, ...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
-    A = getA(data_off, fitResult, method, CP, reps, n1)
+    A = getA(data_off, fitResult, method, CP, reps, n1, transFun = transFun,
+             invTransFun = invTransFun)
     model = switch(method, "model" = with(Total, {
         lm.fit(sampling_errors^2, x = cbind(1, meaneffect))$coef
     }), NULL
@@ -31,7 +33,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
         #Transforms have occurred in Total already
         bootR = getR(data = dat_off_resam, idUnique = dat_off_resam$d1d2,
              transforms = NULL, respS = if(bootRS) bb$respS else respS)
-        bootA = getA(dat_off_resam, bb$simFit, method, CP, reps, n1)
+        bootA = getA(dat_off_resam, bb$simFit, method, CP, reps, n1, transFun = transFun,
+                     invTransFun = invTransFun)
         list("R" = bootR, "A" = bootA)
     })
     bootEffectSizes = vapply(bootEffectSizesList, FUN.VALUE = c(R), function(x) x$R)

@@ -77,6 +77,8 @@
 #' @param confInt a boolean, should confidence intervals be returned?
 #' @param bootRS a boolean, should bootstrapped response surfaces be used in the
 #'  calculation of the confidence intervals?
+#' @param trans,invtrans the transformation function for the variance and its
+#' inverse, possibly as strings
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
 #' @importFrom progress progress_bar
@@ -118,12 +120,14 @@ fitSurface <- function(data, fitResult,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
                        method = c("equal", "model", "unequal"), confInt = TRUE,
-                       bootRS = TRUE) {
+                       bootRS = TRUE, trans = "identity",
+                       invtrans = switch(trans, "identity" = "identity", "log" = "exp")) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
   method <- match.arg(method)
+  transFun = match.fun(trans); invTransFun = match.fun(invtrans)
 
   if (method %in% c("model", "unequal") && (!is.null(transforms) || !is.null(fitResult$transforms))) {
     stop("No transformations can be used when choosing the method 'model' or 'unequal'")
@@ -193,6 +197,13 @@ fitSurface <- function(data, fitResult,
   if (all(reps == 1) && method %in% c("model", "unequal")) {
     stop("Replicates are required when choosing the method 'model' or 'unequal'")
   }
+  #Check predicted variances
+  if(method == "model"){
+    predVar = modelVar(data_off, transFun, invTransFun)
+    if(any(predVar<0)){
+      stop("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
+    }
+  }
 
   B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
   #If any bootstraps needed, do them first
@@ -244,7 +255,8 @@ fitSurface <- function(data, fitResult,
                           "idUnique" = idUnique, "B.B" = B.B,
                           "Total" = Total, "n1" = length(R), "method" = method,
                           "respS" = offAxisPredAll, "bootRS" = bootRS,
-                          "doseGridOff" = doseGridOff[names(R),])
+                          "doseGridOff" = doseGridOff[names(R),], "transFun" = transFun,
+                          "invTransFun" = invTransFun)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
       statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))

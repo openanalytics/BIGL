@@ -205,21 +205,23 @@ $$
 \operatorname{TestStat} = \frac{R^{T}\left(\Sigma_{1}D + \sigma^{2}_{0}C_{p}\right)^{-1}R}{n_{1}}
 $$
 
-1. **`SepVar` method**: The variance for the dose combinations is estimated by
+1. **`unqueal` method**: The variance for the dose combinations is estimated by
    taking the variance in each dose combination and then taking the mean of all
    these variances, thus $\Sigma_{1} = \sigma^2_1 I_{n_1}$. The downside
    of this method is that the variance for all combinations is assumed to be
    equal. In reality the variance often depends on the mean effect. This is
    taken into account in the `ModVar` method.
 
-2. **`ModVar` method**: In this method the diagonal elements of $\Sigma_{1}$
+2. **`model` method**: In this method the diagonal elements of $\Sigma_{1}$
    are no longer estimated as single number but rather as a vector of
    variances. Each off-axis point has now its own variance. A linear model is
    fitted on the original dataset, modeling the variance of each off-axis point
    as a function of its mean effect. The estimated model parameters are then
    used to predict the variance for the corresponding mean effect measured for
    that dose combination. These predicted variances are placed in the diagonal
-   of $\Sigma_{1}$.
+   of $\Sigma_{1}$. Modelling the variance with a linear model may require a 
+   transformation, to achieva  better fit and to avoid negative variances being 
+   modelled. A log-transformation often makes a good impression.
 
 ### Adapted `maxR`
 
