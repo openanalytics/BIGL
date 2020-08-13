@@ -185,7 +185,7 @@ to the variance of the off-axis combinations. The assumption of equal variances
 is thus not always valid. That is why the `meanR` and `maxR` test-statistics can
 also estimate the variances for on-axis (monotherapies) and
 off-axis dose-combinations separately. Two extra methods are described below:
-the `SepVar` method (Separated variance) and the `ModVar` method (Modeled
+the `unequal` method (Separated variance) and the `model` method (Modeled
 variance). For both methods replicates are required and no variance-stabilizing
 transformations are required. The latter is often necessary when assuming equal
 variances.
@@ -196,7 +196,7 @@ The adapted `meanR` test uses two separate variance estimates for
 (a) the monotherapies (= $\sigma^{2}_{0}$) 
 and 
 (b) the dose combinations (= $\Sigma_{1}$, a diagonal matrix).
-The notation for both `SepVar` as `ModVar` will be the same, but the estimation
+The notation for both `unequal` as `model` will be the same, but the estimation
 of $\Sigma_{1}$ will be different. The variance of the monotherapies $\sigma^{2}_{0}$ is
 estimated as $\sigma^{2}$ above by taking the MSE of the null model.
 The test statistic is given by:
@@ -210,7 +210,7 @@ $$
    these variances, thus $\Sigma_{1} = \sigma^2_1 I_{n_1}$. The downside
    of this method is that the variance for all combinations is assumed to be
    equal. In reality the variance often depends on the mean effect. This is
-   taken into account in the `ModVar` method.
+   taken into account in the `model` method.
 
 2. **`model` method**: In this method the diagonal elements of $\Sigma_{1}$
    are no longer estimated as single number but rather as a vector of
@@ -228,7 +228,7 @@ $$
 The same approach is taken for the adapted `maxR` test statistic. Instead of
 using one estimated variance for both on- and off-axis points, two separate
 estimates are used. The estimates for $\Sigma_{1}$ are different depending
-on the method used (`ModVar` or `SepVar`). The methodology of estimating the
+on the method used (`unequal` or `model`). The methodology of estimating the
 variance is the same as was described in the "Adapted `meanR`" section above.
 
 The `maxR` test becomes
@@ -244,15 +244,15 @@ $$
 $$
 where $\left[\cdot\right]_{k}$ indicates the $k$-th coordinate. 
 
-### Advantages of `ModVar` and `SepVar` methods compared to assumption of equal variances
+### Advantages of `unequal` and `model` methods compared to assumption of equal variances
 
 The assumption of equal variances between monotherapies and
 off-axis dose-combinations fails to control the type I error rate around
 pre-specified level, when the variance of off-axis points increases (natural
 variance or outliers). This results in false positive synergy calls when in
-reality there were none. Both the `SepVar` and the `ModVar` methods control
+reality there were none. Both the `unequal` and the `model` methods control
 the type I error rate far better, with slightly better results obtained by the
-`ModVar` method.
+`model` method.
 
 Furthermore, the sensitivity and specificity of the `maxR` test statistics are
 higher with the methods assuming variance heterogeneity compared to the methods
