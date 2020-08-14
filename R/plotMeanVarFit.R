@@ -1,13 +1,15 @@
 #' Make a mean-variance plot
 #' @param data a dataset or matrix with d1, d2 and effect column
 #' @param trans,invtrans the transformation function for the variance and its inverse, possibly as strings
+#' @param main the title of the plot
 #' @param ... passed on to plot()
 #' @return Plots the mean-variance trend
 #' @export
 #' @importFrom graphics lines
 #' @details This is a crucial graphical check for deciding on the
 plotMeanVarFit = function(data, trans = "identity",
-                          invtrans = switch(trans, "identity" = "identity", "log" = "exp"),...){
+                          invtrans = switch(trans, "identity" = "identity", "log" = "exp"),
+                          main = paste(trans, "transformation"),...){
     transFun = match.fun(trans); invtransFun = match.fun(invtrans)
     if(!all(c("d1", "d2", "effect") %in% colnames(data)))
         stop("Data must contain d1, d2 and effect columns!")
@@ -19,6 +21,6 @@ plotMeanVarFit = function(data, trans = "identity",
     if(any(predVar<0))
         warning("Negative variances modelled!\n")
     plot(off_mean, off_var, log = switch(trans, "identity" = "", "log" = "y", ""),
-         ylab = "Variance", xlab ="Mean", main = paste(trans, "link"),...)
+         ylab = "Variance", xlab ="Mean", main = main,...)
     lines(off_mean, predVar)
 }

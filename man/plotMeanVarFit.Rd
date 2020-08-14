@@ -8,6 +8,7 @@ plotMeanVarFit(
   data,
   trans = "identity",
   invtrans = switch(trans, identity = "identity", log = "exp"),
+  main = paste(trans, "transformation"),
   ...
 )
 }
@@ -15,6 +16,8 @@ plotMeanVarFit(
 \item{data}{a dataset or matrix with d1, d2 and effect column}
 
 \item{trans, invtrans}{the transformation function for the variance and its inverse, possibly as strings}
+
+\item{main}{the title of the plot}
 
 \item{...}{passed on to plot()}
 }
