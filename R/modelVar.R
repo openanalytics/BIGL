@@ -7,5 +7,7 @@ modelVar = function(dat_off, transFun, invTransFun){
     off_mean <- with(dat_off, tapply(effect, d1d2, mean))
     off_var = with(dat_off, tapply(effect, d1d2, var))
     linmod <- lm.fit(transFun(off_var), x = cbind(1, off_mean))
-    invTransFun(linmod$coef[1] + linmod$coef[2]*off_mean)
+    Var = invTransFun(linmod$coef[1] + linmod$coef[2]*off_mean)
+    Var[Var<=0] = min(off_var) #Correct negative variances
+    Var
 }

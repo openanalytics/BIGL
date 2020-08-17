@@ -419,7 +419,7 @@ For the variance model, an exploratory plotting function is available.
 
 ```{r modelVariancePlot, fig.width=6, fig.height=5}
 plotMeanVarFit(data)
-plotMeanVarFit(data, trans ="log")
+plotMeanVarFit(data, trans = "log")
 ```
 
 The linear fit seems fine in this case.

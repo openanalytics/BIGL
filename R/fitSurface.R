@@ -199,11 +199,17 @@ fitSurface <- function(data, fitResult,
   }
   #Check predicted variances
   if(method == "model"){
-    predVar = modelVar(data_off, transFun, invTransFun)
-    if(any(predVar<0)){
+    Coef = lm.fit(Total$sampling_errors^2, x = cbind(1, Total$meaneffect))$coef
+    #Don't allow negative variances
+    if(Coef[2]<0){
+      stop("Variance was found to decrease with mean, check mean-variance trend!")
+    }
+    predVar = Coef[1] + Coef[2]*Total$meaneffect
+    if(any(predVar < 0)){
       stop("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
     }
-  }
+    model = c(Coef, "min" = min(predVar)) #Store smallest modelled variance
+  } else model = NULL
 
   B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
   #If any bootstraps needed, do them first
@@ -234,8 +240,8 @@ fitSurface <- function(data, fitResult,
           "error" = error, "sampling_errors" = sampling_errors,
                              "wild_bootstrap" = wild_bootstrap,
                               "method" = method, "doseGrid" = doseGrid,
-          "startvalues" = startvalues, "pb" = pb, "progressBar" = progressBar)
-
+          "startvalues" = startvalues, "pb" = pb, "progressBar" = progressBar,
+          "model" = model, "means" = Total$meaneffect)
 
       bootStraps = if(is.null(clusterObj)) {
               lapply(integer(B), bootFun, args = paramsBootstrap)

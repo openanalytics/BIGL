@@ -12,19 +12,15 @@ bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,
                        bootRS, data_off, posEffect = all(Total$effect >= 0),
-                       transFun, invTransFun, ...){
+                       transFun, invTransFun, model, ...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
     A = getA(data_off, fitResult, method, CP, reps, n1, transFun = transFun,
              invTransFun = invTransFun)
-    model = switch(method, "model" = with(Total, {
-        lm.fit(sampling_errors^2, x = cbind(1, meaneffect))$coef
-    }), NULL
-    )
     bootEffectSizesList = lapply(bootStraps, function(bb){
         #Do use bootstrapped response surface for complete mimicry of variability
         dat_off_resam = within(Total, {
-            effect = addResids(meaneffect, sampling_errors, method, model)
+            effect = addResids(Total$meaneffect, sampling_errors, method, model)
             #Sample with replacement
             if(posEffect){
                 effect = abs(effect)

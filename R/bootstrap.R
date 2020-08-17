@@ -52,8 +52,8 @@
 generateData <- function(pars, sigma, data = NULL,
                          transforms = NULL,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"),
-                         error = 1, sampling_errors = NULL,
-                         wild_bootstrap = FALSE, ...) {
+                         error = 1, sampling_errors = NULL, means = NULL,
+                         model = NULL, method = "equal", wild_bootstrap = FALSE, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -100,8 +100,8 @@ generateData <- function(pars, sigma, data = NULL,
                      "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
                      ## Resampling from defined vector
                      "4" = { if (!wild_bootstrap) {
-                       errors_test <- sample(sampling_errors, nrow(data), replace = TRUE)
-                       errors_test
+                          errors_test <- sampleResids(means, sampling_errors, method, model)
+                          errors_test
                      } else {
                        ## Use Rademacher distribution to account for heteroskedasticity
                        errors_test <- sampling_errors*
@@ -112,6 +112,9 @@ generateData <- function(pars, sigma, data = NULL,
     )
 
     ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
+    if(all(data$effect>0)){
+      ySim = abs(ySim)
+    }
     data.frame("effect" = ySim, data)
   })
 }

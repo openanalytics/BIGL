@@ -19,16 +19,24 @@ backscaleResids = function(scaledResids, means, model){
 #' @inheritParams scaleResids
 predictVar = function(means, model){
     predVar = model[1] + model[2]*means
+    predVar[predVar<=0] = model[3] #Correct for negative variances
+    predVar
 }
 #' Add residuals by adding to mean effects
 #' @param method a variance method, see \code{\link{fitSurface}}
 #' @inheritParams scaleResids
 addResids = function(means, sampling_errors, method, model){
+    means + sampleResids(means, sampling_errors, method, model)
+}
+#' Sample residuals according to a new model
+#' @inheritParams addResids
+#' @return sampled residuals
+sampleResids = function(means, sampling_errors, method, model){
     if(method %in% c("equal", "unequal")){
-        return(means + sample(sampling_errors, replace = TRUE))
+        return(sample(sampling_errors, replace = TRUE))
     } else if(method == "model"){
         scaledResids = scaleResids(sampling_errors, means, model)
         sampledResids = sample(scaledResids, replace = TRUE)
-        return(means + backscaleResids(sampledResids, means, model))
+        return(backscaleResids(sampledResids, means, model))
     } else{}
 }

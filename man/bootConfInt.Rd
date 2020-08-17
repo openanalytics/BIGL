@@ -23,6 +23,7 @@ bootConfInt(
   posEffect = all(Total$effect >= 0),
   transFun,
   invTransFun,
+  model,
   ...
 )
 }

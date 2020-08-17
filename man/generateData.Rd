@@ -12,6 +12,9 @@ generateData(
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
   error = 1,
   sampling_errors = NULL,
+  means = NULL,
+  model = NULL,
+  method = "equal",
   wild_bootstrap = FALSE,
   ...
 )
@@ -52,6 +55,16 @@ specified in \code{sampling_errors}.}
 
 \item{sampling_errors}{Sampling vector to resample errors from. Used only if
 \code{error = 4}.}
+
+\item{method}{What assumption should be used for the variance of on- and
+off-axis points. This argument can take one of the values from
+\code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
+default. \code{"equal"} assumes that both on- and off-axis points have the
+same variance, \code{"unequal"} estimates a different parameter for on- and
+off-axis points and \code{"model"} predicts variance based on the average
+effect of an off-axis point. If no transformations are used the
+\code{"model"} method is recommended. If transformations are used, only the
+\code{"equal"} method can be chosen.}
 
 \item{wild_bootstrap}{Whether special bootstrap to correct for
 heteroskedasticity should be used. If \code{wild_bootstrap = TRUE}, errors
