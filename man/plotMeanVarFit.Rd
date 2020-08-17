@@ -8,7 +8,8 @@ plotMeanVarFit(
   data,
   trans = "identity",
   invtrans = switch(trans, identity = "identity", log = "exp"),
-  main = paste(trans, "transformation"),
+  main = paste(switch(trans, identity = "No", log = "log"), "transformation"),
+  log = switch(trans, identity = "", log = "y", ""),
   ...
 )
 }
@@ -18,6 +19,8 @@ plotMeanVarFit(
 \item{trans, invtrans}{the transformation function for the variance and its inverse, possibly as strings}
 
 \item{main}{the title of the plot}
+
+\item{log}{log-transform of the axes, as in plot()}
 
 \item{...}{passed on to plot()}
 }

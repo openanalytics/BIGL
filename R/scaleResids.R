@@ -19,7 +19,8 @@ backscaleResids = function(scaledResids, means, model){
 #' @inheritParams scaleResids
 predictVar = function(means, model){
     predVar = model[1] + model[2]*means
-    predVar[predVar<=0] = model[3] #Correct for negative variances
+    predVar[predVar<=0] = model["min"] #Correct for negative variances
+    predVar[predVar > model["max"]] = model["max"] #Upper bound
     predVar
 }
 #' Add residuals by adding to mean effects

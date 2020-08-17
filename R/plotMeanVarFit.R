@@ -25,5 +25,5 @@ plotMeanVarFit = function(data, trans = "identity",
         warning("Negative variances modelled!\n")
     plot(off_mean, off_var, log =log,
          ylab = "Variance", xlab ="Mean", main = main,...)
-    lines(off_mean, predVar)
+    lines(sort(off_mean), sort(predVar))
 }

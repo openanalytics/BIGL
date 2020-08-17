@@ -38,13 +38,14 @@
 #'   used to find the critical value of the F-distribution under the null.
 #'
 #'   If \code{\link{meanR}} test is run with bootstrapping, then p-value
-#'   estimate is based on boostrapped null distribution of test statistic and an
+#'   estimate is based on bootstrapped null distribution of test statistic and an
 #'   additional element \code{"FDist"} (of class \code{"ecdf"}) is returned.
 meanR <- function(data_off, fitResult, transforms = fitResult$transforms,
                   null_model = c("loewe", "hsa", "bliss", "loewe2"), R, CP, reps,
                   nested_bootstrap = FALSE, B.B = NULL, B.CP = NULL,
                   cl = NULL, method = c("equal", "model", "unequal"),
-                  bootStraps, paramsBootstrap, idUnique, n1, transFun, invTransFun, ...) {
+                  bootStraps, paramsBootstrap, idUnique, n1, transFun,
+                  invTransFun, ...) {
 
     ## Argument matching
     null_model <- match.arg(null_model)

@@ -199,16 +199,17 @@ fitSurface <- function(data, fitResult,
   }
   #Check predicted variances
   if(method == "model"){
-    Coef = lm.fit(Total$sampling_errors^2, x = cbind(1, Total$meaneffect))$coef
+    Coef = lm.fit(sampling_errors^2, x = cbind(1, Total$meaneffect))$coef
     #Don't allow negative variances
     if(Coef[2]<0){
-      stop("Variance was found to decrease with mean, check mean-variance trend!")
+      warning("Variance was found to decrease with mean, check mean-variance trend!")
     }
     predVar = Coef[1] + Coef[2]*Total$meaneffect
     if(any(predVar < 0)){
-      stop("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
+      warning("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
     }
-    model = c(Coef, "min" = min(predVar)) #Store smallest modelled variance
+    model = c(Coef, "min" = min(sampling_errors[sampling_errors>0]^2),
+              "max" = sampling_errors^2) #Store smallest observed variance
   } else model = NULL
 
   B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
