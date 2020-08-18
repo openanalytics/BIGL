@@ -36,8 +36,11 @@ sampleResids = function(means, sampling_errors, method, model){
     if(method %in% c("equal", "unequal")){
         return(sample(sampling_errors, replace = TRUE))
     } else if(method == "model"){
-        scaledResids = scaleResids(sampling_errors, means, model)
-        sampledResids = sample(scaledResids, replace = TRUE)
-        return(backscaleResids(sampledResids, means, model))
+        normResids = rnorm(length(means), sd = sqrt(predictVar(means, model)))
+        # scaledResids = scaleResids(sampling_errors, means, model)
+        # sampledResids = sample(scaledResids, replace = TRUE)
+        # back = backscaleResids(sampledResids, means, model)
+        # Rescaling residuals does not really work
+        return(normResids)
     } else{}
 }

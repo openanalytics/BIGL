@@ -113,7 +113,7 @@ This function returns a \code{meanR} object with estimates for the
   used to find the critical value of the F-distribution under the null.
 
   If \code{\link{meanR}} test is run with bootstrapping, then p-value
-  estimate is based on boostrapped null distribution of test statistic and an
+  estimate is based on bootstrapped null distribution of test statistic and an
   additional element \code{"FDist"} (of class \code{"ecdf"}) is returned.
 }
 \description{

@@ -209,7 +209,7 @@ fitSurface <- function(data, fitResult,
       warning("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
     }
     model = c(Coef, "min" = min(sampling_errors[sampling_errors>0]^2),
-              "max" = sampling_errors^2) #Store smallest observed variance
+              "max" = max(sampling_errors^2)) #Store smallest observed variance
   } else model = NULL
 
   B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
@@ -263,7 +263,7 @@ fitSurface <- function(data, fitResult,
                           "Total" = Total, "n1" = length(R), "method" = method,
                           "respS" = offAxisPredAll, "bootRS" = bootRS,
                           "doseGridOff" = doseGridOff[names(R),], "transFun" = transFun,
-                          "invTransFun" = invTransFun)
+                          "invTransFun" = invTransFun, "model" = model)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
       statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
