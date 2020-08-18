@@ -8,6 +8,10 @@ predictVar(means, model, invTransFun)
 }
 \arguments{
 \item{means}{a vector of means}
+
+\item{model}{The mean-variance model}
+
+\item{invTransFun}{the inverse transformation function, back to the variance domain}
 }
 \description{
 Predict variance

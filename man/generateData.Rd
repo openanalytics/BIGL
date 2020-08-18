@@ -58,6 +58,8 @@ specified in \code{sampling_errors}.}
 \item{sampling_errors}{Sampling vector to resample errors from. Used only if
 \code{error = 4}.}
 
+\item{means}{The vector of mean values of the response surface, for variance modelling}
+
 \item{model}{The mean-variance model}
 
 \item{method}{What assumption should be used for the variance of on- and
@@ -76,6 +78,8 @@ are generated from \code{sampling_errors} multiplied by a random variable
 following Rademacher distribution. Argument is used only if \code{error = 4}.}
 
 \item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
+
+\item{invTransFun}{the inverse transformation function, back to the variance domain}
 
 \item{...}{Further arguments}
 }

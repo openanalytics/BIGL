@@ -16,7 +16,7 @@ backscaleResids = function(scaledResids, ...){
 }
 #'Predict variance
 #' @param means a vector of means
-#' @inheritParams fitSurface
+#' @inheritParams generateData
 predictVar = function(means, model, invTransFun){
     predVar = invTransFun(model[1] + model[2]*means)
     predVar[predVar<=0] = model["min"] #Correct for negative variances
@@ -30,7 +30,7 @@ addResids = function(means, ...){
     means + sampleResids(means, ...)
 }
 #' Sample residuals according to a new model
-#' @inheritParams addResids
+#' @inheritParams fitSurface
 #' @inheritParams predictVar
 #' @inheritParams scaleResids
 #' @return sampled residuals

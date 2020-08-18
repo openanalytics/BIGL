@@ -34,6 +34,8 @@
 #'   are generated from \code{sampling_errors} multiplied by a random variable
 #'   following Rademacher distribution. Argument is used only if \code{error = 4}.
 #' @param model The mean-variance model
+#' @param means The vector of mean values of the response surface, for variance modelling
+#' @param invTransFun the inverse transformation function, back to the variance domain
 #' @param ... Further arguments
 #' @inheritParams fitSurface
 #' @inheritParams predictOffAxis
