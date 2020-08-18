@@ -246,7 +246,7 @@ where $\left[\cdot\right]_{k}$ indicates the $k$-th coordinate.
 
 ### Bootstrapping under unequal variances
 
-In case of the `unequal` variance assumption, the bootstrap proceeds as before, with the off-axis residuals being resampled.
+In case of the `unequal` variance assumption, the bootstrap proceeds as before, with the off-axis residuals being pooled and resampled. With the `model` assumption, the resampling is more complicated, as the residuals are no longer exchangeable. One option is to rescale the observed residuals according to the mean-variance model (i.e. dividing them by their standard deviations), resample from this pool of standardized residuals, and then scale back to the true variance (by multiplying by the standard deviation). Yet this approach has proven to be unstable as it leads to extreme observations. An alternative (the default) is to generate zero-mean normal data with the modelled variances (see the `rescaleResids` argument in `fitSurface()`). 
 
 ### Advantages of `unequal` and `model` methods compared to assumption of equal variances
 
