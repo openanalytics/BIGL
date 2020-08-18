@@ -2,7 +2,7 @@
 % Please edit documentation in R/scaleResids.R
 \name{scaleResids}
 \alias{scaleResids}
-\title{Functions for scaling, and rescaling residuals}
+\title{Functions for scaling, and rescaling residuals. May lead to unstable behaviour in practice}
 \usage{
 scaleResids(sampling_errors, means, model)
 }
@@ -14,7 +14,7 @@ scaleResids(sampling_errors, means, model)
 \item{model}{coefficients of a fitted mean-variance trend}
 }
 \description{
-Functions for scaling, and rescaling residuals
+Functions for scaling, and rescaling residuals. May lead to unstable behaviour in practice
 }
 \details{
 Residuals are calculated with respect to the average observation on

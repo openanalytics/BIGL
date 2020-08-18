@@ -1,4 +1,4 @@
-#' Functions for scaling, and rescaling residuals
+#' Functions for scaling, and rescaling residuals. May lead to unstable behaviour in practice
 #' @details Residuals are calculated with respect to the average observation on
 #' the off-axis point, so replicates are required!
 #' @param sampling_errors A vector of raw  residuals
