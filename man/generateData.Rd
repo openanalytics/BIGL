@@ -16,6 +16,8 @@ generateData(
   model = NULL,
   method = "equal",
   wild_bootstrap = FALSE,
+  rescaleResids,
+  invTransFun,
   ...
 )
 }
@@ -72,6 +74,8 @@ effect of an off-axis point. If no transformations are used the
 heteroskedasticity should be used. If \code{wild_bootstrap = TRUE}, errors
 are generated from \code{sampling_errors} multiplied by a random variable
 following Rademacher distribution. Argument is used only if \code{error = 4}.}
+
+\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
 
 \item{...}{Further arguments}
 }

@@ -24,6 +24,7 @@ bootConfInt(
   transFun,
   invTransFun,
   model,
+  rescaleResids,
   ...
 )
 }
@@ -96,6 +97,8 @@ calculation of the confidence intervals?}
 \item{invTransFun}{the transformation and inverse transformation functions for the variance}
 
 \item{model}{The mean-variance model}
+
+\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}
