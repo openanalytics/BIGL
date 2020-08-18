@@ -4,16 +4,14 @@
 \alias{sampleResids}
 \title{Sample residuals according to a new model}
 \usage{
-sampleResids(means, sampling_errors, method, model)
+sampleResids(means, sampling_errors, method, rescaleResids, ...)
 }
 \arguments{
 \item{means}{a vector of means}
 
 \item{sampling_errors}{A vector of raw  residuals}
 
-\item{method}{a variance method, see \code{\link{fitSurface}}}
-
-\item{model}{coefficients of a fitted mean-variance trend}
+\item{...}{passed on to predictVar}
 }
 \value{
 sampled residuals

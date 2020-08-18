@@ -79,6 +79,7 @@
 #'  calculation of the confidence intervals?
 #' @param trans,invtrans the transformation function for the variance and its
 #' inverse, possibly as strings
+#' @param rescaleResids a boolean indicating whether to rescale residuals or assume normality
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
 #' @importFrom progress progress_bar
@@ -120,7 +121,7 @@ fitSurface <- function(data, fitResult,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
                        cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
                        method = c("equal", "model", "unequal"), confInt = TRUE,
-                       bootRS = TRUE, trans = "identity",
+                       bootRS = TRUE, trans = "identity", rescaleResids = FALSE,
                        invtrans = switch(trans, "identity" = "identity", "log" = "exp")) {
 
   ## Argument matching
@@ -242,7 +243,8 @@ fitSurface <- function(data, fitResult,
                              "wild_bootstrap" = wild_bootstrap,
                               "method" = method, "doseGrid" = doseGrid,
           "startvalues" = startvalues, "pb" = pb, "progressBar" = progressBar,
-          "model" = model, "means" = Total$meaneffect)
+          "model" = model, "means" = Total$meaneffect, "rescaleResids" = rescaleResids,
+          "invTransFun" = invTransFun)
 
       bootStraps = if(is.null(clusterObj)) {
               lapply(integer(B), bootFun, args = paramsBootstrap)
@@ -263,7 +265,7 @@ fitSurface <- function(data, fitResult,
                           "Total" = Total, "n1" = length(R), "method" = method,
                           "respS" = offAxisPredAll, "bootRS" = bootRS,
                           "doseGridOff" = doseGridOff[names(R),], "transFun" = transFun,
-                          "invTransFun" = invTransFun, "model" = model)
+                          "invTransFun" = invTransFun, "model" = model, "rescaleResids" = rescaleResids)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
       statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))

@@ -4,14 +4,12 @@
 \alias{backscaleResids}
 \title{Backscale residuals}
 \usage{
-backscaleResids(scaledResids, means, model)
+backscaleResids(scaledResids, ...)
 }
 \arguments{
 \item{scaledResids}{scaled residuals}
 
-\item{means}{a vector of means}
-
-\item{model}{coefficients of a fitted mean-variance trend}
+\item{...}{passed on to predictVar}
 }
 \description{
 Backscale residuals

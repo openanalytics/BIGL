@@ -4,16 +4,12 @@
 \alias{addResids}
 \title{Add residuals by adding to mean effects}
 \usage{
-addResids(means, sampling_errors, method, model)
+addResids(means, ...)
 }
 \arguments{
 \item{means}{a vector of means}
 
-\item{sampling_errors}{A vector of raw  residuals}
-
-\item{method}{a variance method, see \code{\link{fitSurface}}}
-
-\item{model}{coefficients of a fitted mean-variance trend}
+\item{...}{passed on to predictVar}
 }
 \description{
 Add residuals by adding to mean effects

@@ -56,6 +56,8 @@ specified in \code{sampling_errors}.}
 \item{sampling_errors}{Sampling vector to resample errors from. Used only if
 \code{error = 4}.}
 
+\item{model}{The mean-variance model}
+
 \item{method}{What assumption should be used for the variance of on- and
 off-axis points. This argument can take one of the values from
 \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the

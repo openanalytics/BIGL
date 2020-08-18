@@ -27,6 +27,7 @@ fitSurface(
   confInt = TRUE,
   bootRS = TRUE,
   trans = "identity",
+  rescaleResids = FALSE,
   invtrans = switch(trans, identity = "identity", log = "exp")
 )
 }
@@ -127,6 +128,8 @@ calculation of the confidence intervals?}
 
 \item{trans, invtrans}{the transformation function for the variance and its
 inverse, possibly as strings}
+
+\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates

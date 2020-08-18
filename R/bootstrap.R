@@ -33,6 +33,7 @@
 #'   heteroskedasticity should be used. If \code{wild_bootstrap = TRUE}, errors
 #'   are generated from \code{sampling_errors} multiplied by a random variable
 #'   following Rademacher distribution. Argument is used only if \code{error = 4}.
+#' @param model The mean-variance model
 #' @param ... Further arguments
 #' @inheritParams fitSurface
 #' @inheritParams predictOffAxis
@@ -53,7 +54,8 @@ generateData <- function(pars, sigma, data = NULL,
                          transforms = NULL,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"),
                          error = 1, sampling_errors = NULL, means = NULL,
-                         model = NULL, method = "equal", wild_bootstrap = FALSE, ...) {
+                         model = NULL, method = "equal", wild_bootstrap = FALSE,
+                         rescaleResids, invTransFun,...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -100,7 +102,9 @@ generateData <- function(pars, sigma, data = NULL,
                      "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
                      ## Resampling from defined vector
                      "4" = { if (!wild_bootstrap) {
-                          errors_test <- sampleResids(means, sampling_errors, method, model)
+                          errors_test <- sampleResids(means = means, sampling_errors = sampling_errors,
+                                                      method = method, rescaleResids = rescaleResids,
+                                                      model = model, invTransFun = invTransFun)
                           errors_test
                      } else {
                        ## Use Rademacher distribution to account for heteroskedasticity

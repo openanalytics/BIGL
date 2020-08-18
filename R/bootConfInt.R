@@ -3,6 +3,7 @@
 #' @param Total data frame with all effects and mean effects
 #' @inheritParams fitSurface
 #' @inheritParams meanR
+#' @inheritParams generateData
 #' @param posEffect a boolean, are effects restricted to be positive
 #' @param respS the observed response surface
 #' @return A list with components
@@ -12,7 +13,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,
                        bootRS, data_off, posEffect = all(Total$effect >= 0),
-                       transFun, invTransFun, model, ...){
+                       transFun, invTransFun, model, rescaleResids,...){
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
     A = getA(data_off, fitResult, method, CP, reps, n1, transFun = transFun,
@@ -20,7 +21,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
     bootEffectSizesList = lapply(bootStraps, function(bb){
         #Do use bootstrapped response surface for complete mimicry of variability
         dat_off_resam = within(Total, {
-            effect = addResids(Total$meaneffect, sampling_errors, method, model)
+            effect = addResids(Total$meaneffect, sampling_errors, method,
+                               rescaleResids, model, invTransFun)
             #Sample with replacement
             if(posEffect){
                 effect = abs(effect)

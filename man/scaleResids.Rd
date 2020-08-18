@@ -4,14 +4,12 @@
 \alias{scaleResids}
 \title{Functions for scaling, and rescaling residuals. May lead to unstable behaviour in practice}
 \usage{
-scaleResids(sampling_errors, means, model)
+scaleResids(sampling_errors, ...)
 }
 \arguments{
 \item{sampling_errors}{A vector of raw  residuals}
 
-\item{means}{a vector of means}
-
-\item{model}{coefficients of a fitted mean-variance trend}
+\item{...}{passed on to predictVar}
 }
 \description{
 Functions for scaling, and rescaling residuals. May lead to unstable behaviour in practice

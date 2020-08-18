@@ -6,8 +6,8 @@
 modelVar = function(dat_off, transFun, invTransFun){
     off_mean <- with(dat_off, tapply(effect, d1d2, mean))
     off_var = with(dat_off, tapply(effect, d1d2, var))
-    linmod <- lm.fit(transFun(off_var), x = cbind(1, off_mean))
-    Var = invTransFun(linmod$coef[1] + linmod$coef[2]*off_mean)
-    Var[Var<=0] = min(off_var[off_var>0]) #Correct negative variances
+    linmod <- c(lm.fit(transFun(off_var), x = cbind(1, off_mean))$coef,
+                "min" = min(off_var), "max" = max(off_var))
+    Var = predictVar(off_mean, linmod, invTransFun)
     Var
 }

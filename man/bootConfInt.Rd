@@ -95,6 +95,8 @@ calculation of the confidence intervals?}
 
 \item{invTransFun}{the transformation and inverse transformation functions for the variance}
 
+\item{model}{The mean-variance model}
+
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}
 }

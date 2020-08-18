@@ -4,12 +4,10 @@
 \alias{predictVar}
 \title{Predict variance}
 \usage{
-predictVar(means, model)
+predictVar(means, model, invTransFun)
 }
 \arguments{
 \item{means}{a vector of means}
-
-\item{model}{coefficients of a fitted mean-variance trend}
 }
 \description{
 Predict variance
