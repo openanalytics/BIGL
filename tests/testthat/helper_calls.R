@@ -36,10 +36,8 @@ genData <- function(pars, reps, mult = c(1, -1)) {
   ## Compute values for marginal observations
   data$effect[d2null] <- L4(data$d1[d2null],
                             pars["h1"], pars["b"], pars["m1"], pars["e1"])
-
   data$effect[d1null] <- L4(data$d2[d1null],
                             pars["h2"], pars["b"], pars["m2"], pars["e2"])
-
   data$effect[!one_null] <- predictOffAxis(data[,c("d1", "d2")], fitResult)
 
   ## Create some replicates

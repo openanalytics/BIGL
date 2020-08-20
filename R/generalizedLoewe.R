@@ -40,6 +40,14 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
   } else {
     parm <- parmInput
   }
+  increasing <- parm["m1"] >= parm["b"] && parm["m2"] >= parm["b"]
+  decreasing <- parm["m1"] <= parm["b"] && parm["m2"] <= parm["b"]
+
+  ## If agonist and antagonist, give a warning
+  if (!(increasing || decreasing)) {
+    warning("Marginal curves are diverging. The synergy/antagonism calls may be reversed")
+  }
+
   logDoseMinE = cbind(logDoseMinE,
                       "start" = if(is.null(startvalues)) integer(nrow(logDoseMinE)) else
                         startvalues)
