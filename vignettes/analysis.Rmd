@@ -41,7 +41,7 @@ This data consists of 11 experiments that can be processed separately. For initi
 
 ```{r}
 subsetData <- function(data, i) {
-  ## Subset data to a single experiment and, optionaly, select the necessary
+  ## Subset data to a single experiment and, optionally, select the necessary
   ## columns only
   subset(data, experiment == i)[, c("effect", "d1", "d2")]
 }
@@ -108,7 +108,7 @@ The first step of the fitting procedure will consist in treating marginal data o
 
 The marginal models will be estimated together using non-linear least squares estimation procedure. Estimation of both marginal models needs to be simultaneous since it is assumed they share a common baseline that also needs to be estimated. The `fitMarginals` function and other marginal estimation routines will automatically extract marginal data from the dose-response data frame.
 
-Before proceeding onto the estimation, we get a rough guess of the parameters to use as starting values in optimization and then we fit the model. `marginalFit`, returned by the `fitMarginals` routine, is an object of class `MarginalFit` which is essentially a list containing the main information about the marginal models, in particular the estimated coeffcients.
+Before proceeding onto the estimation, we get a rough guess of the parameters to use as starting values in optimization and then we fit the model. `marginalFit`, returned by the `fitMarginals` routine, is an object of class `MarginalFit` which is essentially a list containing the main information about the marginal models, in particular the estimated coefficients.
 
 The optional `names` argument allows to specify the names of the compounds to
 be shown on the plots and in the summary. If not defined, the defaults
@@ -227,7 +227,7 @@ rs <- fitSurface(data, marginalFit,
 summary(rs)
 ```
 
-The occcupancy matrix used in the expected response calculation for the Loewe models can be accessed with `rs$occupancy`.
+The occupancy matrix used in the expected response calculation for the Loewe models can be accessed with `rs$occupancy`.
 
 For off-axis data and a fixed dose combination, the Z-score for that dose combination is defined to be the standardized difference between the observed effect and the effect predicted by a generalized Loewe model. If the observed effect differs significantly from the prediction, it might be due to the presence of synergy or antagonism. If multiple observations refer to the same combination of doses, then a mean is taken over these multiple standardized differences.
 
@@ -378,13 +378,13 @@ rglwidget()
 
 ### Effect sizes and confidence interval
 
-The BIGL package also yields effect sizes and corresponding confidence intervals with respect to any response surface. The overall effect size and confidence interval is output in the summary of the `ResponseSurface`, but can also be called directly
+The BIGL package also yields effect sizes and corresponding confidence intervals with respect to any response surface. The overall effect size and confidence interval is output in the summary of the `ResponseSurface`, but can also be called directly:
 
 ```{r summarySingleConfInt}
 summary(maxR_B$confInt)
 ```
 
-In addition, a contour plot can be made with pointwise confidence intervals, similar to the `drugCombo` package.
+In addition, a contour plot can be made with pointwise confidence intervals, similar to the `contour()` function in the `drugCombo` package.
 
 ```{r plotSingleConfInt, fig.height=5, fig.width=6}
 plotConfInt(maxR_B)
@@ -393,7 +393,7 @@ plotConfInt(maxR_B)
 # Analysis in case of variance heterogeneity
 
 Starting from the package version `1.2.0` the variance can be estimated
-separatelty for on-axis (monotherapy) and off-axis points using `method`
+separately for on-axis (monotherapy) and off-axis points using `method`
 argument to `fitSurface`. The possible values for
 `method` are:
 
@@ -419,14 +419,20 @@ For the variance model, an exploratory plotting function is available.
 
 ```{r modelVariancePlot, fig.width=6, fig.height=5}
 plotMeanVarFit(data)
-plotMeanVarFit(data, trans = "log")
+plotMeanVarFit(data, log = "xy") #Clearer on the log-scale
+plotMeanVarFit(data, trans = "log") #Thresholded at maximum observed variance
 ```
 
-The linear fit seems fine in this case.
+The linear fit seems fine in this case. 
 
 ```{r modelVarianceSum, fig.width=6, fig.height=5}
 resM <- fitSurface(data, marginalFit, method = "model", 
     statistic = "both", B.CP = 20, B.B = 20, parallel = FALSE)
+```
+
+Negative variances were modelled, but variance model has the smallest observed variances as minimum so we can proceed.`
+
+```{r resM}
 summary(resM) 
 ```
 

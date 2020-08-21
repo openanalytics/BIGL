@@ -32,11 +32,11 @@ print.summary.BIGLconfInt <- function(x, ...) {
     #Overall
     cat("Overall effect\n")
     cat(sep = "", "Estimated mean departure from null response surface with ",
-        x$sigLevel, " confidence interval: ", round(x$estimate, 4), " [", round(x$singleCI[1], 4), ", ", round(x$singleCI[2], 4), "]\n")
+        x$sigLevel, " confidence interval:\n", round(x$estimate, 4), " [", round(x$singleCI[1], 4), ", ", round(x$singleCI[2], 4), "]\n")
     cat("Evidence for effects in data:", x$call, "\n\n")
 
     #Pointwise
-    cat("Pointwise effects\n")
+    cat("Significant pointwise effects\n")
     print(x$confInt)
     cat("\nPointwise", x$sigLevel, "confidence intervals summary:\n")
     print(x$totals)

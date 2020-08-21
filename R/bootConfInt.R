@@ -99,7 +99,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
     ans  = list("offAxis" = confInt,
                 "single" = list("meanEffect" = singleMeasure,
                                 "confIntMeanEffect" = studentizedCI,
-                                "Call" = overallCall))
+                                "Call" = overallCall),
+                "cutoff" = cutoff)
     class(ans) <- append("BIGLconfInt", class(ans))
     return(ans)
 }
