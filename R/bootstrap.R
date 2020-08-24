@@ -104,7 +104,7 @@ generateData <- function(pars, sigma, data = NULL,
                      "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
                      ## Resampling from defined vector
                      "4" = { if (!wild_bootstrap) {
-                          errors_test <- sampleResids(means = means, sampling_errors = sampling_errors,
+                          errors_test <- sampleResids(means = ySim, sampling_errors = sampling_errors,
                                                       method = method, rescaleResids = rescaleResids,
                                                       model = model, invTransFun = invTransFun)
                           errors_test
