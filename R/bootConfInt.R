@@ -75,7 +75,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
     studentizedCI = singleMeasure + sdA*
         quantile(bootRstand, c("lower" = (1-cutoff)/2,
                                "upper" = (1+cutoff)/2))
-    names(studentizedCI) = c("upper", "lower")
+    names(studentizedCI) = c("lower", "upper")
     overallCall = if (eq) {
         "Undefined"
     } else {

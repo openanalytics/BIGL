@@ -90,33 +90,38 @@ generateData <- function(pars, sigma, data = NULL,
                  "bliss" = Blissindependence(data[, c("d1", "d2")], pars),
                  "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars))
   ySim <- with(transforms, PowerT(BiolT(ySim, compositeArgs), compositeArgs))
-
+  charEr = as.character(error)
   with(as.list(pars), {
-    errors <- switch(as.character(error),
-                     ## Normal
-                     "1" = {rnorm(length(ySim), 0, sigma)},
-                     ## Two normals
-                     "2" = {ru <- sample(seq_len(2), replace = TRUE, size = length(ySim))
-                     mus <- c(-sigma, sigma)
-                     sigmas <- c(sigma/2, sigma/3)
-                     rnorm(length(ySim), mus[ru], sigmas[ru])},
-                     ## Distribution with right-tail outliers
-                     "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
-                     ## Resampling from defined vector
-                     "4" = { if (!wild_bootstrap) {
-                          errors_test <- sampleResids(means = ySim, sampling_errors = sampling_errors,
-                                                      method = method, rescaleResids = rescaleResids,
-                                                      model = model, invTransFun = invTransFun)
-                          errors_test
-                     } else {
-                       ## Use Rademacher distribution to account for heteroskedasticity
-                       errors_test <- sampling_errors*
-                         (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
-                       errors_test
-                     }},
-                     stop("Unavailable error type.")
-    )
-
+    if(charEr %in% c("1", "2", "3")){
+      errors = switch(charEr,
+                      ## Normal
+                      "1" = {rnorm(length(ySim), 0, sigma)},
+                      ## Two normals
+                      "2" = {ru <- sample(seq_len(2), replace = TRUE, size = length(ySim))
+                      mus <- c(-sigma, sigma)
+                      sigmas <- c(sigma/2, sigma/3)
+                      rnorm(length(ySim), mus[ru], sigmas[ru])},
+                      ## Distribution with right-tail outliers
+                      "3" = {sigma*(rchisq(length(ySim), df = 4)-4)/8 })
+    } else if(charEr == "4"){
+      if (wild_bootstrap) {
+        ## Use Rademacher distribution to account for heteroskedasticity
+        errors = sampling_errors*(2*rbinom(length(ySim), size = 1, prob = 0.5)-1)
+      } else {
+        idd1d2 = with(data, d1&d2)
+        numOff = sum(idd1d2); numOn = length(ySim) - numOff
+        errors = integer(length(ySim))
+        #On-axis points
+        errors[!idd1d2] = sampleResids(means = ySim[!idd1d2], sampling_errors = sampling_errors[!idd1d2],
+                     method = "equal", rescaleResids = FALSE)
+        #Off-axis points
+        errors[idd1d2] = sampleResids(means = ySim[idd1d2], sampling_errors = sampling_errors[idd1d2],
+                                     method = method, rescaleResids = rescaleResids,
+                                     model = model, invTransFun = invTransFun)
+      }
+    } else {
+      stop("Unavailable error type.")
+    }
     ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
     if(all(data$effect>0)){
       ySim = abs(ySim)

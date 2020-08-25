@@ -181,7 +181,7 @@ fitSurface <- function(data, fitResult,
   ## Bootstrap sampling vector
   if (is.null(sampling_errors)) {
     ## Ensure errors are generated from transformed data if applicable
-    dataT <- switch(method, "equal" = data, data_off)[, c("d1", "d2", "effect", "d1d2")]
+    dataT <- data[, c("d1", "d2", "effect", "d1d2")]
     if (!is.null(transforms)) {
       dataT$effect <- with(transforms,
                            PowerT(dataT$effect, compositeArgs))
