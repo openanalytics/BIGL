@@ -181,7 +181,7 @@ fitSurface <- function(data, fitResult,
   ## Bootstrap sampling vector
   if (is.null(sampling_errors)) {
     ## Ensure errors are generated from transformed data if applicable
-    dataT <- data[, c("d1", "d2", "effect", "d1d2")]
+    dataT <- data_off[, c("d1", "d2", "effect", "d1d2")]
     if (!is.null(transforms)) {
       dataT$effect <- with(transforms,
                            PowerT(dataT$effect, compositeArgs))
@@ -200,12 +200,12 @@ fitSurface <- function(data, fitResult,
   }
   #Check predicted variances
   if(method == "model"){
-    Coef = lm.fit(sampling_errors^2, x = cbind(1, Total$meaneffect))$coef
+    Coef = lm.fit(transFun(sampling_errors^2), x = cbind(1, Total$meaneffect))$coef
     #Don't allow negative variances
     if(Coef[2]<0){
       warning("Variance was found to decrease with mean, check mean-variance trend!")
     }
-    predVar = Coef[1] + Coef[2]*Total$meaneffect
+    predVar = invTransFun(Coef[1] + Coef[2]*Total$meaneffect)
     if(any(predVar < 0)){
       warning("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
     }
