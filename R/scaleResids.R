@@ -36,7 +36,7 @@ addResids = function(means, ...){
 #' @return sampled residuals
 sampleResids = function(means, sampling_errors, method, rescaleResids,...){
     if(method %in% c("equal", "unequal")){
-        return(sample(sampling_errors, replace = TRUE))
+        return(sample(sampling_errors, size = length(means), replace = TRUE))
     } else if(method == "model"){
         resids = if(rescaleResids){
             scaledResids = scaleResids(sampling_errors, means, ...)
