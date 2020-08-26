@@ -109,7 +109,6 @@ generateData <- function(pars, sigma, data = NULL,
         errors = sampling_errors*(2*rbinom(length(ySim), size = 1, prob = 0.5)-1)
       } else {
         idd1d2 = with(data, d1&d2)
-        numOff = sum(idd1d2); numOn = length(ySim) - numOff
         errors = integer(length(ySim))
         #On-axis points
         errors[!idd1d2] = sampleResids(means = ySim[!idd1d2], sampling_errors = sampling_errors[!idd1d2],
