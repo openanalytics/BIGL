@@ -50,7 +50,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
     inc <- coefFit["m1"] >= coefFit["b"] && coefFit["m2"] >= coefFit["b"]
     dec <- coefFit["m1"] <= coefFit["b"] && coefFit["m2"] <= coefFit["b"]
 
-    call = rep("Add", length(R))
+    call = rep("None", length(R))
     call[confInt[, "lower"] >= 0] <- if (eq) {
         "Undefined"
     } else if (inc) {
@@ -92,7 +92,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
                 "Syn"
              } else "Undefined"
         } else {
-            "Add"
+            "None"
         }
     }
 
