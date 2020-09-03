@@ -12,7 +12,7 @@ predictResponseSurface = function(doseGrid, fitResult, null_model,
                            function(y, args) PowerT(BiolT(y, args), args))
         vec <- with(transforms, CompositeT(vec, compositeArgs))
     }
-    out = matrix(0, length(unique(doseGrid$d1)), length(unique(doseGrid$d1)),
+    out = matrix(0, length(unique(doseGrid$d1)), length(unique(doseGrid$d2)),
                  dimnames = list(sort(unique(doseGrid$d1)), sort(unique(doseGrid$d2))))
     for(n in names(vec)){
         foo = strsplit(n, split = "_")[[1]]
