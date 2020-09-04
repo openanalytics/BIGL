@@ -57,7 +57,7 @@ generateData <- function(pars, sigma, data = NULL,
                          null_model = c("loewe", "hsa", "bliss", "loewe2"),
                          error = 1, sampling_errors = NULL, means = NULL,
                          model = NULL, method = "equal", wild_bootstrap = FALSE,
-                         rescaleResids, invTransFun,...) {
+                         rescaleResids, invTransFun, newtonRaphson = FALSE, ...) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -85,14 +85,15 @@ generateData <- function(pars, sigma, data = NULL,
   }
 
   ySim <- switch(null_model,
-                 "loewe" = generalizedLoewe(data, pars, asymptotes = 2)$response,
+                 "loewe" = generalizedLoewe(data, pars, asymptotes = 2,
+                                            newtonRaphson =  newtonRaphson)$response,
                  "hsa" = hsa(data[, c("d1", "d2")], pars),
                  "bliss" = Blissindependence(data[, c("d1", "d2")], pars),
-                 "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars))
+                 "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars,
+                                         newtonRaphson = newtonRaphson))
   ySim <- with(transforms, PowerT(BiolT(ySim, compositeArgs), compositeArgs))
   charEr = as.character(error)
-  with(as.list(pars), {
-    if(charEr %in% c("1", "2", "3")){
+  if(charEr %in% c("1", "2", "3")){
       errors = switch(charEr,
                       ## Normal
                       "1" = {rnorm(length(ySim), 0, sigma)},
@@ -125,8 +126,7 @@ generateData <- function(pars, sigma, data = NULL,
     if(all(data$effect>0)){
       ySim = abs(ySim)
     }
-    data.frame("effect" = ySim, data)
-  })
+    return(data.frame("effect" = ySim, data))
 }
 
 #' Estimate CP matrix from bootstraps
@@ -216,7 +216,7 @@ simulateNull <- function(data, fitResult, doseGrid,
   #Also precalculate response surface, quite computation intensive
   respS <- predictOffAxis(fitResult = simFit,
                           transforms = transforms, startvalues = startvalues,
-                          doseGrid = doseGrid, null_model = null_model)
+                          doseGrid = doseGrid, null_model = null_model, ...)
   return(list("data" = simData, "simFit" = simFit, "respS" = respS))
 }
 bootFun = function(i, args) {

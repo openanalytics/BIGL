@@ -6,13 +6,15 @@
 #' @param parmInput Numeric vector or list with appropriately named
 #'   parameter inputs. Typically, it will be coefficients from a
 #'   \code{MarginalFit} object.
-#' @param asymptotes Number of asymptotes. It can be either \code{1}
-#'   as in standard Loewe model or \code{2} as in generalized Loewe model.
+#' @inheritParams fitSurface
+#' @param newtonRaphson a boolean, is Neton raphson used for finding the
+#' response surface? May be faster but also less stable
 #' @param ... Further arguments that are currently unused
 #' @inheritParams simulateNull
 #' @importFrom nleqslv nleqslv
+#' @importFrom stats uniroot
 generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
-                              startvalues = NULL,...) {
+                              startvalues = NULL, newtonRaphson = FALSE, ...) {
   parmInput[c("h1", "h2")] = abs(parmInput[c("h1", "h2")])
   ## Need good accuracy here: solve for -logit(o)
   solver <- function(dose, par){
@@ -24,7 +26,10 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
       exp(dose[1] + x/par["h1"])/par["h1"] +
         exp(dose[2] + x/par["h2"])/par["h2"]
     }
-    nleqslv(fn = fun0, x = dose[3], jac = gr0)$x
+    if(newtonRaphson)
+      nleqslv(fn = fun0, x = dose[3], jac = gr0)$x
+    else
+      uniroot(fun0, c(-5000, 5000), tol = .Machine$double.eps)$root
   }
 
   ## Remove observations where both drugs are dosed at zero

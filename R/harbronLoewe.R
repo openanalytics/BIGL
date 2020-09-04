@@ -31,7 +31,7 @@ doseRatioGr = function(response, d, h, b, m, expe, lower, upper){
 #'
 #' @inheritParams generalizedLoewe
 harbronLoewe <- function (doseInput, parmInput, asymptotes = 2,
-                          startvalues = NULL, ...) {
+                          startvalues = NULL, newtonRaphson, ...) {
   parmInput[c("h1", "h2")] = abs(parmInput[c("h1", "h2")])
   ## In case of a single asymptote, use an artificial one for the second drug
   ## equal to the first one.
@@ -61,10 +61,17 @@ harbronLoewe <- function (doseInput, parmInput, asymptotes = 2,
       doseRatioGr(y, dose[1], par["h1"], par["b"], par["m1"], expE1, lower1, upper1) +
         doseRatioGr(y, dose[2], par["h2"], par["b"], par["m2"], expE2, lower2, upper2)
     }
+    if(newtonRaphson){
     out = nleqslv(fn = fun0, x = dose[3], jac = gr0,
             control = list(ftol = .Machine$double.eps))$x
     out = if(out <= lower) {lower} else if(out >= upper) {upper} else {out}
     return(out)
+    } else {
+      parRange <- range(par[c("b", "m1", "m2")])
+      if (length(unique(parRange)) == 1) # special case of 2 flat profiles
+        return(par["b"])
+      uniroot(fun0, parRange, tol = .Machine$double.eps)$root
+    }
   }
 
   ## Remove observations where both drugs are dosed at zero

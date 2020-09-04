@@ -79,7 +79,12 @@
 #'  calculation of the confidence intervals?
 #' @param trans,invtrans the transformation function for the variance and its
 #' inverse, possibly as strings
-#' @param rescaleResids a boolean indicating whether to rescale residuals or assume normality
+#' @param rescaleResids a boolean indicating whether to rescale residuals,
+#' or else normality of the residuals is assumed.
+#' @param newtonRaphson A boolean, should Newton-Raphson be used to find Loewe
+#' response surfaces? May be faster but also less stable to switch on
+#' @param asymptotes Number of asymptotes. It can be either \code{1}
+#'   as in standard Loewe model or \code{2} as in generalized Loewe model.
 #' @inheritParams generateData
 #' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
 #' @importFrom progress progress_bar
@@ -122,7 +127,8 @@ fitSurface <- function(data, fitResult,
                        cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
                        method = c("equal", "model", "unequal"), confInt = TRUE,
                        bootRS = TRUE, trans = "identity", rescaleResids = FALSE,
-                       invtrans = switch(trans, "identity" = "identity", "log" = "exp")) {
+                       invtrans = switch(trans, "identity" = "identity", "log" = "exp"),
+                       newtonRaphson = FALSE, asymptotes = 2) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
@@ -150,7 +156,7 @@ fitSurface <- function(data, fitResult,
      "d2" = sort(unique(d2))))
   doseGrid <- expand.grid(uniqueDoses)
   offAxisFit = fitOffAxis(fitResult, null_model = null_model,
-                               doseGrid = doseGrid)
+                               doseGrid = doseGrid, newtonRaphson = newtonRaphson)
   offAxisPred = predictOffAxis(fitResult, null_model = null_model,
                                           doseGrid = doseGrid, transforms = transforms,
                                           fit = offAxisFit)
@@ -246,7 +252,8 @@ fitSurface <- function(data, fitResult,
                               "method" = method, "doseGrid" = doseGrid,
           "startvalues" = startvalues, "pb" = pb, "progressBar" = progressBar,
           "model" = model, "means" = Total$meaneffect, "rescaleResids" = rescaleResids,
-          "invTransFun" = invTransFun)
+          "invTransFun" = invTransFun, "newtonRaphson" = newtonRaphson,
+          "asymptotes" = asymptotes)
 
       bootStraps = if(is.null(clusterObj)) {
               lapply(integer(B), bootFun, args = paramsBootstrap)
@@ -282,7 +289,7 @@ fitSurface <- function(data, fitResult,
 
   retObj <- c(list("data" = data, "fitResult" = fitResult,
                    "transforms" = transforms, "null_model" = null_model,
-                   "method" = method, "offAxisTable" = offAxisTable,
+                   "method" = method, "offAxisTable" = offAxisTable, "asymptotes" = asymptotes,
                    "occupancy" = occupancy, "CP" = CP, "cutoff" = cutoff), statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
   # add compound names from marginal fit

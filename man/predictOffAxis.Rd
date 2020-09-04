@@ -9,7 +9,6 @@ predictOffAxis(
   fitResult,
   transforms = fitResult$transforms,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
-  startvalues = NULL,
   fit = NULL,
   ...
 )
@@ -40,11 +39,9 @@ Currently, allowed options are \code{"loewe"} for generalized Loewe model,
 \code{"hsa"} for Highest Single Agent model, \code{"bliss"} for Bliss additivity,
 and \code{"loewe2"} for the alternative Loewe generalization.}
 
-\item{startvalues}{starting values for the off-axis fit}
-
 \item{fit}{a pre-calculated off-axis fit}
 
-\item{...}{Further arguments that are currently unused}
+\item{...}{Further arguments passed on to the Loewe fitters}
 }
 \value{
 This functions returns a named vector with predicted off-axis points

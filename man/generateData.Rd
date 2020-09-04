@@ -18,6 +18,7 @@ generateData(
   wild_bootstrap = FALSE,
   rescaleResids,
   invTransFun,
+  newtonRaphson = FALSE,
   ...
 )
 }
@@ -77,9 +78,13 @@ heteroskedasticity should be used. If \code{wild_bootstrap = TRUE}, errors
 are generated from \code{sampling_errors} multiplied by a random variable
 following Rademacher distribution. Argument is used only if \code{error = 4}.}
 
-\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
+\item{rescaleResids}{a boolean indicating whether to rescale residuals,
+or else normality of the residuals is assumed.}
 
 \item{invTransFun}{the inverse transformation function, back to the variance domain}
+
+\item{newtonRaphson}{A boolean, should Newton-Raphson be used to find Loewe
+response surfaces? May be faster but also less stable to switch on}
 
 \item{...}{Further arguments}
 }

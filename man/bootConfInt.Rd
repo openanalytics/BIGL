@@ -98,7 +98,8 @@ calculation of the confidence intervals?}
 
 \item{model}{The mean-variance model}
 
-\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
+\item{rescaleResids}{a boolean indicating whether to rescale residuals,
+or else normality of the residuals is assumed.}
 
 \item{...}{Further arguments that will be later passed to
 \code{\link{generateData}} function during bootstrapping}

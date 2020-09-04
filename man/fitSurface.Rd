@@ -28,7 +28,9 @@ fitSurface(
   bootRS = TRUE,
   trans = "identity",
   rescaleResids = FALSE,
-  invtrans = switch(trans, identity = "identity", log = "exp")
+  invtrans = switch(trans, identity = "identity", log = "exp"),
+  newtonRaphson = FALSE,
+  asymptotes = 2
 )
 }
 \arguments{
@@ -129,7 +131,14 @@ calculation of the confidence intervals?}
 \item{trans, invtrans}{the transformation function for the variance and its
 inverse, possibly as strings}
 
-\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
+\item{rescaleResids}{a boolean indicating whether to rescale residuals,
+or else normality of the residuals is assumed.}
+
+\item{newtonRaphson}{A boolean, should Newton-Raphson be used to find Loewe
+response surfaces? May be faster but also less stable to switch on}
+
+\item{asymptotes}{Number of asymptotes. It can be either \code{1}
+as in standard Loewe model or \code{2} as in generalized Loewe model.}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates

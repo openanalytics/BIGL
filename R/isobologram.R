@@ -49,7 +49,7 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
                                  "d2" = sort(unique(d2))))
   doseGrid <- expand.grid(uniqueDoses)
   predSurface <- predictOffAxis(doseGrid, x$fitResult,
-                                null_model = x$null_model)
+                                null_model = x$null_model, asympotes = x$asymptotes)
   melt.surface <- data.frame(doseGrid[with(doseGrid, d1&d2),],
                              "effect" = as.numeric(predSurface))
 

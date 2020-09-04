@@ -24,7 +24,8 @@ effect of an off-axis point. If no transformations are used the
 \code{"model"} method is recommended. If transformations are used, only the
 \code{"equal"} method can be chosen.}
 
-\item{rescaleResids}{a boolean indicating whether to rescale residuals or assume normality}
+\item{rescaleResids}{a boolean indicating whether to rescale residuals,
+or else normality of the residuals is assumed.}
 
 \item{...}{passed on to predictVar}
 }

@@ -5,7 +5,14 @@
 \title{Compute combined predicted response from drug doses according to standard or
 generalized Loewe model.}
 \usage{
-generalizedLoewe(doseInput, parmInput, asymptotes = 2, startvalues = NULL, ...)
+generalizedLoewe(
+  doseInput,
+  parmInput,
+  asymptotes = 2,
+  startvalues = NULL,
+  newtonRaphson = FALSE,
+  ...
+)
 }
 \arguments{
 \item{doseInput}{Dose-response dataframe containing \code{"d1"} and
@@ -20,6 +27,9 @@ as in standard Loewe model or \code{2} as in generalized Loewe model.}
 
 \item{startvalues}{Starting values for the non-linear equation,
 from the observed data}
+
+\item{newtonRaphson}{a boolean, is Neton raphson used for finding the
+response surface? May be faster but also less stable}
 
 \item{...}{Further arguments that are currently unused}
 }

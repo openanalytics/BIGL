@@ -7,8 +7,7 @@
 #'
 #' @param doseGrid A dose grid with unique combination of doses
 #' @param fit a pre-calculated off-axis fit
-#' @param startvalues starting values for the off-axis fit
-#' @param ... Further arguments that are currently unused
+#' @param ... Further arguments passed on to the Loewe fitters
 #' @inheritParams fitSurface
 #' @return This functions returns a named vector with predicted off-axis points
 #' @export
@@ -22,14 +21,14 @@
 #'     doseGrid <- expand.grid(uniqueDoses)
 #'   predictOffAxis(fitResult, null_model = "hsa", doseGrid = doseGrid)
 predictOffAxis <- function(doseGrid, fitResult, transforms = fitResult$transforms,
-                           null_model = c("loewe", "hsa", "bliss", "loewe2"), startvalues = NULL,
-                            fit = NULL,...) {
+                           null_model = c("loewe", "hsa", "bliss", "loewe2"),
+                           fit = NULL,...) {
   nm = match.arg(null_model)
   if(is.null(fit)){
-    fit = fitOffAxis(doseGrid, fitResult, nm, startvalues)
+    fit = fitOffAxis(doseGrid, fitResult, nm,  ...)
   }
   out = (if(nm %in% c("loewe")) fit$response else fit)[doseGrid$d1 & doseGrid$d2]
-  names(out) = apply(doseGrid[doseGrid$d1 & doseGrid$d2, ], 1, paste, collapse = "_")
+  names(out) = getd1d2(doseGrid[doseGrid$d1 & doseGrid$d2, ])
   if (!is.null(transforms)) {
       CompositeT <- with(transforms,
                          function(y, args) PowerT(BiolT(y, args), args))
@@ -39,14 +38,12 @@ predictOffAxis <- function(doseGrid, fitResult, transforms = fitResult$transform
 }
 fitOffAxis = function(doseGrid, fitResult,
                       null_model = c("loewe", "hsa", "bliss", "loewe2"),
-                      startvalues = NULL){
+                      ...){
   nm = match.arg(null_model)
   switch(nm,
-               "loewe" = generalizedLoewe(doseGrid, fitResult$coef,
-                                          startvalues = startvalues),
+               "loewe" = generalizedLoewe(doseGrid, fitResult$coef, ...),
                "hsa" = hsa(doseGrid, fitResult$coef),
                "bliss" = Blissindependence(doseGrid, fitResult$coef),
-               "loewe2" = harbronLoewe(doseGrid, fitResult$coef,
-                                       startvalues = startvalues)
+               "loewe2" = harbronLoewe(doseGrid, fitResult$coef,...)
   )
 }
