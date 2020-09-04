@@ -51,6 +51,16 @@ test_that("plots", {
             plot(rs, "maxR")
             rgl.close()
           })
+
+      expect_silent({
+        plot(rs, "confInt")
+        rgl.close()
+      })
+
+      expect_silent({
+        plot(rs, "z-score")
+        rgl.close()
+      })
     })
 
 test_that("Error and warnings", {
