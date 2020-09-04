@@ -116,7 +116,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
   transformF <- if (logScale) log10T else function(z) z
 
   zGrid <- predSurface
-  ## If marginal fit information is provided, response surface can be
+  ## If marginal fit informacolorRampPalettetion is provided, response surface can be
   ## automatically calculated.
   if (is.null(predSurface)) {
     respSurface <- predictResponseSurface(doseGrid, fitResult,
@@ -174,21 +174,32 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ## color.
   surfaceColors <- colorRampPalette(colorPalette)(length(breaks) - 1)
 
+  getFF = function(response){
+    if(is.numeric(response)) {
+      cut(response, breaks = breaks, include.lowest = TRUE)
+    } else if(is.factor(response)){
+      response
+    } else if(is.character(response)){
+      factor(response, levels = c("Syn", "None", "Ant"),
+             labels = c("Syn", "None", "Ant"),
+             ordered = TRUE)
+    }
+  }
   surfaceColor <- function(response) {
-    ff <- cut(response, breaks = breaks, include.lowest = TRUE)
+    ff <- getFF(response)
     zcol <- surfaceColors[ff]
     return(zcol)
   }
-
   getLabels <- function(response) {
-    ff <- cut(response, breaks = breaks, include.lowest = TRUE)
+    ff <- getFF(response)
     labels <- gsub(",", ", ", levels(ff))
     return(labels)
   }
 
   ## Generate colors for the surface plot
   if (colorBy == "asis") {
-    colorVec[is.na(colorVec)] <- 0
+    if(is.numeric(colorVec))
+      colorVec[is.na(colorVec)] <- 0
     zcol <- surfaceColor(colorVec)
     labels <- getLabels(colorVec)
 
@@ -202,8 +213,6 @@ plotResponseSurface <- function(data, fitResult = NULL,
     col <- terrain.colors(diff(range(zGridFloor, na.rm = TRUE)))
     zcol <- col[zGridFloor - min(zGridFloor, na.rm = TRUE) + 1]
   }
-
-  ##
   ## 3-dimensional surface plotting
   ##
   labnames <- c("Response", if (!is.null(fitResult$names))
