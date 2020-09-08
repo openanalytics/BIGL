@@ -56,8 +56,8 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
 
   LogOccupancy <- function(d, e, o, h) log(d) - e + abs(1/h) * o
   xf <- with(as.list(parm), {
-    logO1 <- LogOccupancy(dose[, "d1"], e1, oc, h1)
-    logO2 <- LogOccupancy(dose[, "d2"], e2, oc, h2)
+    logO1 <- LogOccupancy(dose[["d1"]], e1, oc, h1)
+    logO2 <- LogOccupancy(dose[["d2"]], e2, oc, h2)
     rvInt <- (m1 - b) * exp(logO1) + (m2 - b) * exp(logO2)
     rv <- b + rvInt/(exp(oc) + 1)
     rv
