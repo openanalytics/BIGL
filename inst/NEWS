@@ -1,3 +1,5 @@
+1.5.3 (2020-09-10)
+  o fix issue with `generalizedLoewe` and `hsa` functions when data is a tibble
 1.5.2 (2020-07-24)
   o fix issue with smooth monotherapy plot when dotted line was not shown due to numeric inaccuracies
 1.5.1 (2020-07-02)
