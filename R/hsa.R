@@ -24,8 +24,8 @@ hsa <- function(doseInput, parmInput, ...) {
     applyFunction <- if (increasing) max else min
   }
 
-  pred1 <- L4(doseInput[, "d1"], pars["h1"], pars["b"], pars["m1"], pars["e1"])
-  pred2 <- L4(doseInput[, "d2"], pars["h2"], pars["b"], pars["m2"], pars["e2"])
+  pred1 <- L4(doseInput[["d1"]], pars["h1"], pars["b"], pars["m1"], pars["e1"])
+  pred2 <- L4(doseInput[["d2"]], pars["h2"], pars["b"], pars["m2"], pars["e2"])
 
   apply(cbind(pred1, pred2), 1, applyFunction)
 
