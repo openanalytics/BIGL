@@ -17,7 +17,7 @@
 #'   \code{colorBy} argument in this method is computed automatically and thus
 #'   cannot be passed to \code{\link{plotResponseSurface}}.
 #' @export
-plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy"), ...) {
+plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "confInt"), ...) {
 
   color <- match.arg(color)
   inputs <- as.list(substitute(list(...)))[-1L]
@@ -47,6 +47,19 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy"), .
     inputs$colorPalette <- c("#EFF3FF", "#BDD7E7", "#6BAED6", "#2171B5")
     if (!exists("breaks", inputs)) inputs$breaks <- c(0, 0.25, 0.5, 0.75, 1)
     if (!exists("main", inputs)) inputs$main <- "Occupancy rate"
+  } else if (color == "confInt"){
+    if(is.null(x$confInt))
+      stop("No confidence intervals were calculated")
+    # x$confInt$offAxis$call = factor(x$confInt$offAxis$call,
+    #                                 levels = c("Syn", "None", "Ant"),
+    #                                 ordered = TRUE)
+    x$confInt$offAxis = cbind(x$confInt$offAxis,
+                                   t(sapply(rownames(x$confInt$offAxis),
+                                            function(y) strsplit(y, split = "_")[[1]])))
+    colnames(x$confInt$offAxis)[5:6] = c("d1", "d2")
+    inputs$colorBy = x$confInt$offAxis[, c("d1", "d2", "call")]
+    if (!exists("breaks", inputs)) inputs$breaks <- seq_len(4)
+    if (!exists("main", inputs)) inputs$main <- "Calls from confidence intervals"
   }
 
   inputs$data <- x$data
@@ -108,6 +121,8 @@ summary.ResponseSurface <- function(object, ...) {
 
   ans$occup <- if (!is.null(object$occupancy)) mean(object$occupancy$occupancy) else NULL
   ans$method <- object$method
+  object$confInt$cutoff = object$cutoff
+  ans$CI = summary(object$confInt)
 
   class(ans) <- "summary.ResponseSurface"
   ans
@@ -156,6 +171,11 @@ print.summary.ResponseSurface <- function(x, ...) {
   if (is.null(x$meanR) & is.null(x$maxR)) {
     cat("\n\n")
     cat("No test statistics were computed.")
+  }
+
+  if(!is.null(x$CI)) {
+    cat("\nCONFIDENCE INTERVALS\n")
+    print(x$CI)
   }
 
   cat("\n")

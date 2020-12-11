@@ -1,3 +1,7 @@
+1.6.0 (2020-12-11)
+  o Residual resampling according to mean-variance trend
+  o With bootstrapped confidence intervals for point-by-point and overall effect sizes
+  o Internal redesign for speed-up, using "d1d2" identifiers
 1.5.3 (2020-09-10)
   o fix issue with `generalizedLoewe` and `hsa` functions when data is a tibble
 1.5.2 (2020-07-24)

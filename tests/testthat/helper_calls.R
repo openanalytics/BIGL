@@ -40,14 +40,13 @@ genData <- function(pars, reps, mult = c(1, -1)) {
   data$effect[d1null] <- L4(data$d2[d1null],
                             pars["h2"], pars["b"], pars["m2"], pars["e2"])
 
-  pred <- predictOffAxis(data, fitResult)$offaxisZTable
-  data$effect[!one_null] <- pred$predicted
+  data$effect[!one_null] <- predictOffAxis(data[,c("d1", "d2")], fitResult)
 
   ## Create some replicates
   data <- data[rep(row.names(data), reps), ]
   ## Add noise to data and synergistic/antagonistic effect to off-axis
   data$effect[!one_null] <- data$effect[!one_null] +
-    mult * rnorm(sum(!one_null), 0.3, 0.1)
+    mult * rnorm(sum(!one_null)*reps, 0.3, 0.1)
 
   return(list("data" = data, "pars" = fitResult))
 }

@@ -2,8 +2,7 @@ context("maxR")
 
 test_that('statistics', {
 
-  expect_silent(MaxR <- maxR(data, fit, transforms, B.B = NULL, B.CP = NULL,
-                             Ymean = offAxisTable, CP = rs$CP, reps = reps))
+  expect_silent(MaxR <- rs$maxR)
 
   expect_true(inherits(MaxR, "maxR"))
   expect_true(exists("q", where = attributes(MaxR$Ymean)) &

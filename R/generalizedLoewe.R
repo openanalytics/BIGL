@@ -6,30 +6,36 @@
 #' @param parmInput Numeric vector or list with appropriately named
 #'   parameter inputs. Typically, it will be coefficients from a
 #'   \code{MarginalFit} object.
-#' @param asymptotes Number of asymptotes. It can be either \code{1}
-#'   as in standard Loewe model or \code{2} as in generalized Loewe model.
+#' @inheritParams fitSurface
+#' @param newtonRaphson a boolean, is Newton raphson used for finding the
+#' response surface? May be faster but also less stable
 #' @param ... Further arguments that are currently unused
+#' @inheritParams simulateNull
+#' @importFrom nleqslv nleqslv
 #' @importFrom stats uniroot
-generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
-
-  stopifnot(asymptotes %in% c(1, 2))
-  stopifnot(identical(colnames(doseInput), c("d1", "d2")))
-
+generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2,
+                              startvalues = NULL, newtonRaphson = FALSE, ...) {
+  parmInput[c("h1", "h2")] = abs(parmInput[c("h1", "h2")])
   ## Need good accuracy here: solve for -logit(o)
   solver <- function(dose, par){
-    dose <- as.numeric(dose)
     fun0 <- function(x){
-      logO1 <- log(dose[1]) - par["e1"] + x/abs(par["h1"])
-      logO2 <- log(dose[2]) - par["e2"] + x/abs(par["h2"])
-      res <- exp(logO1) + exp(logO2) - 1
-      ifelse(is.finite(res), res, 1)
+      res <- exp(dose[1] + x/par["h1"]) + exp(dose[2] + x/par["h2"]) - 1
+      if(is.finite(res)) res else 1
     }
-    uniroot(fun0, c(-5000, 5000), tol = .Machine$double.eps)$root
+    gr0 = function(x){
+      exp(dose[1] + x/par["h1"])/par["h1"] +
+        exp(dose[2] + x/par["h2"])/par["h2"]
+    }
+    if(newtonRaphson)
+      nleqslv(fn = fun0, x = dose[3], jac = gr0)$x
+    else
+      uniroot(fun0, c(-5000, 5000), tol = .Machine$double.eps)$root
   }
 
   ## Remove observations where both drugs are dosed at zero
   allZero <- !rowSums(doseInput != 0)
   dose <- doseInput[!allZero,, drop = FALSE]
+  logDoseMinE = log(dose) - rep(parmInput[c("e1", "e2")], each = nrow(dose))
 
   ## In case of a single asymptote, use an artificial one for the second drug
   ## equal to the first one.
@@ -46,11 +52,14 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
   ## If agonist and antagonist, give a warning
   if (!(increasing || decreasing)) {
     warning("Marginal curves are diverging. The synergy/antagonism calls may be reversed")
-  }  
-  
+  }
+
+  logDoseMinE = cbind(logDoseMinE,
+                      "start" = if(is.null(startvalues)) integer(nrow(logDoseMinE)) else
+                        startvalues)
   ## For each combination of Compound 1 and Compound 2, find transformed
   ## occupancy rate, i.e. -logit(o*), which satisfies Loewe model equation.
-  oc <- apply(dose, 1, solver, parmInput)
+  oc <- apply(logDoseMinE, 1, solver, parmInput)
   if (all(is.na(oc))) stop("genLoewe: no roots found between starting parameters")
   if (any(is.na(oc))) warning("genLoewe: some roots not found")
 
@@ -72,6 +81,6 @@ generalizedLoewe <- function (doseInput, parmInput, asymptotes = 2, ...) {
     xf <- rv
   }
 
-  return(list("response" = xf,
+  return(list("response" = xf, "oc" = oc,
               "occupancy" = cbind(dose, "occupancy" = 1/(exp(oc)+1))))
 }

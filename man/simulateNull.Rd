@@ -7,7 +7,9 @@
 simulateNull(
   data,
   fitResult,
+  doseGrid,
   transforms = fitResult$transforms,
+  startvalues,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
   ...
 )
@@ -27,11 +29,16 @@ were used in marginal model estimation, \code{fitResult} should contain
 \code{transforms} elements with these transformations. Alternatively, these
 can also be specified via \code{transforms} argument.}
 
+\item{doseGrid}{A grid of dose combinations}
+
 \item{transforms}{Transformation functions. If non-null, \code{transforms} is
 a list containing 5 elements, namely biological and power transformations
 along with their inverse functions and \code{compositeArgs} which is a list
 with argument values shared across the 4 functions. See vignette for more
 information.}
+
+\item{startvalues}{Starting values for the non-linear equation,
+from the observed data}
 
 \item{null_model}{Specified null model for the expected response surface.
 Currently, allowed options are \code{"loewe"} for generalized Loewe model,
@@ -52,5 +59,6 @@ Simulate data from a given null model and monotherapy coefficients
   data <- subset(directAntivirals, experiment == 1)
   ## Data must contain d1, d2 and effect columns
   fitResult <- fitMarginals(data)
-  simulateNull(data, fitResult, null_model = "hsa")
+  simDat <- simulateNull(data, fitResult, expand.grid(d1 = data$d1, d2 = data$d2),
+  null_model = "hsa")
 }

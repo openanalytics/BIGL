@@ -1,9 +1,9 @@
 Package: BIGL
 Type: Package
 Title: Biochemically Intuitive Generalized Loewe Model
-Version: 1.5.3
-Date: 2020-09-10
-Author: Heather Turner, Annelies Tourny, Olivier Thas, Maxim Nazarov, Rytis Bagdziunas
+Version: 1.6.2.1
+Date: 2020-12-11
+Author: Heather Turner, Annelies Tourny, Olivier Thas, Maxim Nazarov, Rytis Bagdziunas, Stijn Hawinkel
 Maintainer: Maxim Nazarov <maxim.nazarov@openanalytics.eu>
 Description: Response surface methods for drug synergy analysis. Available
     methods include generalized and classical Loewe formulations as well as Highest
@@ -16,7 +16,7 @@ Description: Response surface methods for drug synergy analysis. Available
     Maxim Nazarov, Heather Turner, Bie Verbist & Hugo Ceulemans (2017) 
     <doi:10.1038/s41598-017-18068-5>.
 License: GPL-3
-Depends: R (>= 3.0)
+Depends: R (>= 3.5)
 Imports:
     ggplot2,
     MASS,
@@ -27,7 +27,14 @@ Imports:
     progress,
     rgl,
     robustbase,
-    scales
+    scales,
+    nleqslv,
+    grDevices, 
+    graphics, 
+    stats, 
+    tibble,
+    dplyr,
+    utils
 Suggests:
     knitr,
     rmarkdown,
