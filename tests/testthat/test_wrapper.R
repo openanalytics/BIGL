@@ -58,7 +58,7 @@ test_that('root finders', {
 test_that("plots", {
 #      contour(rs)
 #      contour(rs, xlab = "x-label", ylab = "y-label")
-#      
+      
       expect_silent(isobologram(rs))
       
       expect_silent({
