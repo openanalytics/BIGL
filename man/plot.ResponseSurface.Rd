@@ -4,7 +4,7 @@
 \alias{plot.ResponseSurface}
 \title{Method for plotting response surface objects}
 \usage{
-\method{plot}{ResponseSurface}(x, color = c("z-score", "maxR", "occupancy"), ...)
+\method{plot}{ResponseSurface}(x, color = c("z-score", "maxR", "occupancy", "confInt"), ...)
 }
 \arguments{
 \item{x}{Output of \code{\link{fitSurface}}}

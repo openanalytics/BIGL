@@ -21,8 +21,17 @@ fitSurface(
   sampling_errors = NULL,
   wild_bootstrap = FALSE,
   cutoff = 0.95,
-  parallel = TRUE,
-  method = c("equal", "model", "unequal")
+  parallel = FALSE,
+  progressBar = TRUE,
+  method = c("equal", "model", "unequal"),
+  confInt = TRUE,
+  bootRS = TRUE,
+  trans = "identity",
+  rescaleResids = FALSE,
+  invtrans = switch(trans, identity = "identity", log = "exp"),
+  newtonRaphson = FALSE,
+  asymptotes = 2,
+  bootmethod = method
 )
 }
 \arguments{
@@ -103,6 +112,8 @@ be used or logical \code{TRUE/FALSE}. If \code{parallel = TRUE}, then
 \code{parallel = FALSE}, then a single thread is used and cluster object
 is not created.}
 
+\item{progressBar}{A boolean, should progress of bootstraps be shown?}
+
 \item{method}{What assumption should be used for the variance of on- and 
 off-axis points. This argument can take one of the values from 
 \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
@@ -112,6 +123,25 @@ off-axis points and \code{"model"} predicts variance based on the average
 effect of an off-axis point. If no transformations are used the 
 \code{"model"} method is recommended. If transformations are used, only the
 \code{"equal"} method can be chosen.}
+
+\item{confInt}{a boolean, should confidence intervals be returned?}
+
+\item{bootRS}{a boolean, should bootstrapped response surfaces be used in the
+calculation of the confidence intervals?}
+
+\item{trans, invtrans}{the transformation function for the variance and its
+inverse, possibly as strings}
+
+\item{rescaleResids}{a boolean indicating whether to rescale residuals,
+or else normality of the residuals is assumed.}
+
+\item{newtonRaphson}{A boolean, should Newton-Raphson be used to find Loewe
+response surfaces? May be faster but also less stable to switch on}
+
+\item{asymptotes}{Number of asymptotes. It can be either \code{1}
+as in standard Loewe model or \code{2} as in generalized Loewe model.}
+
+\item{bootmethod}{The resampling method to be used in the bootstraps. Defaults to the same as method}
 }
 \value{
 This function returns a \code{ResponseSurface} object with estimates
@@ -120,7 +150,7 @@ This function returns a \code{ResponseSurface} object with estimates
 
   Elements of the list include input data, monotherapy model coefficients and
   transformation functions, null model used to construct the surface as well
-  as estimated CP matrix (see \code{\link{CPBootstrap}}), occupancy level at
+  as estimated CP matrix, occupancy level at
   each dose combination according to the generalized Loewe model and
   \code{"offAxisTable"} element which contains observed and predicted effects
   as well as estimated z-scores for each dose combination.

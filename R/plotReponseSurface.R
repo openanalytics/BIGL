@@ -119,14 +119,14 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ## If marginal fit information is provided, response surface can be
   ## automatically calculated.
   if (is.null(predSurface)) {
-    respSurface <- predictOffAxis(data, fitResult,
+    respSurface <- predictResponseSurface(doseGrid, fitResult,
                                   null_model = null_model,
                                   transforms = transforms)
     if (!is.null(transforms)) {
       predSurface <- with(transforms,
-                          InvPowerT(respSurface$predSurface, compositeArgs))
+                          InvPowerT(respSurface, compositeArgs))
     } else {
-      predSurface <- respSurface$predSurface
+      predSurface <- respSurface
     }
     zGrid <- predSurface
   }
@@ -176,21 +176,33 @@ plotResponseSurface <- function(data, fitResult = NULL,
   ## color.
   surfaceColors <- colorRampPalette(colorPalette)(length(breaks) - 1)
 
+  getFF = function(response){
+    if(is.numeric(response)) {
+      cut(response, breaks = breaks, include.lowest = TRUE)
+    } else if(is.factor(response)){
+      response
+    } else if(is.character(response)){
+      factor(response, levels = c("Syn", "None", "Ant"),
+             labels = c("Syn", "None", "Ant"),
+             ordered = TRUE)
+    }
+  }
   surfaceColor <- function(response) {
-    ff <- cut(response, breaks = breaks, include.lowest = TRUE)
+    ff <- getFF(response)
     zcol <- surfaceColors[ff]
     return(zcol)
   }
 
   getLabels <- function(response) {
-    ff <- cut(response, breaks = breaks, include.lowest = TRUE)
+    ff <- getFF(response)
     labels <- gsub(",", ", ", levels(ff))
     return(labels)
   }
 
   ## Generate colors for the surface plot
   if (colorBy == "asis") {
-    colorVec[is.na(colorVec)] <- 0
+    if(is.numeric(colorVec))
+      colorVec[is.na(colorVec)] <- 0
     zcol <- surfaceColor(colorVec)
     labels <- getLabels(colorVec)
 
