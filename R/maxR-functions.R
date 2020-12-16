@@ -153,11 +153,13 @@ plot.maxR <- function(x,
 #'   significant deviations from the expected response surface.
 #' @export
 #' @examples
+#' \donttest{
 #'   data <- subset(directAntivirals, experiment == 2)
 #'   ## Data must contain d1, d2 and effect columns
 #'   fitResult <- fitMarginals(data)
 #'   surf <- fitSurface(data, fitResult, statistic = "maxR")
 #'   outsidePoints(surf$maxR$Ymean)
+#' }
 outsidePoints <- function(maxR, B = 10000) {
   if (is.null(attr(maxR, "distr"))) {
     n1 <- nrow(maxR)

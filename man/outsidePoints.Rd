@@ -25,9 +25,11 @@ List all points with corresponding p-values declared non-additive by the
 maxR statistical test.
 }
 \examples{
+\donttest{
   data <- subset(directAntivirals, experiment == 2)
   ## Data must contain d1, d2 and effect columns
   fitResult <- fitMarginals(data)
   surf <- fitSurface(data, fitResult, statistic = "maxR")
   outsidePoints(surf$maxR$Ymean)
+}
 }
