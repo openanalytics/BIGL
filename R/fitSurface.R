@@ -64,6 +64,7 @@
 #'   is not created.
 #' @param CP Prediction covariance matrix. If not specified, it will be estimated
 #'   by bootstrap using \code{B.CP} iterations.
+#' @param progressBar A boolean, should progress of bootstraps be shown?
 #' @param method What assumption should be used for the variance of on- and 
 #'   off-axis points. This argument can take one of the values from 
 #'   \code{c("equal", "model", "unequal")}. With the value \code{"equal"} as the
@@ -73,15 +74,29 @@
 #'   effect of an off-axis point. If no transformations are used the 
 #'   \code{"model"} method is recommended. If transformations are used, only the
 #'   \code{"equal"} method can be chosen.
+#' @param confInt a boolean, should confidence intervals be returned?
+#' @param bootRS a boolean, should bootstrapped response surfaces be used in the
+#'  calculation of the confidence intervals?
+#' @param trans,invtrans the transformation function for the variance and its
+#' inverse, possibly as strings
+#' @param rescaleResids a boolean indicating whether to rescale residuals,
+#' or else normality of the residuals is assumed.
+#' @param newtonRaphson A boolean, should Newton-Raphson be used to find Loewe
+#' response surfaces? May be faster but also less stable to switch on
+#' @param asymptotes Number of asymptotes. It can be either \code{1}
+#'   as in standard Loewe model or \code{2} as in generalized Loewe model.
+#' @param bootmethod The resampling method to be used in the bootstraps. Defaults to the same as method
 #' @inheritParams generateData
-#' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster
+#' @importFrom parallel makeCluster clusterSetRNGStream detectCores stopCluster parLapply
+#' @importFrom progress progress_bar
+#' @importFrom stats aggregate
 #' @return This function returns a \code{ResponseSurface} object with estimates
 #'   of the predicted surface. \code{ResponseSurface} object is essentially a
 #'   list with appropriately named elements.
 #'
 #'   Elements of the list include input data, monotherapy model coefficients and
 #'   transformation functions, null model used to construct the surface as well
-#'   as estimated CP matrix (see \code{\link{CPBootstrap}}), occupancy level at
+#'   as estimated CP matrix, occupancy level at
 #'   each dose combination according to the generalized Loewe model and
 #'   \code{"offAxisTable"} element which contains observed and predicted effects
 #'   as well as estimated z-scores for each dose combination.
@@ -110,111 +125,176 @@ fitSurface <- function(data, fitResult,
                        statistic = c("none", "meanR", "maxR", "both"),
                        CP = NULL, B.CP = 50, B.B = NULL, nested_bootstrap = FALSE,
                        error = 4, sampling_errors = NULL, wild_bootstrap = FALSE,
-                       cutoff = 0.95, parallel = TRUE,
-                       method = c("equal", "model", "unequal")) {
+                       cutoff = 0.95, parallel = FALSE, progressBar = TRUE,
+                       method = c("equal", "model", "unequal"), confInt = TRUE,
+                       bootRS = TRUE, trans = "identity", rescaleResids = FALSE,
+                       invtrans = switch(trans, "identity" = "identity", "log" = "exp"),
+                       newtonRaphson = FALSE, asymptotes = 2, bootmethod = method) {
 
   ## Argument matching
   null_model <- match.arg(null_model)
   statistic <- match.arg(statistic)
   method <- match.arg(method)
-  
+  transFun = match.fun(trans); invTransFun = match.fun(invtrans)
+
   if (method %in% c("model", "unequal") && (!is.null(transforms) || !is.null(fitResult$transforms))) {
     stop("No transformations can be used when choosing the method 'model' or 'unequal'")
   }
 
   ## Verify column names of input dataframe
-  if (!all(c(effect, d1, d2) %in% colnames(data)))
+  if (!all(c("effect", "d1", "d2") %in% colnames(data)))
     stop("effect, d1 and d2 arguments must be column names of data")
-  id <- match(c(effect, d1, d2), colnames(data))
+  id <- match(c("effect", "d1", "d2"), colnames(data))
   colnames(data)[id] <- c("effect", "d1", "d2")
-
+  data$d1d2 = apply(data[, c("d1", "d2")], 1, paste, collapse = "_")
   sigma0 <- fitResult$sigma
   df0 <- fitResult$df
   MSE0 <- sigma0^2
-  coefFit <- fitResult$coef
 
-  paramsEstimate <- list("data" = data,
-                         "fitResult" = fitResult,
-                         "coefFit" = coefFit,
-                         "null_model" = null_model,
-                         "transforms" = transforms)
-
-  respS <- do.call(predictOffAxis, paramsEstimate)
-  offaxisZScores <- with(respS$offaxisZTable,
-                         (effect - predicted) / sigma0)
-  offAxisTable <- cbind(respS$offaxisZTable, "z.score" = offaxisZScores)
-
-  ## Setup parallel computation
-  if ((is.logical(parallel) & parallel) | is.numeric(parallel)) {
-    nCores <- ifelse(is.logical(parallel),
-                     max(1, detectCores() - 1),
-                     parallel)
-    clusterObj <- makeCluster(nCores, outfile="")
-    clusterSetRNGStream(clusterObj)
+  #Off-axis data and predictions
+  data_off = with(data, data[d1 & d2, , drop = FALSE])
+  uniqueDoses <- with(data, list("d1" = sort(unique(d1)),
+     "d2" = sort(unique(d2))))
+  doseGrid <- expand.grid(uniqueDoses)
+  offAxisFit = fitOffAxis(fitResult, null_model = null_model,
+                               doseGrid = doseGrid, newtonRaphson = newtonRaphson)
+  offAxisPred = predictOffAxis(fitResult, null_model = null_model,
+                                          doseGrid = doseGrid, transforms = transforms,
+                                          fit = offAxisFit)
+  #Retrieve all off-axis points
+  idOffDoseGrid = with(doseGrid, d1 & d2)
+  doseGridOff = doseGrid[idOffDoseGrid,]
+  d1d2off = apply(doseGridOff, 1, paste, collapse = "_")
+  rownames(doseGridOff) = d1d2off
+  idUnique = d1d2off[match(data_off$d1d2, d1d2off)]
+  offAxisPredAll <- offAxisPred[idUnique]
+  offaxisZTable <- cbind(data_off[, c("d1", "d2", "effect", "d1d2"), drop = FALSE],
+                         "predicted" = offAxisPredAll)
+  if(!is.null(transforms))
+    offaxisZTable$effect <- with(transforms,
+                      PowerT(offaxisZTable$effect, compositeArgs))
+  offAxisTable <- cbind(offaxisZTable,
+                        "z.score" = with(offaxisZTable, (effect - predicted) / sigma0))
+  if(null_model == "loewe"){
+   occupancy = offAxisFit$occupancy
+    startvalues = offAxisFit$oc
+  } else if(null_model == "loewe2"){
+    startvalues = offAxisFit
+    occupancy = NULL
   } else {
-    clusterObj <- NULL
+    occupancy = startvalues = NULL
   }
-
-
 ### Computation of MeanR/MaxR statistics
   ## Bootstrap sampling vector
   if (is.null(sampling_errors)) {
     ## Ensure errors are generated from transformed data if applicable
-    dataT <- data[, c("d1", "d2", "effect")]
+    dataT <- data[, c("d1", "d2", "effect", "d1d2")]
     if (!is.null(transforms)) {
       dataT$effect <- with(transforms,
                            PowerT(dataT$effect, compositeArgs))
     }
-
-    mean_effects <- aggregate(effect ~ d1 + d2, dataT, mean)
-    Total <- merge(dataT, mean_effects, by = c("d1", "d2"))
-    colnames(Total) <- c("d1", "d2", "effect", "meaneffect")
+    mean_effects <- aggregate(data = dataT, effect ~ d1d2, mean)
+    names(mean_effects) = c("d1d2", "meaneffect")
+    Total <- merge(dataT, mean_effects, by = c("d1d2"))
     sampling_errors <- Total$effect - Total$meaneffect
   }
 
   ## NB: mean responses are taken
-  Ymean <- aggregate(effect - predicted ~ d1 + d2,
-                     respS$offaxisZTable, mean)
-  R <- Ymean[["effect - predicted"]]
-  reps <- aggregate(effect ~ d1 + d2, respS$offaxisZTable, length)$effect
-  ## Covariance matrix of the predictions
-  stopifnot(length(R) == length(reps))
+  R = with(offaxisZTable, tapply(effect-predicted, d1d2, mean))
+  reps <- with(offaxisZTable, tapply(effect-predicted, d1d2, length))
+  if (all(reps == 1) && method %in% c("model", "unequal")) {
+    stop("Replicates are required when choosing the method 'model' or 'unequal'")
+  }
+  #Check predicted variances
+  if(method == "model"){
+    off_mean <- with(data_off, tapply(effect, d1d2, mean))
+    off_var = with(data_off, tapply(effect, d1d2, var))
+    Coef = lm.fit(transFun(off_var), x = cbind(1, off_mean))$coef
+    #Don't allow negative variances
+    if(Coef[2]<0){
+      #warning("Variance was found to decrease with mean, check mean-variance trend!")
+    }
+    predVar = invTransFun(Coef[1] + Coef[2]*off_mean)
+    if(any(predVar < 0)){
+      #warning("Negative variances modelled on real data!\nCheck mean-variance trend with plotMeanVarFit and consider transforming the variance!")
+    }
+    model = c(Coef, "min" = min(off_var[off_var>0]),
+              "max" = max(off_var)) #Store smallest observed variance
+  } else model = NULL
 
-  paramsBootstrap <- list("B.B" = B.B, "B.CP" = B.CP,
-                          "error" = error, "sampling_errors" = sampling_errors,
-                          "nested_bootstrap" = nested_bootstrap,
-                          "wild_bootstrap" = wild_bootstrap,
-                          "cutoff" = cutoff, "Ymean" = Ymean,
-                          "reps" = reps, "R" = R,
-                          "method" = method,
-                          "clusterObj" = clusterObj)
+  B = if(is.null(B.B)) B.CP else max(B.B, B.CP) #Number of bootstraps
+  #If any bootstraps needed, do them first
+  if(is.null(CP) && (is.null(B))){
+    stop("No covariance matrix supplied, and no bootstraps required.\n Please provide either of both!")
+  } else if(!is.null(B)){
+      ## Setup parallel computation
+      if ((is.logical(parallel) & parallel) | is.numeric(parallel)) {
+          nCores <- ifelse(is.logical(parallel),
+                           max(1, detectCores() - 1),
+                           parallel)
+          clusterObj <- makeCluster(nCores, outfile="")
+          clusterSetRNGStream(clusterObj)
+      } else {
+          clusterObj <- NULL
+      }
 
+      #Progess bar
+      if(progressBar && !is.null(B)){
+      pb <- progress_bar$new(format = "(bootstraps): [:bar]:percent",
+                             total = B, width = 60)
+      pb$tick(0)
+      } else {pb = NULL}
+     #Start bootstrapping
+       paramsBootstrap <- list("data"  =data,
+          "fitResult" = fitResult, "transforms" = transforms,
+                              "null_model" = null_model,
+          "error" = error, "sampling_errors" = sampling_errors,
+                             "wild_bootstrap" = wild_bootstrap, "bootmethod" = bootmethod,
+                              "method" = method, "doseGrid" = doseGrid,
+          "startvalues" = startvalues, "pb" = pb, "progressBar" = progressBar,
+          "model" = model, "means" = Total$meaneffect, "rescaleResids" = rescaleResids,
+          "invTransFun" = invTransFun, "newtonRaphson" = newtonRaphson,
+          "asymptotes" = asymptotes)
+
+      bootStraps = if(is.null(clusterObj)) {
+              lapply(integer(B), bootFun, args = paramsBootstrap)
+          } else {
+              parLapply(clusterObj, integer(B), bootFun, args = paramsBootstrap)
+          }
+  } else {bootStraps = clusterObj = NULL}
   ## If not provided, compute prediction covariance matrix by bootstrap
-  if (is.null(CP)) CP <- do.call(CPBootstrap, c(paramsBootstrap, paramsEstimate))
-  paramsBootstrap$CP <- CP
-
-  retObj <- list("data" = data,
-                 "fitResult" = fitResult,
-                 "transforms" = transforms,
-                 "method" = method,
-                 "null_model" = null_model,
-                 "offAxisTable" = offAxisTable,
-                 "occupancy" = respS$occupancy,
-                 "CP" = CP)
-
+  if (is.null(CP)) CP <- getCP(bootStraps, null_model, transforms,
+                               sigma0 = sigma0, doseGrid = doseGrid)
+  CP = CP[names(R), names(R)]
+  #Calculate test statistics
+  paramsStatistics = list("bootStraps" = bootStraps, "CP" = CP, "cutoff" = cutoff,
+                          "data_off" = data_off, "fitResult" = fitResult,
+                          "null_model" = null_model, "transforms" = transforms,
+                          "doseGrid" = doseGrid, "reps" = reps, "R" = R,
+                          "idUnique" = idUnique, "B.B" = B.B,
+                          "Total" = Total, "n1" = length(R), "method" = method,
+                          "respS" = offAxisPredAll, "bootRS" = bootRS,
+                          "doseGridOff" = doseGridOff[names(R),], "transFun" = transFun,
+                          "invTransFun" = invTransFun, "model" = model, "rescaleResids" = rescaleResids)
   statObj <- NULL
   if (statistic %in% c("meanR", "both"))
-    statObj <- c(statObj, list("meanR" = do.call(meanR, c(paramsBootstrap, paramsEstimate))))
+      statObj <- c(statObj, list("meanR" = do.call(meanR, paramsStatistics)))
   if (statistic %in% c("maxR", "both"))
-    statObj <- c(statObj, list("maxR" = do.call(maxR, c(paramsBootstrap, paramsEstimate))))
+      statObj <- c(statObj, list("maxR" = do.call(maxR, paramsStatistics)))
+  if(confInt && is.null(B.B) && is.null(B.CP)){
+    warning("Confidence intervals only available with the bootstrap")
+    confInt = FALSE
+  }
+  if(confInt)
+      statObj <- c(statObj, list("confInt" = do.call(bootConfInt, paramsStatistics)))
 
-  retObj <- c(retObj, statObj)
+  retObj <- c(list("data" = data, "fitResult" = fitResult,
+                   "transforms" = transforms, "null_model" = null_model,
+                   "method" = method, "offAxisTable" = offAxisTable, "asymptotes" = asymptotes,
+                   "occupancy" = occupancy, "CP" = CP, "cutoff" = cutoff), statObj)
   if (!is.null(clusterObj)) stopCluster(clusterObj)
-
   # add compound names from marginal fit
   retObj$names <- fitResult$names
-  
   class(retObj) <- append(class(retObj), "ResponseSurface")
   return(retObj)
-
 }

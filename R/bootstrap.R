@@ -33,8 +33,13 @@
 #'   heteroskedasticity should be used. If \code{wild_bootstrap = TRUE}, errors
 #'   are generated from \code{sampling_errors} multiplied by a random variable
 #'   following Rademacher distribution. Argument is used only if \code{error = 4}.
+#' @param model The mean-variance model
+#' @param means The vector of mean values of the response surface, for variance modelling
+#' @param invTransFun the inverse transformation function, back to the variance domain
 #' @param ... Further arguments
 #' @inheritParams fitSurface
+#' @inheritParams predictOffAxis
+#' @importFrom stats lm.fit rnorm rchisq rbinom
 #' @return Dose-response dataframe with generated data including \code{"effect"}
 #'   as well as \code{"d1"} and \code{"d2"} columns.
 #' @export
@@ -49,183 +54,113 @@
 #'   data <- subset(directAntivirals, experiment == 1)
 #'   generateData(data = data[, c("d1", "d2")], pars = coefs, sigma = 1)
 generateData <- function(pars, sigma, data = NULL,
-                         transforms = NULL,
-                         null_model = c("loewe", "hsa", "bliss", "loewe2"),
-                         error = 1, sampling_errors = NULL,
-                         wild_bootstrap = FALSE, ...) {
-  
-  ## Argument matching
-  null_model <- match.arg(null_model)
-  
-  if (inherits(pars, "MarginalFit")) {
-    transforms <- pars$transforms
-    pars <- pars$coef
-  }
-  
-  if (is.null(data)) data <- expand.grid("d1" = rep(0:10, each = 2),
-                                         "d2" = rep(0:10, each = 2))
-  
-  if ("effect" %in% colnames(data)) {
-    warning("effect column is unneeded for generateData() function and will be dropped.")
-    data <- data[, c("d1", "d2")]
-  }
-  
-  ## Use identity transformation if no transform functions are supplied
-  if (is.null(transforms)) {
-    idF <- function(z, ...) z
-    transforms <- list("PowerT" = idF,
-                       "InvPowerT" = idF,
-                       "BiolT" = idF,
-                       "compositeArgs" = NULL)
-  }
-  
-  ySim <- switch(null_model,
-                 "loewe" = generalizedLoewe(data, pars, asymptotes = 2)$response,
-                 "hsa" = hsa(data[, c("d1", "d2")], pars),
-                 "bliss" = Blissindependence(data[, c("d1", "d2")], pars),
-                 "loewe2" = harbronLoewe(data[, c("d1", "d2")], pars))
-  ySim <- with(transforms,
-               PowerT(BiolT(ySim, compositeArgs), compositeArgs))
-  
-  with(as.list(pars), {
-    errors <- switch(as.character(error),
-                     ## Normal
-                     "1" = { rnorm(length(ySim), 0, sigma) },
-                     ## Two normals
-                     "2" = { ru <- sample(1:2, replace = TRUE, size = length(ySim))
-                     mus <- c(-sigma, sigma)
-                     sigmas <- c(sigma/2, sigma/3)
-                     rnorm(length(ySim), mus[ru], sigmas[ru]) },
-                     ## Distribution with right-tail outliers
-                     "3" = { sigma*(rchisq(length(ySim), df=4)-4)/8 },
-                     ## Resampling from defined vector
-                     "4" = { if (!wild_bootstrap) {
-                       errors_test <- sample(sampling_errors, nrow(data), replace = TRUE)
-                       errors_test
-                     } else {
-                       ## Use Rademacher distribution to account for heteroskedasticity
-                       errors_test <- sampling_errors*
-                         (2*rbinom(length(sampling_errors), size = 1, prob = 0.5)-1)
-                       errors_test
-                     }},
-                     stop("Unavailable error type.")
-    )
-    
-    ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
-    data.frame("effect" = ySim, data)
-  })
+		transforms = NULL,
+		null_model = c("loewe", "hsa", "bliss", "loewe2"),
+		error = 1, sampling_errors = NULL, means = NULL,
+		model = NULL, method = "equal", wild_bootstrap = FALSE,
+		rescaleResids, invTransFun, newtonRaphson = FALSE, bootmethod = method, ...) {
+	
+	if(bootmethod == "model") bootmethod <- "unequal"
+	
+	## Argument matching
+	null_model <- match.arg(null_model)
+	
+	if (inherits(pars, "MarginalFit")) {
+		transforms <- pars$transforms
+		pars <- pars$coef
+	}
+	
+	if (is.null(data)) data <- expand.grid("d1" = rep(0:10, each = 2),
+				"d2" = rep(0:10, each = 2))
+	
+	if ("effect" %in% colnames(data)) {
+		warning("effect column is unneeded for generateData() function and will be dropped.")
+		data <- data[, c("d1", "d2")]
+	}
+	
+	## Use identity transformation if no transform functions are supplied
+	if (is.null(transforms)) {
+		idF <- function(z, ...) z
+		transforms <- list("PowerT" = idF,
+				"InvPowerT" = idF,
+				"BiolT" = idF,
+				"compositeArgs" = NULL)
+	}
+	
+	ySim <- switch(null_model,
+			"loewe" = generalizedLoewe(data, pars, asymptotes = 2,
+					newtonRaphson =  newtonRaphson)$response,
+			"hsa" = hsa(data[, c("d1", "d2")], pars),
+			"bliss" = Blissindependence(data[, c("d1", "d2")], pars),
+			"loewe2" = harbronLoewe(data[, c("d1", "d2")], pars,
+					newtonRaphson = newtonRaphson))
+	ySim <- with(transforms, PowerT(BiolT(ySim, compositeArgs), compositeArgs))
+	charEr = as.character(error)
+	if(charEr %in% c("1", "2", "3")){
+		errors = switch(charEr,
+				## Normal
+				"1" = {rnorm(length(ySim), 0, sigma)},
+				## Two normals
+				"2" = {ru <- sample(seq_len(2), replace = TRUE, size = length(ySim))
+					mus <- c(-sigma, sigma)
+					sigmas <- c(sigma/2, sigma/3)
+					rnorm(length(ySim), mus[ru], sigmas[ru])},
+				## Distribution with right-tail outliers
+				"3" = {sigma*(rchisq(length(ySim), df = 4)-4)/8 })
+	} else if(charEr == "4"){
+		if (wild_bootstrap) {
+			## Use Rademacher distribution to account for heteroskedasticity
+			errors = sampling_errors*(2*rbinom(length(ySim), size = 1, prob = 0.5)-1)
+		} else {
+			if(bootmethod == "equal"){
+				errors = sampleResids(means = ySim, sampling_errors = sampling_errors,
+						method = "equal", rescaleResids = FALSE)
+			} else {
+				idd1d2 = with(data, d1&d2)
+				errors = integer(length(ySim))
+				#On-axis points
+				errors[!idd1d2] = sampleResids(means = ySim[!idd1d2], sampling_errors = sampling_errors[!idd1d2],
+						method = "equal", rescaleResids = FALSE)
+				#Off-axis points
+				errors[idd1d2] = sampleResids(means = ySim[idd1d2], sampling_errors = sampling_errors[idd1d2],
+						method = bootmethod, rescaleResids = rescaleResids,
+						model = model, invTransFun = invTransFun)
+			}
+		}
+	} else {
+		stop("Unavailable error type.")
+	}
+	ySim <- with(transforms, InvPowerT(ySim + errors, compositeArgs))
+	if(all(data$effect>0)){
+		ySim = abs(ySim)
+	}
+	return(data.frame("effect" = ySim, data))
 }
 
-#' Estimate CP matrix with bootstrap
+#' Estimate CP matrix from bootstraps
 #'
 #' This function is generally called from within \code{\link{fitSurface}}.
 #'
-#' @param ... Further parameters that will be passed to \code{\link{generateData}}
+#' @param bootStraps the bootstraps carried out already
+#' @param sigma0 standard deviation of the null model on the real data
+#' @param doseGrid a grid of dose combinations
 #' @inheritParams fitSurface
 #' @inheritParams generateData
-#' @importFrom stats aggregate var
-#' @importFrom parallel clusterApply
+#' @importFrom stats lm.fit var
 #' @return Estimated CP matrix
-#' @export
-#' @examples
-#'   data <- subset(directAntivirals, experiment == 5)
-#'   ## Data must contain d1, d2 and effect columns
-#'   fitResult <- fitMarginals(data)
-#'   CPBootstrap(data, fitResult, null_model = "loewe", B.CP = 5)
-CPBootstrap <- function(data, fitResult,
-                        transforms = fitResult$transforms,
-                        null_model = c("loewe", "hsa", "bliss", "loewe2"), B.CP, ...) {
-
-  ## Argument matching
-  null_model <- match.arg(null_model)
-
-  if (B.CP < 2) stop("Number of iterations for bootstrapping CP needs to exceed 2.")
-  sigma0 <- fitResult$sigma
-
-  pred <- sapply(seq_len(B.CP), function(b) {
-    simModel <- simulateNull(data = data, fitResult = fitResult,
-                             transforms = transforms,
-                             null_model = null_model, ...)
-    dataCP <- simModel$data
-    fitResultCP <- simModel$fitResult
-
-    predOffAxis <- predictOffAxis(data = dataCP, fitResult = fitResultCP,
-                                  null_model = null_model,
-                                  transforms = transforms)
-
-    ## If multiple predictions with same x-y coordinates are available,
-    ## average them out.
-    pred <- aggregate(predicted ~ d1 + d2,
-                      predOffAxis$offaxisZTable, mean)$predicted/sigma0
-
-    return(pred)
-  })
-
-  CP <- var(t(pred))
-  return(CP)
+getCP = function(bootStraps, null_model, transforms, sigma0, doseGrid){
+	pred <- vapply(bootStraps,
+			FUN.VALUE = bootStraps[[1]]$respS,
+			function(b) {b$respS/sigma0})
+	var(t(pred))
 }
-
-#' Data generating function used for constructing null distribution of meanR and
-#' maxR statistics
-#'
-#' This function uses \code{\link{simulateNull}} and simulates all necessary
-#' steps to calculate null distribution which will furtherly be used in either
-#' \code{\link{meanR}} or \code{\link{maxR}} functions.
-#'
-#' @param ... Further arguments that will be passed to
-#'   \code{\link{generateData}} function
-#' @inheritParams fitSurface
-#' @inheritParams generateData
-bootstrapData <- function(data, fitResult,
-                          transforms = fitResult$transforms,
-                          null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
-
-  ## Argument matching
-  null_model <- match.arg(null_model)
-
-  simModel <- simulateNull(data = data, fitResult = fitResult,
-                           transforms = transforms,
-                           null_model = null_model, ...)
-  dataB <- simModel$data
-  fitResultB <- simModel$fitResult
-
-  respS <- predictOffAxis(dataB, fitResultB,
-                          null_model = null_model,
-                          transforms = transforms)
-
-  Rb <- aggregate(effect - predicted ~ d1 + d2,
-                  data = respS$offaxisZTable, mean)[[3]]
-
-  repsb <- aggregate(effect ~ d1 + d2,
-                     data = respS$offaxisZTable, length)$effect
-
-  ## Covariance matrix of the predictions
-  n1b <- length(Rb)
-  stopifnot(n1b == length(repsb))
-
-  ## Estimators of the residual variance
-  df0b <- fitResultB$df
-  MSE0b <- fitResultB$sigma^2
-  
-  dat_offB  <- dataB[dataB$d1 != 0 & dataB$d2 != 0, ]
-  off_varB  <- aggregate(effect ~ d1 + d2, data = dat_offB, var)[["effect"]]
-  mse_offb  <- mean(off_varB)
-  off_meanB <- aggregate(effect ~ d1 + d2, data = dat_offB, mean)[["effect"]]
-  
-  linmodB <- lm(off_varB ~ off_meanB)
-  PredvarB <- predict(linmodB)
-
-  out <- list("Rb" = Rb, "MSE0b" = MSE0b, "fitResult" = fitResultB,
-              "n1b" = n1b, "repsb" = repsb, "Predvarb" = PredvarB,
-              "mse_offb" = mse_offb)
-
-  return(out)
-}
-
 #' Simulate data from a given null model and monotherapy coefficients
 #'
 #' @param ... Further parameters that will be passed to
 #'   \code{\link{generateData}}
+#' @param doseGrid A grid of dose combinations
+#' @param startvalues Starting values for the non-linear equation,
+#'   from the observed data
 #' @inheritParams fitSurface
 #' @inheritParams generateData
 #' @return List with \code{data} element containing simulated data and
@@ -235,65 +170,64 @@ bootstrapData <- function(data, fitResult,
 #'   data <- subset(directAntivirals, experiment == 1)
 #'   ## Data must contain d1, d2 and effect columns
 #'   fitResult <- fitMarginals(data)
-#'   simulateNull(data, fitResult, null_model = "hsa")
-simulateNull <- function(data, fitResult,
-                         transforms = fitResult$transforms,
-                         null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
-
-  ## Argument matching
-  null_model <- match.arg(null_model)
-
-  method <- fitResult$method
-  coefFit0 <- fitResult$coef
-  sigma0 <- fitResult$sigma
-  model <- fitResult$model
-
-  control <- {
-    if (method %in% c("nls", "nlslm"))
-      list("maxiter" = 200)
-  }
-
-  ## Parameter estimates may at times return an error due to non-convergence. If
-  ## necessary, repeat the step until it functions properly and 1000 times at
-  ## most.
-  counter <- 0
-  initPars <- coefFit0
-  repeat {
-
-    simData <- generateData(pars = coefFit0, sigma = sigma0,
-                            data = data[, c("d1", "d2")],
-                            transforms = transforms,
-                            null_model = null_model, ...)
-
-    ## In cases where added errors put the response into negative domain, revert
-    ## it back to the positive one. Usually, values of such observations tend to
-    ## be quite small.
-    simData$effect <- abs(simData$effect)
-
-    ## construct a list of arguments, including ... passed to original 
-    ## `fitMarginals` call (saved as `extraArgs`)
-    paramsMarginal <- list("data" = simData, "method" = method, 
-        "start" = initPars, "model" = model, "transforms" = transforms,
-        "control" = control)
-    if (!is.null(fitResult$extraArgs) && is.list(fitResult$extraArgs))
-      # use `modifyList` here, since `control` could be user-defined
-      paramsMarginal <- modifyList(paramsMarginal, fitResult$extraArgs)
-    
-    simFit <- try({
-      do.call(fitMarginals, paramsMarginal)
-    }, silent = TRUE)
-
-    counter <- counter + 1
-    initPars <- NULL
-    if (counter > 1000)
-      stop(paste("Data simulation process failed. ",
-                 "Check that transformation functions correspond ",
-                 "to the marginal model."))
-    if (!inherits(simFit, "try-error")) break
-
-  }
-
-  return(list("data" = simData,
-              "fitResult" = simFit))
-
+#'   simDat <- simulateNull(data, fitResult, expand.grid(d1 = data$d1, d2 = data$d2),
+#'   null_model = "hsa")
+simulateNull <- function(data, fitResult, doseGrid,
+		transforms = fitResult$transforms, startvalues,
+		null_model = c("loewe", "hsa", "bliss", "loewe2"), ...) {
+	## Argument matching
+	null_model <- match.arg(null_model)
+	
+	method <- fitResult$method
+	coefFit0 <- fitResult$coef
+	sigma0 <- fitResult$sigma
+	model <- fitResult$model
+	control <- {
+		if (method %in% c("nls", "nlslm"))
+			list("maxiter" = 200)
+	}
+	## Parameter estimates may at times return an error due to non-convergence. If
+	## necessary, repeat the step until it functions properly and 1000 times at
+	## most.
+	counter <- 0
+	initPars <- coefFit0
+	repeat {
+		simData <- generateData(pars = coefFit0, sigma = sigma0,
+				data = data[, c("d1", "d2")],
+				transforms = transforms,
+				null_model = null_model, ...)
+		## In cases where added errors put the response into negative domain, revert
+		## it back to the positive one. Usually, values of such observations tend to
+		## be quite small.
+		simData$effect <- abs(simData$effect)
+		simData$d1d2 = data$d1d2
+		
+		## construct a list of arguments, including ... passed to original
+		## `fitMarginals` call (saved as `extraArgs`)
+		paramsMarginal <- list("data" = simData, "method" = method,
+				"start" = initPars, "model" = model, "transforms" = transforms,
+				"control" = control)
+		if (!is.null(fitResult$extraArgs) && is.list(fitResult$extraArgs))
+			# use `modifyList` here, since `control` could be user-defined
+			paramsMarginal <- modifyList(paramsMarginal, fitResult$extraArgs)
+		simFit <- try({
+					do.call(fitMarginals, paramsMarginal)
+				}, silent = TRUE)
+		counter <- counter + 1
+		initPars <- NULL
+		if (counter > 1000)
+			stop(paste("Data simulation process failed. ",
+							"Check that transformation functions correspond ",
+							"to the marginal model."))
+		if (!inherits(simFit, "try-error")) break
+	}
+	#Also precalculate response surface, quite computation intensive
+	respS <- predictOffAxis(fitResult = simFit,
+			transforms = transforms, startvalues = startvalues,
+			doseGrid = doseGrid, null_model = null_model, ...)
+	return(list("data" = simData, "simFit" = simFit, "respS" = respS))
 }
+bootFun = function(i, args) {
+	if(args$progressBar) args$pb$tick()
+	do.call(simulateNull, args)
+}#Wrapper with index
