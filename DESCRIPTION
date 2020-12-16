@@ -29,12 +29,6 @@ Imports:
     robustbase,
     scales,
     nleqslv,
-    grDevices, 
-    graphics, 
-    stats, 
-    tibble,
-    dplyr,
-    utils
 Suggests:
     knitr,
     rmarkdown,

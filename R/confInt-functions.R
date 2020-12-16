@@ -52,85 +52,81 @@ print.summary.BIGLconfInt <- function(x, ...) {
 #' @param showAll show all intervals in the plot or only significant ones, logical defaulting to \code{TRUE}
 #' @param ... additional arguments, currently ignored
 #' @importFrom stats setNames
-#' @importFrom dplyr rename mutate
-#' @importFrom tibble rownames_to_column
 #' @export
 #' @note written after the contour() function in the \code{drugCombo} package
 plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, ...) {
 	
-	if("maxR" %in% names(x)){
-		synOut <- x$maxR$Ymean %>% 
-				rename(synCall = call)
-		effectOut <-  x$confInt$offAxis %>% 
-				rename(effectCall = call) %>% 
-				rownames_to_column(var = "rowname") %>% 
-				mutate(d1 = as.numeric(gsub("(.+)_.+", "\\1", rowname)), 
-						d2 = as.numeric(gsub(".+_(.+)", "\\1", rowname)))
+	if ("maxR" %in% names(x)) {
+    synOut <- x$maxR$Ymean
+    names(synOut)[names(synOut) == "call"] <- "synCall"
+    
+    effectOut <- x$confInt$offAxis
+    names(effectOut)[names(effectOut) == "call"] <- "effectCall"
+    effectOut$d1 <- as.numeric(gsub("(.+)_.+", "\\1", rownames(effectOut)))
+    effectOut$d2 <- as.numeric(gsub(".+_(.+)", "\\1", rownames(effectOut)))
+    
 		x <- merge(synOut, effectOut, by = c("d1","d2"))
 	} else {
-		x = x$offAxis %>% 
-				rename(effectCall = call) 
+		x <- x$offAxis
+    names(x)[names(x) == "call"] <- "effectCall"
 		#show doses on equidistant grid
-		d1d2 = rownames(x)
-		d1d2split = sapply(d1d2, function(y) strsplit(y, split = "_")[[1]])
+		d1d2 <- rownames(x)
+		d1d2split <- sapply(d1d2, function(y) strsplit(y, split = "_")[[1]])
 		x$d1 <- as.numeric(d1d2split[1,])
 		x$d2 <- as.numeric(d1d2split[2,])
 	}
-	
-
-
-        # prepare fill legend
-        synCalls <- c("additive", "antagonism", "synergy")
-		
-		if(color == "effect-size"){
-			x$synLabel <- factor(x$effectCall, labels = synCalls, levels = c("None", "Ant", "Syn"))
-		} else {
-			x$synLabel <- factor(x$synCall, labels = synCalls, levels = c("None", "Ant", "Syn"))
-		}
+  
+  # prepare fill legend
+  synCalls <- c("additive", "antagonism", "synergy")
+  
+  if (color == "effect-size") {
+    x$synLabel <- factor(x$effectCall, labels = synCalls, levels = c("None", "Ant", "Syn"))
+  } else {
+    x$synLabel <- factor(x$synCall, labels = synCalls, levels = c("None", "Ant", "Syn"))
+  }
         
-        legendColors <- c("white", "pink", "lightblue")
-        names(legendColors) = synCalls
-        # subset to only the colors that are present in the data
-        legendColors <- legendColors[names(legendColors) %in% as.character(unique(x$synLabel))]
-
-        # text to show
-        
-		if(showAll == TRUE){
-			x$label <- sprintf("%.2f\n(%.2f, %.2f)", x$estimate, x$lower, x$upper)
-		} else {
-			x$label <- ifelse(x$synLabel != "additive",
-					sprintf("%.2f\n(%.2f, %.2f)", x$estimate, x$lower, x$upper),
-					"")
-		}
-
-        x$d1 = factor(x$d1, levels = sort(unique(x$d1)),
-                      labels = sort(unique(x$d1)), ordered = TRUE)
-        x$d2 = factor(x$d2, levels = sort(unique(x$d2)),
-                      labels = sort(unique(x$d2)), ordered = TRUE)
-
-        p <- ggplot(data = x, aes_string(x = "d1", y = "d2")) +
-            geom_tile(aes_string(fill = "synLabel"), color = "grey") +
-            geom_text(aes_string(label = "label"), show.legend = FALSE, size = 3) +
-            # invisible points, used only for labels
-            geom_point(aes_string(color = "synLabel"), alpha = 0) +
-            # round dose labels to digits
-            scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = 4)) +
-            scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = 4)) +
-            scale_fill_manual(values = legendColors,
-                              guide = FALSE) +
-            scale_color_manual( # for a nicer legend
-                values = setNames(seq_len(3), nm = synCalls),
-                guide = guide_legend(title = "call:",
-                                     override.aes = list(alpha = 1, shape = 22, size = 8, color = "grey",
-                                                         fill = legendColors))
-            ) +
-            theme_minimal() +
-            theme(
-                panel.grid.major = element_blank(),
-                legend.position = "bottom",
-                axis.text.x = element_text(angle = 45, hjust = 1)
-            )
-        p
+  legendColors <- c("white", "pink", "lightblue")
+  names(legendColors) <- synCalls
+  # subset to only the colors that are present in the data
+  legendColors <- legendColors[names(legendColors) %in% as.character(unique(x$synLabel))]
+  
+  # text to show
+  if (isTRUE(showAll)) {
+    x$label <- sprintf("%.2f\n(%.2f, %.2f)", x$estimate, x$lower, x$upper)
+  } else {
+    x$label <- ifelse(x$synLabel != "additive",
+        sprintf("%.2f\n(%.2f, %.2f)", x$estimate, x$lower, x$upper),
+        "")
+  }
+  
+  x$d1 <- factor(x$d1, levels = sort(unique(x$d1)),
+      labels = sort(unique(x$d1)), ordered = TRUE)
+  x$d2 <- factor(x$d2, levels = sort(unique(x$d2)),
+      labels = sort(unique(x$d2)), ordered = TRUE)
+  
+  p <- ggplot(data = x, aes_string(x = "d1", y = "d2")) +
+      geom_tile(aes_string(fill = "synLabel"), color = "grey") +
+      geom_text(aes_string(label = "label"), show.legend = FALSE, size = 3) +
+      # invisible points, used only for labels
+      geom_point(aes_string(color = "synLabel"), alpha = 0) +
+      # round dose labels to digits
+      scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = 4)) +
+      scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = 4)) +
+      scale_fill_manual(values = legendColors,
+          guide = FALSE) +
+      scale_color_manual( # for a nicer legend
+          values = setNames(seq_len(3), nm = synCalls),
+          guide = guide_legend(title = "call:",
+              override.aes = list(alpha = 1, shape = 22, size = 8, color = "grey",
+                  fill = legendColors))
+      ) +
+      theme_minimal() +
+      theme(
+          panel.grid.major = element_blank(),
+          legend.position = "bottom",
+          axis.text.x = element_text(angle = 45, hjust = 1)
+      )
+  p
 }
 #' Plot confidence intervals from BIGL object in a contour plot
 #'
