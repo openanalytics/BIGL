@@ -61,6 +61,8 @@ test_that("plots", {
       
       expect_silent(isobologram(rs))
       
+      skip_on_cran()  # rgl fails on mac on CRAN
+      
       expect_silent({
             plot(rs, "maxR")
             rgl.close()
