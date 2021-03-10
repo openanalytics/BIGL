@@ -1,4 +1,4 @@
-1.6.2 (2021-03-08)
+1.6.2 (2021-03-10)
   o Fix issue with testing when variance at off-axis points equals zero
 1.6.0 (2020-12-16)
   o Residual resampling according to mean-variance trend
