@@ -19,7 +19,11 @@ backscaleResids = function(scaledResids, ...){
 #' @inheritParams generateData
 predictVar = function(means, model, invTransFun){
     predVar = invTransFun(model[1] + model[2]*means)
-    predVar[predVar<=0] = model["min"] #Correct for negative variances
+    if(model["min"] == 0){
+        predVar[predVar<=0] = 0.000001 #Correct for negative variances
+    } else {
+        predVar[predVar<=0] = model["min"] #Correct for negative variances
+    }
     predVar[predVar > model["max"]] = model["max"] #Upper bound
     predVar
 }
