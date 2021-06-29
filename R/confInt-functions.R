@@ -113,9 +113,10 @@ plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, ...) {
       scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = 4)) +
       scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = 4)) +
       scale_fill_manual(values = legendColors,
-          guide = FALSE) +
+          guide = "none") +
       scale_color_manual( # for a nicer legend
-          values = setNames(seq_len(3), nm = synCalls),
+          values = setNames(1:3, nm = synCalls),
+          limits = force,
           guide = guide_legend(title = "call:",
               override.aes = list(alpha = 1, shape = 22, size = 8, color = "grey",
                   fill = legendColors))
