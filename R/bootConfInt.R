@@ -13,7 +13,8 @@ bootConfInt = function(Total, idUnique, bootStraps,
                        transforms, respS, B.B, method,
                        CP, reps, n1, cutoff, R, fitResult,
                        bootRS, data_off, posEffect = all(Total$effect >= 0),
-                       transFun, invTransFun, model, rescaleResids,...){
+                       transFun, invTransFun, model, rescaleResids,...)
+{
     Total = Total[Total$d1 & Total$d2,]
     sampling_errors <- Total$effect - Total$meaneffect
     A = getA(data_off, fitResult, method, CP, reps, n1, transFun = transFun,
@@ -40,7 +41,7 @@ bootConfInt = function(Total, idUnique, bootStraps,
     #Off axis confidence interval
     bootEffectSizesStand = abs(bootEffectSizes-c(R))/bootAs
     maxEffectSizes = apply(bootEffectSizesStand, 2, max)
-    effectSizeQuant = quantile(maxEffectSizes, cutoff)
+    effectSizeQuant = quantile(maxEffectSizes, cutoff, na.rm = TRUE)
     confInt = c(R) + outer(effectSizeQuant*sqrt(diag(A)),
                            c("lower" = -1, "upper" = 1))
     rownames(confInt) = rownames(bootEffectSizesStand)
@@ -74,9 +75,13 @@ bootConfInt = function(Total, idUnique, bootStraps,
     sdA = mean(A)
     studentizedCI = singleMeasure + sdA*
         quantile(bootRstand, c("lower" = (1-cutoff)/2,
-                               "upper" = (1+cutoff)/2))
+                               "upper" = (1+cutoff)/2),
+          na.rm = T
+        )
     names(studentizedCI) = c("lower", "upper")
     overallCall = if (eq) {
+        "Undefined"
+    } else if (sum(!is.na(studentizedCI)) == 0) {
         "Undefined"
     } else {
         if(studentizedCI["lower"] > 0){
