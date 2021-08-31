@@ -19,6 +19,12 @@ library(knitr)
 library(rgl)
 library(ggplot2)
 set.seed(12345)
+
+if (!requireNamespace("rmarkdown", quietly = TRUE) || !rmarkdown::pandoc_available("1.14")) {
+  warning(call. = FALSE, "These vignettes assume rmarkdown and pandoc
+          version 1.14. These were not found. Older versions will not work.")
+  knitr::knit_exit()
+}
 ```
 
 ```{r settings}
