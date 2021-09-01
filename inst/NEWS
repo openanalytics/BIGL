@@ -1,4 +1,7 @@
-1.6.3 (2021-06-29
+1.6.4 (2021-09-01)
+  o Fix vignettes to avoid CRAN warnings on systems without pandoc or webshot2
+  o Make sure NAs in bootConfint are handled
+1.6.3 (2021-06-29)
   o Fix code for compatibility with new ggplot2 version
 1.6.2 (2021-03-10)
   o Fix issue with testing when variance at off-axis points equals zero
