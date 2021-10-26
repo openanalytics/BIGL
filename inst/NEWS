@@ -1,3 +1,5 @@
+1.6.5 (2021-10-26)
+  o skip some tests on CRAN that may fail randomly
 1.6.4 (2021-09-01)
   o Fix vignettes to avoid CRAN warnings on systems without pandoc or webshot2
   o Make sure NAs in bootConfint are handled
