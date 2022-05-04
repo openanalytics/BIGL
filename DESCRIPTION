@@ -28,7 +28,7 @@ Imports:
     rgl,
     robustbase,
     scales,
-    nleqslv,
+    nleqslv
 Suggests:
     knitr,
     rmarkdown,
