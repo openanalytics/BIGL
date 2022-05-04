@@ -2,6 +2,8 @@ context("Monotherapy fitting")
 
 test_that('marginals', {
 
+  skip_on_cran()
+      
   ## We expect both NLS methods to give similar results in nice cases. This is
   ## not always true for the method based on optim output, although in very nice
   ## cases all should be similar.
@@ -42,7 +44,9 @@ test_that('marginals', {
 })
 
 test_that('marginals-constraints', {
-
+  
+  skip_on_cran()
+      
   constraintsA <- list("matrix" = c(0, 0, 0, 1, -1, 0, 0),
                        "vector" = 0)
   constraintsB <- list("matrix" = c(0, 0, 1, 0, 0, 0, 0),
@@ -155,6 +159,9 @@ test_that('marginals-constraints', {
 })
 
 test_that('marginals-transforms', {
+  
+  skip_on_cran()
+      
   ## Check that both methods lead to same results under transformations and with
   ## perturbed initial parameters.
   dataM <- data[data$d1 < 1e-12 | data$d2 < 1e-12,]
