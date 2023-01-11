@@ -65,17 +65,17 @@ test_that("plots", {
       
       expect_silent({
             plot(rs, "maxR")
-            rgl.close()
+            close3d()
           })
 
       expect_silent({
         plot(rs, "confInt")
-        rgl.close()
+        close3d()
       })
 
       expect_silent({
         plot(rs, "z-score")
-        rgl.close()
+        close3d()
       })
     })
 

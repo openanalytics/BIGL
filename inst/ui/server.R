@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
                           plotfun = median,
                           colorPalette = c("#EFF3FF", "#BDD7E7", "#6BAED6", "#2171B5"))
       scene1 <- scene3d()
-      rgl.close()
+      close3d()
       rglwidget(scene1)
     })
 
