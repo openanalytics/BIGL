@@ -286,7 +286,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
   if (!add){
     ## Add box and annotation
     ## Must come after persp3d, otherwise only get wireframe
-    rgl.bbox(xlen = 0, ylen = 0, zlen = 0, # no tickmarks
+    bbox3d(xlen = 0, ylen = 0, zlen = 0, # no tickmarks
              expand = 1.03,
              color = "#000000", front = "lines", back = "cull")
     axis3d(edge = "x--", at = xat, labels = format(xlab, ...))
