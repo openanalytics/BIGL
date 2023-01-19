@@ -11,7 +11,9 @@
   ylab = "Dose (Compound 2)",
   colorPalette = c("blue", "white", "red"),
   logScale = TRUE,
-  zTransform = function(z) {     z },
+  zTransform = function(z) {
+     z
+ },
   plevels = c(0.7, 0.8, 0.9, 0.95, 0.99, 0.999),
   cutoff = max(plevels),
   maxshow = NULL,

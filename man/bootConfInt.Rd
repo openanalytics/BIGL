@@ -92,9 +92,7 @@ calculation of the confidence intervals?}
 
 \item{posEffect}{a boolean, are effects restricted to be positive}
 
-\item{transFun}{the transformation and inverse transformation functions for the variance}
-
-\item{invTransFun}{the transformation and inverse transformation functions for the variance}
+\item{transFun, invTransFun}{the transformation and inverse transformation functions for the variance}
 
 \item{model}{The mean-variance model}
 
