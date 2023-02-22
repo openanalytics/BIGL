@@ -50,11 +50,12 @@ print.summary.BIGLconfInt <- function(x, ...) {
 #' @param x off axis confidence intervals, a data frame
 #' @param color analysis with which to colour cells, either \code{effect-size} or \code{maxR}
 #' @param showAll show all intervals in the plot or only significant ones, logical defaulting to \code{TRUE}
+#' @param digits digits
 #' @param ... additional arguments, currently ignored
 #' @importFrom stats setNames
 #' @export
 #' @note written after the contour() function in the \code{drugCombo} package
-plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, ...) {
+plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, digits = 3, ...) {
 	
 	if ("maxR" %in% names(x)) {
     synOut <- x$maxR$Ymean
@@ -91,11 +92,12 @@ plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, ...) {
   legendColors <- legendColors[names(legendColors) %in% as.character(unique(x$synLabel))]
   
   # text to show
+  fmt <- sprintf("%%.%if\n(%%.%if, %%.%if)", digits, digits, digits)
   if (isTRUE(showAll)) {
-    x$label <- sprintf("%.2f\n(%.2f, %.2f)", x$estimate, x$lower, x$upper)
+    x$label <- sprintf(fmt, x$estimate, x$lower, x$upper)
   } else {
     x$label <- ifelse(x$synLabel != "additive",
-        sprintf("%.2f\n(%.2f, %.2f)", x$estimate, x$lower, x$upper),
+        sprintf(fmt, x$estimate, x$lower, x$upper),
         "")
   }
   
@@ -110,8 +112,8 @@ plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, ...) {
       # invisible points, used only for labels
       geom_point(aes_string(color = "synLabel"), alpha = 0) +
       # round dose labels to digits
-      scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = 4)) +
-      scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = 4)) +
+      scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = digits)) +
+      scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = digits)) +
       scale_fill_manual(values = legendColors,
           guide = "none") +
       scale_color_manual( # for a nicer legend
