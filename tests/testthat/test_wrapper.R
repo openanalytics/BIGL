@@ -56,28 +56,22 @@ test_that('root finders', {
 })
 
 test_that("plots", {
-#      contour(rs)
-#      contour(rs, xlab = "x-label", ylab = "y-label")
-      
-      expect_silent(isobologram(rs))
-      
-      skip_on_cran()  # rgl fails on mac on CRAN
-      
-      expect_silent({
-            plot(rs, "maxR")
-            close3d()
-          })
 
-      expect_silent({
-        plot(rs, "confInt")
-        close3d()
-      })
-
-      expect_silent({
-        plot(rs, "z-score")
-        close3d()
-      })
+    expect_silent(isobologram(rs))
+    
+    expect_silent({
+      plot(rs, "maxR")
     })
+    
+    expect_silent({
+      plot(rs, "effect-size")
+    })
+
+    expect_silent({
+      plot(rs, "z-score")
+    })
+    
+})
 
 test_that("Error and warnings", {
   expect_error(fitSurface(data, fit, transforms = transforms,

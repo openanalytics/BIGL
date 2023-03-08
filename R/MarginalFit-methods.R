@@ -154,7 +154,7 @@ df.residual.MarginalFit <- function(object, ...) {
 #' @return Returns a \code{ggplot} object. It can be consequently modified by
 #'   using standard operations on \code{ggplot} objects (if \code{ggplot2}
 #'   package is loaded).
-#' @importFrom ggplot2 aes_string facet_wrap geom_line geom_point ggplot
+#' @importFrom ggplot2 aes facet_wrap geom_line geom_point ggplot
 #'   scale_x_log10 theme_bw xlab ylab
 #' @importFrom scales trans_new
 #' @importFrom stats fitted
@@ -228,8 +228,8 @@ plot.MarginalFit <- function(x, ncol = 2, logScale = TRUE, smooth = TRUE, dataSc
   }
 
   p <- ggplot() +
-    geom_line(data = curveDat, aes_string(x = "dose", y = "predicted", linetype = "type")) +
-    geom_point(data = dat, aes_string(x = "dose", y = "effect")) +
+    geom_line(data = curveDat, aes(x = .data$dose, y = .data$predicted, linetype = .data$type)) +
+    geom_point(data = dat, aes(x = .data$dose, y = .data$effect)) +
     facet_wrap(~ comp, ncol = ncol, scales = "free_x") +
     scale_linetype_manual(values = c("TRUE" = "dotted", "FALSE" = "solid"), guide = "none") +
     xlab("Dose") + ylab("Effect") + theme_bw()

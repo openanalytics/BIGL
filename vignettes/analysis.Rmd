@@ -16,7 +16,6 @@ We first load the necessary packages and set some pre-defined values needed to r
 ```{r init, message = FALSE}
 library(BIGL)
 library(knitr)
-library(rgl)
 library(ggplot2)
 set.seed(12345)
 
@@ -248,8 +247,6 @@ The plot below illustrates the above considerations in a 3-dimensional setting. 
 
 ```{r plot3d, warning=FALSE, fig.align="center", fig.height=7, fig.width=7}
 plot(rs, legend = FALSE, main = "")
-view3d(0, -75)
-rglwidget()
 ```
 
 ### Highest Single Agent
@@ -369,17 +366,16 @@ Synergistic effects of drug combinations can be depicted in a bi-dimensional con
 
 ```{r maxcontour, fig.align="center", fig.width=6, fig.height=5}
 contour(maxR_B,
-         ## colorPalette = c("blue", "black", "black", "red"),
+       colorPalette = c("blue", "white", "red"),
         main = paste0(" Experiment ", i, " contour plot for maxR"),
-        scientific = TRUE, digits = 3, cutoff = cutoff)
+        scientific = TRUE, digits = 3, cutoff = cutoff
+)
 ```
 
 Previously, we had colored the 3-dimensional predicted response surface plot based on its Z-score, i.e. deviation of the predicted versus the observed effect. We can also easily color it based on the computed `maxR` statistic to account for additional statistical variation.
 
 ```{r plot3dmax, warning=FALSE, fig.height=7, fig.width=7}
 plot(maxR_B, color = "maxR", legend = FALSE, main = "")
-view3d(0, -75)
-rglwidget()
 ```
 
 ### Effect sizes and confidence interval

@@ -11,3 +11,14 @@ L4 <- function(dose, b, L, U, logEC50) {
   return(L + (U - L) / denum)
 
 }
+
+
+#' R color to RGB (red/green/blue) conversion.
+#' @param cname vector of any of the three kinds of R color specifications, i.e., either a color name (as listed by \code{\link{colors}}()), a hexadecimal string of the form "#rrggbb" or "#rrggbbaa" (see \code{\link{rgb}}), or a positive integer i meaning \code{\link{palette}}()[i].
+#' @param alpha logical value indicating whether the alpha channel (opacity) values should be returned.
+#' @importFrom grDevices rgb col2rgb
+col2hex <- function (cname, alpha = FALSE) 
+{
+  colMat <- col2rgb(cname)
+  rgb(red = colMat[1, ]/255, green = colMat[2, ]/255, blue = colMat[3, ]/255)
+}

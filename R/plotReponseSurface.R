@@ -5,12 +5,9 @@
 #' model prediction and observed points. This function is mainly used
 #' as the workhorse of \code{\link{plot.ResponseSurface}} method.
 #'
-#' Title for the plot and legend are drawn as bitmaps and do not rotate with the
-#' rest of the plot. Since they are bitmaps, they do not scale properly, hence
-#' resizing window will result in unappealing visuals. For them to look
-#' properly, it suffices to set the appropriate RGL window size and rerun the
-#' plotting command.
-#'
+#' @param data Object "data" from the output of \code{\link{fitSurface}}
+#' @param fitResult Object "fitResult" from the output of \code{\link{fitSurface}}
+#' @param transforms Object "transforms" from the output of \code{\link{fitSurface}}
 #' @param predSurface Vector of all predicted responses based on
 #'   \code{expand.grid(uniqueDoses)}. If not supplied, it will be computed
 #'   with \code{\link{predictOffAxis}} function.
@@ -18,8 +15,9 @@
 #'   one of the available null models, i.e. \code{"loewe"}, \code{"hsa"}, 
 #'   \code{"bliss"} and \code{"loewe2"}. See also \code{\link{fitSurface}}.
 #' @param breaks Numeric vector with numerical breaks. To be used in conjunction
-#'   with \code{colorPalette} argument.
+#'   with \code{colorPalette} argument. If named, the labels will be displayed in the legend
 #' @param colorPalette Vector of color names for surface
+#' @param colorPaletteNA Color used in the matrix of colours when the combination of doses doesn't exist (NA)
 #' @param colorBy This parameter determines values on which coloring is based
 #'   for the 3-dimensional surface. If matrix or a data frame with \code{d1} and
 #'   {d2} columns is supplied, dose combinations from \code{colorBy} will be
@@ -28,18 +26,18 @@
 #'   plotting results for off-axis estimates only, e.g. off-axis Z-scores or
 #'   maxR test statistics. If \code{colorBy = "colors"}, surface will be colored
 #'   using colors in \code{colorPalette} argument.
+#' @param addPoints Boolean whether the dose points should be included
 #' @param colorPoints Colors for off-axis and on-axis points. Character vector
 #'   of length four with colors for 1) off-axis points; 2) on-axis points of the
 #'   first drug (i.e. second drug is dosed at zero); 3) on-axis points of the
 #'   second drug; 4) on-axis points where both drugs are dosed at zero.
-#' @param radius Radius of spheres. If missing, an educated guess based on
-#'   number of digits in average effect will be made.
+#' @param radius Size of spheres (default is 4)
 #' @param logScale Draw doses on log-scale (setting zeroes to be finite constant)
 #' @param zTransform Optional transformation function for z-axis. By default,
 #'   identity function is used.
 #' @param main Fixed non-moving title for the 3D plot
-#' @param legend Whether legend should be added
-#' @param add Add the predicted response surface to an existing plot. Will not
+#' @param legend Whether legend should be added (default FALSE)
+#' @param add (deprecated) Add the predicted response surface to an existing plot. Will not
 #'   draw any points, just the surface. Must be called after another call to
 #'   \code{\link{plotResponseSurface}}.
 #' @param xat x-axis ticks: "pretty", "actual" or a numeric vector
@@ -52,13 +50,18 @@
 #'   Typically, it will be \code{\link{mean}}, \code{\link[stats]{median}},
 #'   \code{\link{min}} or \code{\link{max}} but a custom-defined function
 #'   returning a scalar from a vector is also possible.
+#' @param gradient Boolean indicating whether colours should be interpolated between breaks (default TRUE). 
+#'   If FALSE, \code{colorPalette} must contain length(breaks)-1 colours
+#' @param width Width in pixels (optional, defaults to 800px).
+#' @param height Height in pixels (optional, defaults to 800px).
+#' @param title String title (default "")
+#' @param digitsFunc Function to be applied to the axis values
 #' @param ... Further arguments to format axis labels
-#' @return Plot is shown on a rgl device.
-#' @import rgl
+#' @return Plotly plot
 #' @importFrom stats median predict quantile
 #' @importFrom grDevices axisTicks colorRampPalette colors terrain.colors
 #' @importFrom graphics plot.new
-#' @inheritParams fitSurface
+#' @importFrom plotly plot_ly add_surface add_markers layout config
 #' @export
 #' @examples
 #' \dontrun{
@@ -75,30 +78,37 @@
 #'                       colorPalette = c("grey", "blue", "green"))
 #'
 #'   ## Response surface based on Loewe additivity model and colored with
-#'   ## rainbow colors. Legend will not be displayed in any case.
-#'   plotResponseSurface(data, fitResult, null_model = "loewe",
+#'   ## rainbow colors.
+#'   plotResponseSurface(data, fitResult, null_model = "loewe", breaks = c(-Inf, 0, Inf),
 #'                       colorBy = "colors", colorPalette = rainbow(6))
 #' }
-plotResponseSurface <- function(data, fitResult = NULL,
-                                transforms = fitResult$transforms,
+plotResponseSurface <- function(data, fitResult = NULL, 
+                                transforms = fitResult$transforms, 
                                 predSurface = NULL, null_model = c("loewe", "hsa", "bliss", "loewe2"),
-                                colorPalette = c("blue", "grey70", "red"),
-                                colorBy = "none",
-                                colorPoints = c("black", "sandybrown", "brown", "white"),
-                                breaks = c(-Inf, 0, Inf),
-                                radius = NULL,
-                                logScale = TRUE,
-                                colorfun = median,
-                                zTransform = function(x) x,
-                                add = FALSE,
-                                main = "", legend = TRUE,
-                                xat = "actual", yat = "actual",
-                                plotfun = NULL, ...) {
-
+                                colorPalette   = c("blue", "grey70", "red"), 
+                                colorPaletteNA = "grey70",
+                                colorBy = "none", 
+                                addPoints = TRUE,
+                                colorPoints = c("black", "sandybrown", "brown", "white"), 
+                                breaks, # = c(-Inf, 0, Inf) 
+                                radius = 4, 
+                                logScale = TRUE, 
+                                colorfun = median, 
+                                zTransform = function(x) x, 
+                                add = FALSE, 
+                                main = "", 
+                                legend = FALSE, 
+                                xat = "actual", yat = "actual", 
+                                plotfun = NULL,
+                                gradient = TRUE,
+                                width = 800, height = 800, 
+                                title = "", 
+                                digitsFunc = function(x) {x}, ...
+) {
   ## Argument matching
   null_model <- match.arg(null_model)
 
-  if (missing(fitResult) & missing(predSurface))
+  if (missing(fitResult) & missing(predSurface)) 
     stop("Marginals fit result or predicted surface need to be supplied.")
 
   if (is.character(colorBy) & all(colorBy %in% colors())) {
@@ -107,8 +117,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
   }
 
   ## Calculate extra arguments
-  uniqueDoses <- with(data, list("d1" = sort(unique(d1)),
-                                 "d2" = sort(unique(d2))))
+  uniqueDoses <- with(data, list("d1" = sort(unique(d1)), "d2" = sort(unique(d2))))
   doseGrid <- expand.grid(uniqueDoses)
   logT <- function(z) log(z + 0.5 * min(z[z != 0]))
   log10T <- function(z) log10(z + 0.5 * min(z[z != 0]))
@@ -129,12 +138,6 @@ plotResponseSurface <- function(data, fitResult = NULL,
       predSurface <- respSurface
     }
     zGrid <- predSurface
-  }
-
-  ## Rougly, radius is proportional to the number of digits of mean response
-  if (missing(radius)) {
-    avgEffect <- abs(mean(zTransform(zGrid)))
-    radius <- max(10^(log10(avgEffect) - 1.5), 0.05)
   }
 
   ## If colorVec is a matrix with d1 and d2 columns, reorder it so that it
@@ -164,25 +167,22 @@ plotResponseSurface <- function(data, fitResult = NULL,
   }
 
   dataOffAxis <- with(data, data[d1 & d2, , drop = FALSE])
-  predOffAxis <- predSurface[cbind(match(dataOffAxis$d1, uniqueDoses$d1),
+  predOffAxis <- predSurface[cbind(match(dataOffAxis$d1, uniqueDoses$d1), 
                                    match(dataOffAxis$d2, uniqueDoses$d2))]
   if (nrow(dataOffAxis) == 0) {
     warning("No off-axis observations were found. Surface won't be custom colored..")
     colorBy <- "none"
   }
 
-  ## This function computes a grid of colors for the 3d surface. Values
-  ## that exceed specified boundary in absolute value take the boundary
-  ## color.
   surfaceColors <- colorRampPalette(colorPalette)(length(breaks) - 1)
-
+  
   getFF = function(response){
     if(is.numeric(response)) {
       cut(response, breaks = breaks, include.lowest = TRUE)
     } else if(is.factor(response)){
       response
     } else if(is.character(response)){
-      factor(response, levels = c("Syn", "None", "Ant"),
+      factor(response, levels = c("Syn", "None", "Ant"), 
              labels = c("Syn", "None", "Ant"),
              ordered = TRUE)
     }
@@ -216,89 +216,252 @@ plotResponseSurface <- function(data, fitResult = NULL,
     col <- terrain.colors(diff(range(zGridFloor, na.rm = TRUE)))
     zcol <- col[zGridFloor - min(zGridFloor, na.rm = TRUE) + 1]
   }
-
+  
   ##
   ## 3-dimensional surface plotting
   ##
-  labnames <- c("Response", if (!is.null(fitResult$names)) 
+  labnames <- c("Response", if (!is.null(fitResult$names))
             fitResult$names else c("Compound 1", "Compound 2"))
   if (!is.null(attr(data, "orig.colnames")))
     labnames <- attr(data, "orig.colnames")
+  
 
-  if (!add) {
-    ## Plot with no axes/labels
-    if (!is.null(plotfun))
-      data <- aggregate(effect ~ d1 + d2, data, FUN = plotfun)[, names(data)]
-
-    plot3d(transformF(data$d1), transformF(data$d2),
-           zTransform(data$effect), xlab = "", ylab = "", zlab = "",
-           box = FALSE, axes = FALSE)
-
-    ## Get x and y ticks
-    ## TODO: use scales:log_breaks()(range(x))
-    if (!is.numeric(xat)) {
-      xat <- match.arg(xat, c("pretty", "actual"))
-      if (xat == "pretty") {
-        xlab <-  axisTicks(range(transformF(uniqueDoses$d1)),
-                           log = logScale, nint = 3)
-        if (logScale && length(xlab) > 4)
-          xlab <- xlab[!(log10(xlab) %% 1)]
-      } else xlab <- uniqueDoses$d1
-      xat <- transformF(xlab)
-    } else {
-      xlab <- xat
-      xat <- transformF(xat)
-    }
-    if (!is.numeric(yat)) {
-      yat <- match.arg(yat, c("pretty", "actual"))
-      if (yat == "pretty") {
-        ylab <-  axisTicks(range(transformF(uniqueDoses$d2)),
-                           log = logScale, nint = 3)
-        if (logScale && length(ylab) > 4)
-          ylab <- ylab[!(log10(ylab) %% 1)]
-      } else ylab <- uniqueDoses$d2
-      yat <- transformF(ylab)
-    } else {
-      ylab <- yat
-      yat <- transformF(yat)
-    }
-    ## add points
-    with(data, spheres3d(transformF(d1), transformF(d2),
-                         zTransform(effect), radius = radius, add = TRUE,
-                         col = colorPoints[1 + 1 * (d2 == 0) + 2 * (d1 == 0)]))
+  ## Plot with no axes/labels
+  if (!is.null(plotfun))
+    data <- aggregate(effect ~ d1 + d2, data, FUN = plotfun)[, names(data)]
+  ## Get x and y ticks
+  ## TODO: use scales:log_breaks()(range(x))
+  if (!is.numeric(xat)) {
+    xat <- match.arg(xat, c("pretty", "actual"))
+    if (xat == "pretty") {
+      xlab <-  axisTicks(range(transformF(uniqueDoses$d1)),
+                        log = logScale, nint = 3)
+      if (logScale && length(xlab) > 4)
+        xlab <- xlab[!(log10(xlab) %% 1)]
+    } else xlab <- uniqueDoses$d1
+    xat <- transformF(xlab)
+  } else {
+    xlab <- xat
+    xat <- transformF(xat)
+  }
+  if (!is.numeric(yat)) {
+    yat <- match.arg(yat, c("pretty", "actual"))
+    if (yat == "pretty") {
+      ylab <-  axisTicks(range(transformF(uniqueDoses$d2)),
+                        log = logScale, nint = 3)
+      if (logScale && length(ylab) > 4)
+        ylab <- ylab[!(log10(ylab) %% 1)]
+    } else ylab <- uniqueDoses$d2
+    yat <- transformF(ylab)
+  } else {
+    ylab <- yat
+    yat <- transformF(yat)
   }
 
-  planes3d(0, 0, 1, zTransform(0),
-           col = "grey", lit = FALSE, alpha = 0.3)
-  persp3d(transformF(uniqueDoses$d1), transformF(uniqueDoses$d2),
-          zTransform(zGrid), add = TRUE, col = zcol, alpha = 0.6,
-          lit = FALSE, aspect = FALSE, lwd = 2)
-
-  bgplot3d({
-    plot.new()
-    title(main = main)
-
-    if (legend && is.character(labels))
-      legend("topleft", legend = labels, pch = 16, cex = 1.5, col = surfaceColors)
-  })
-
-
-  if (!add){
-    ## Add box and annotation
-    ## Must come after persp3d, otherwise only get wireframe
-    bbox3d(xlen = 0, ylen = 0, zlen = 0, # no tickmarks
-             expand = 1.03,
-             color = "#000000", front = "lines", back = "cull")
-    axis3d(edge = "x--", at = xat, labels = format(xlab, ...))
-    axis3d(edge = "y--", at = yat, labels = format(ylab, ...))
-    axis3d(edge = "z--")
-    mtext3d(labnames[2], edge = "x--", line = 2)
-    mtext3d(labnames[3], edge = "y--", line = 2)
-    mtext3d(labnames[1], edge = "z--", line = 2)
+  MatrixForColor <- matrix(as.numeric(factor(zcol, levels = unique(surfaceColors))), nrow = nrow(zGrid), ncol = ncol(zGrid))
+  
+  if (any(is.na(MatrixForColor))) {
+    if (missing(colorPaletteNA)) colorPaletteNA <- "grey70"
+    if (!colorPaletteNA %in% colorPaletteNA) stop("Please indicate a colour for `colorPaletteNA` that is present in the `colorPalette` list")
+    MatrixForColor[is.na(MatrixForColor)] <- which(colorPalette %in% colorPaletteNA)[1]
   }
+  
+  # Layout setting (x, y and z axis)
+  axx <- list(
+    backgroundcolor = "rgb(250, 250, 250)",
+    gridcolor = "rgb(150, 150, 150)",
+    showbackground = TRUE,
+    ticketmode = 'array',
+    ticktext = digitsFunc(as.numeric(xlab)),
+    tickvals = xat,
+    title = fitResult$names[1]
+  )
+  
+  axy <- list(
+    backgroundcolor = "rgb(250, 250, 250)",
+    gridcolor = "rgb(150, 150, 150)",
+    showbackground = TRUE,
+    ticketmode = 'array',
+    ticktext = digitsFunc(as.numeric(ylab)),
+    tickvals = yat,
+    title = fitResult$names[2]
+  )
+  
+  axz <- list(
+    backgroundcolor = "rgb(250, 250, 250)",
+    gridcolor = "rgb(150, 150, 150)",
+    showbackground = TRUE,
+    title = "Response"
+  )
+  
+  data$color <- colorPoints[1 + 1 * (data$d2 == 0) + 2 * (data$d1 == 0)]
+  data$color <- factor(data$color, levels = colorPoints)
 
-  persp3d(transformF(uniqueDoses$d1), transformF(uniqueDoses$d2),
-          zTransform(zGrid), add = TRUE, col = zcol, alpha = 0.6,
-          lit = FALSE, aspect = FALSE, lwd = 2)
+
+  # Plot the main surface
+  p <- plotly::plot_ly(
+    height = height, width = width, colors = unique(colorPalette), 
+    type = "surface", showlegend = FALSE
+  )
+  
+  if (gradient) {
+    p <- plotly::add_surface(
+      p,
+      x = transformF(uniqueDoses$d1),
+      y = transformF(uniqueDoses$d2),
+      #NOTE: Plotly requires to transpose the zGrid matrix (and consequently the MatrixForColor)
+      z = zTransform(t(as.matrix(zGrid))),
+      opacity = 0.8,
+      surfacecolor = t(MatrixForColor),
+      cauto = FALSE,
+      colors = unique(surfaceColors),
+      cmin = 1,
+      cmax = length(unique(surfaceColors)),
+      text = "",
+      hoverinfo = 'text',
+      showlegend = FALSE, showscale = FALSE
+    ) 
+  } else {
+    
+    colorPaletteHex <- col2hex(unique(colorPalette))
+    colorVecAlt <- colorPaletteHex[sort(unique(as.numeric(MatrixForColor)))]
+    
+    mz <- seq(0,1, length.out = length(colorVecAlt)+1)
+    if (length(mz) > 2)
+      mz <- c(mz[1], rep(mz[2:(length(mz)-1)], each = 2), mz[length(mz)])
+    custom_colors <- data.frame(
+      z   =  mz,
+      col = rep(colorVecAlt, each = 2)
+    )
+    
+    p <- plotly::add_surface(
+      p,
+      x = transformF(uniqueDoses$d1),
+      y = transformF(uniqueDoses$d2),
+      #NOTE: Plotly requires to transpose the zGrid matrix (and consequently the MatrixForColor)
+      z = zTransform(t(as.matrix(zGrid))),
+      # zauto = FALSE,
+      # opacity = 0.8,
+      surfacecolor = t(MatrixForColor),
+      colorscale = custom_colors,
+      # cauto = FALSE,
+      text = "",
+      hoverinfo = 'text',
+      showlegend = FALSE, showscale = FALSE
+    )
+    
+  }
+    
+  if (legend) {
+    # Categorical legend (only if colorPalette was named)
+    if (!is.null(names(colorPalette))) {
+      uColorPalette <- colorPalette[!duplicated(colorPalette)]
+      for (xcolor in names(uColorPalette)) {
+        p <- add_markers(
+          p, x = -900, y = -900, color = I(uColorPalette[as.character(xcolor)]), size = 10,
+          legendgroup = "call", name = xcolor, opacity = 1, 
+          showlegend = TRUE, marker = list(symbol = "square")
+        )
+      }
+
+      p <- layout(
+        p,
+        xaxis = list(
+          showgrid = FALSE,
+          zeroline = FALSE,
+          showticklabels = FALSE
+        ),
+        yaxis = list(
+          showgrid = FALSE,
+          zeroline = FALSE,
+          showticklabels = FALSE
+        ),
+        legend = list(
+          title = "Call:",
+          itemsizing = 'constant',
+          font = list(size = 10),
+          orientation = "h",   # show entries horizontally
+          xanchor = "center",  # use center of legend as anchor
+          x = 0.5,
+          y = 0
+        )
+      )
+    } else {
+      #TODO Add legend for continuous variables
+    }
+  }
+  
+  if (addPoints) {
+    # Legend names
+    pointNames <- c(
+      paste0("Combination \n", paste(fitResult$names, collapse = " and ")), 
+      fitResult$names, 
+      "Dose 0 for both compounds"
+    )
+    names(pointNames) <- colorPoints
+    
+    ## add points (spheres)
+    for (xcolor in levels(data$color)) {
+      df <- data.frame(
+        d1_transf = transformF(data$d1)[data$color == xcolor],
+        d1        = data$d1[data$color == xcolor],
+        d2_transf = transformF(data$d2)[data$color == xcolor],
+        d2        = data$d2[data$color == xcolor],
+        effect    = zTransform(data$effect)[data$color == xcolor]
+      )
+      p <- plotly::add_markers(
+        p = p,
+        opacity = 1,
+        x = df$d1_transf,
+        y = df$d2_transf,
+        z = df$effect,
+        marker = list(color = xcolor, size = radius,  line = list(color = "#333", width = 1)),
+        showlegend = legend,
+        text = paste0("d1: ", digitsFunc(df$d1), "\nd2: ", digitsFunc(df$d2), "\neffect: ", digitsFunc(df$effect)),
+        hoverinfo = "text",
+        name = pointNames[xcolor],
+        legendgroup = "points"
+      ) 
+    }
+
+    # set legend layout
+    p <- plotly::layout(
+      p = p,
+      title = title,
+      scene = list(
+        xaxis = axx, yaxis = axy, zaxis = axz,
+        aspectratio = list(x = 1, y = 1, z = 1.1)
+      ),
+      legend = list(
+        itemsizing = 'constant',
+        font = list(size = 10),
+        orientation = "h",   # show entries horizontally
+        xanchor = "center",  # use center of legend as anchor
+        x = 0.5,
+        y = 0
+      )
+    )
+  }
+  
+  
+  p <- layout(
+    p,
+    scene = list(
+      xaxis = axx, yaxis = axy, zaxis = axz,
+      aspectratio = list(x = 1, y = 1, z = 1.1)
+    ),
+    title = title
+  )
+  
+  p <- config(
+    p,
+    displaylogo = FALSE,
+    modeBarButtonsToRemove = c("orbitRotation", "resetCameraLastSave3d", "hoverClosest3d")
+  )
+
+  p
 
 }
+
+
+

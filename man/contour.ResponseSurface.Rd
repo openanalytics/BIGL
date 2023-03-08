@@ -4,10 +4,12 @@
 \alias{contour.ResponseSurface}
 \title{Method for plotting of contours based on maxR statistics}
 \usage{
-\method{contour}{ResponseSurface}(x, ...)
+\method{contour}{ResponseSurface}(x, colorBy = "maxR", ...)
 }
 \arguments{
 \item{x}{Output of \code{\link{fitSurface}}}
+
+\item{colorBy}{String indicating the characteristic to use for coloring ("maxR" or "effect-size"). By default, "maxR".}
 
 \item{...}{Further parameters passed to \code{\link{plot.maxR}}}
 }

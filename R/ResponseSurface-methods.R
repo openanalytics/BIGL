@@ -3,7 +3,7 @@
 #' @param x Output of \code{\link{fitSurface}}
 #' @param color Character indicating on what values surface coloring will be
 #'   based.
-#'
+#'   
 #'   If \code{color = "z-score"}, surface coloring will be based on median of
 #'   standartized off-axis Z-scores. Median function can be replaced by other
 #'   function using an optional \code{colorfun} argument which will be passed to
@@ -12,12 +12,14 @@
 #'   based on values of maxR statistic and the quantile of its distribution
 #'   (bootstrapped or not). If \code{color = "occupancy"}, coloring will be
 #'   based on calculated occupancy rate for the respective dose combination.
+#'   If \code{color = "effect-size"}, coloring will be
+#'   based on effect size for the respective dose combination.
 #'
 #' @param ... Further parameters passed to \code{\link{plotResponseSurface}}.
 #'   \code{colorBy} argument in this method is computed automatically and thus
 #'   cannot be passed to \code{\link{plotResponseSurface}}.
 #' @export
-plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "confInt"), ...) {
+plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "effect-size"), ...) {
 
   color <- match.arg(color)
   inputs <- as.list(substitute(list(...)))[-1L]
@@ -32,6 +34,8 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "c
     # TODO: what to do in the 'undefined' case - agonist+antagonist or both flat?
   }
 
+  #TODO include the name of the `color` to be used in the legend of `plotResponseSurface()`
+  
   if (color == "z-score") {
     boundary <- sd(x$offAxisTable[["z.score"]])
     inputs$colorBy <- x$offAxisTable[, c("d1", "d2", "z.score")]
@@ -40,6 +44,7 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "c
   } else if (color == "maxR") {
     inputs$colorBy <- x$maxR$Ymean[, c("d1", "d2", "R")]
     q <- attr(x$maxR$Ymean, "q")
+    #TODO add `q` to the inputs so we can use it in plotResponseSurface
     if (!exists("breaks", inputs)) inputs$breaks <- c(-Inf, -q, 0, q, Inf)
     if (!exists("main", inputs)) inputs$main <- "maxR"
   } else if (color == "occupancy") {
@@ -47,19 +52,19 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "c
     inputs$colorPalette <- c("#EFF3FF", "#BDD7E7", "#6BAED6", "#2171B5")
     if (!exists("breaks", inputs)) inputs$breaks <- c(0, 0.25, 0.5, 0.75, 1)
     if (!exists("main", inputs)) inputs$main <- "Occupancy rate"
-  } else if (color == "confInt"){
+  } else if (color == "effect-size") {
     if(is.null(x$confInt))
       stop("No confidence intervals were calculated")
-    # x$confInt$offAxis$call = factor(x$confInt$offAxis$call,
-    #                                 levels = c("Syn", "None", "Ant"),
-    #                                 ordered = TRUE)
-    x$confInt$offAxis = cbind(x$confInt$offAxis,
-                                   t(sapply(rownames(x$confInt$offAxis),
-                                            function(y) strsplit(y, split = "_")[[1]])))
-    colnames(x$confInt$offAxis)[5:6] = c("d1", "d2")
-    inputs$colorBy = x$confInt$offAxis[, c("d1", "d2", "call")]
+    if (!exists("main", inputs)) inputs$main <- "Effect size"
+    synOut <- x$maxR$Ymean
+    names(synOut)[names(synOut) == "call"] <- "synCall"
+    effectOut <- x$confInt$offAxis
+    names(effectOut)[names(effectOut) == "call"] <- "effectCall"
+    effectOut$d1 <- as.numeric(gsub("(.+)_.+", "\\1", rownames(effectOut)))
+    effectOut$d2 <- as.numeric(gsub(".+_(.+)", "\\1", rownames(effectOut)))
+    x_new <- merge(synOut, effectOut, by = c("d1","d2"))
+    inputs$colorBy <- x_new[, c("d1", "d2", "effectCall")]
     if (!exists("breaks", inputs)) inputs$breaks <- seq_len(4)
-    if (!exists("main", inputs)) inputs$main <- "Calls from confidence intervals"
   }
 
   inputs$data <- x$data
@@ -74,10 +79,11 @@ plot.ResponseSurface <- function(x, color = c("z-score", "maxR", "occupancy", "c
 #' Method for plotting of contours based on maxR statistics
 #'
 #' @param x Output of \code{\link{fitSurface}}
+#' @param colorBy String indicating the characteristic to use for coloring ("maxR" or "effect-size"). By default, "maxR".
 #' @param ... Further parameters passed to \code{\link{plot.maxR}}
 #' @export
-contour.ResponseSurface <- function(x, ...) {
-
+contour.ResponseSurface <- function(x, colorBy = "maxR", ...) {
+  
   if (!exists("maxR", x))
     stop("maxR statistics were not found.")
 
@@ -89,8 +95,9 @@ contour.ResponseSurface <- function(x, ...) {
     args$ylab <- paste0("Dose (", cpdNames[[2]], ")")
   
   ## Blue is synergy, red is antagonism
-  if(!exists("colorPalette", args)) {
+  if (!exists("colorPalette", args)) {
     args$colorPalette <- c("red", "white", "blue")
+    names(args$colorPalette) <- c("Ant", "None", "Syn")
     if (x$fitResult$coef["b"] >= x$fitResult$coef["m1"] && 
         x$fitResult$coef["b"] >= x$fitResult$coef["m2"]) {
       args$colorPalette <- rev(args$colorPalette)
@@ -98,8 +105,12 @@ contour.ResponseSurface <- function(x, ...) {
     # TODO: what to do in the 'undefined' case - agonist+antagonist or both flat?
   }
   
-  args$x <- x$maxR
-  
+  if (colorBy == "maxR") {
+    args$x <- x$maxR
+  } else if (colorBy == "effect-size") {
+    args$x <- x
+  }
+  class(args$x) <- c(colorBy, setdiff(class(args$x), c("maxR", "effect-size")))
   do.call(plot, args)
   
 }

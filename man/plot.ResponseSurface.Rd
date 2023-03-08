@@ -4,22 +4,24 @@
 \alias{plot.ResponseSurface}
 \title{Method for plotting response surface objects}
 \usage{
-\method{plot}{ResponseSurface}(x, color = c("z-score", "maxR", "occupancy", "confInt"), ...)
+\method{plot}{ResponseSurface}(x, color = c("z-score", "maxR", "occupancy", "effect-size"), ...)
 }
 \arguments{
 \item{x}{Output of \code{\link{fitSurface}}}
 
 \item{color}{Character indicating on what values surface coloring will be
-  based.
+based.
 
-  If \code{color = "z-score"}, surface coloring will be based on median of
-  standartized off-axis Z-scores. Median function can be replaced by other
-  function using an optional \code{colorfun} argument which will be passed to
-  \code{plotResponseSurface}. Color breaks are determined here by standard
-  deviation of off-axis Z-scores. For \code{color = "maxR"}, coloring will be
-  based on values of maxR statistic and the quantile of its distribution
-  (bootstrapped or not). If \code{color = "occupancy"}, coloring will be
-  based on calculated occupancy rate for the respective dose combination.}
+If \code{color = "z-score"}, surface coloring will be based on median of
+standartized off-axis Z-scores. Median function can be replaced by other
+function using an optional \code{colorfun} argument which will be passed to
+\code{plotResponseSurface}. Color breaks are determined here by standard
+deviation of off-axis Z-scores. For \code{color = "maxR"}, coloring will be
+based on values of maxR statistic and the quantile of its distribution
+(bootstrapped or not). If \code{color = "occupancy"}, coloring will be
+based on calculated occupancy rate for the respective dose combination.
+If \code{color = "effect-size"}, coloring will be
+based on effect size for the respective dose combination.}
 
 \item{...}{Further parameters passed to \code{\link{plotResponseSurface}}.
 \code{colorBy} argument in this method is computed automatically and thus
