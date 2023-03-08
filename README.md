@@ -34,5 +34,3 @@ If you have `shiny` and `DT` packages installed, you might be interested in tryi
 library(BIGL)
 runBIGL()
 ```
-
-Alternatively, the demo can be accessed [here](https://bigl.openanalytics.eu/app/bigl).
