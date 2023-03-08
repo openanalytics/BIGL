@@ -14,9 +14,8 @@
   zTransform = function(z) {
      z
  },
-  digitsFunc = function(x) {
-     x
- },
+  digits,
+  digitsFunc,
   ...
 )
 }
@@ -36,6 +35,8 @@
 \item{logScale}{logScale}
 
 \item{zTransform}{zTransform}
+
+\item{digits}{Numeric value indicating the number of digits used for numeric values. Whether \code{digitsFunc} is provided, this will be ignored.}
 
 \item{digitsFunc}{Function to be applied to numeric values like doses. This expects a single parameter.}
 
