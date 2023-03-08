@@ -60,8 +60,7 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
   }
 
   p <- ggplot(melt.surface,
-              aes_string(x = "d1", y = "d2",
-                         z = "effect", fill = "effect")) +
+              aes(x = .data$d1, y = .data$d2, z = .data$effect, fill = .data$effect)) +
     theme_bw() +
     geom_tile() +
     labs(x = labnames[2], y = labnames[3]) +
@@ -69,7 +68,7 @@ isobologram <- function(x, grid.len = 100, logScale = TRUE, ...) {
                          colours = c("steelblue", "lightsteelblue", "lightblue",
                                      "floralwhite", "beige", "khaki",
                                      "orange1", "tomato3", "red")) +
-    geom_contour(bins = 7, col = "black", size = 0.2)
+    geom_contour(bins = 7, col = "black", linewidth = 0.2)
 
   xBreaks <- unique(x$data$d1)
   yBreaks <- unique(x$data$d2)

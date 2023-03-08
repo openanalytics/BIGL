@@ -50,14 +50,19 @@ print.summary.BIGLconfInt <- function(x, ...) {
 #' @param x off axis confidence intervals, a data frame
 #' @param color analysis with which to colour cells, either \code{effect-size} or \code{maxR}
 #' @param showAll show all intervals in the plot or only significant ones, logical defaulting to \code{TRUE}
-#' @param digits digits
+#' @param digits Numeric value indicating the number of digits used for numeric values
+#' @param xlab String for the x axis label
+#' @param ylab String for the y axis label
 #' @param ... additional arguments, currently ignored
 #' @importFrom stats setNames
 #' @export
 #' @note written after the contour() function in the \code{drugCombo} package
-plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, digits = 3, ...) {
-	
-	if ("maxR" %in% names(x)) {
+plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, digits = 3, xlab, ylab, ...) {
+  
+  if (missing(xlab)) xlab <- sprintf("Dose (%s)", x$names[1])
+  if (missing(ylab)) ylab <- sprintf("Dose (%s)", x$names[2])
+  
+  if ("maxR" %in% names(x)) {
     synOut <- x$maxR$Ymean
     names(synOut)[names(synOut) == "call"] <- "synCall"
     
@@ -66,26 +71,26 @@ plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, digits = 
     effectOut$d1 <- as.numeric(gsub("(.+)_.+", "\\1", rownames(effectOut)))
     effectOut$d2 <- as.numeric(gsub(".+_(.+)", "\\1", rownames(effectOut)))
     
-		x <- merge(synOut, effectOut, by = c("d1","d2"))
-	} else {
-		x <- x$offAxis
+    x <- merge(synOut, effectOut, by = c("d1","d2"))
+  } else {
+    x <- x$offAxis
     names(x)[names(x) == "call"] <- "effectCall"
-		#show doses on equidistant grid
-		d1d2 <- rownames(x)
-		d1d2split <- sapply(d1d2, function(y) strsplit(y, split = "_")[[1]])
-		x$d1 <- as.numeric(d1d2split[1,])
-		x$d2 <- as.numeric(d1d2split[2,])
-	}
+    #show doses on equidistant grid
+    d1d2 <- rownames(x)
+    d1d2split <- sapply(d1d2, function(y) strsplit(y, split = "_")[[1]])
+    x$d1 <- as.numeric(d1d2split[1,])
+    x$d2 <- as.numeric(d1d2split[2,])
+  }
   
   # prepare fill legend
-  synCalls <- c("additive", "antagonism", "synergy")
+  synCalls <- c("None", "Ant", "Syn")
   
   if (color == "effect-size") {
     x$synLabel <- factor(x$effectCall, labels = synCalls, levels = c("None", "Ant", "Syn"))
   } else {
     x$synLabel <- factor(x$synCall, labels = synCalls, levels = c("None", "Ant", "Syn"))
   }
-        
+  
   legendColors <- c("white", "pink", "lightblue")
   names(legendColors) <- synCalls
   # subset to only the colors that are present in the data
@@ -96,48 +101,51 @@ plot.BIGLconfInt <- function(x, color = "effect-size", showAll = TRUE, digits = 
   if (isTRUE(showAll)) {
     x$label <- sprintf(fmt, x$estimate, x$lower, x$upper)
   } else {
-    x$label <- ifelse(x$synLabel != "additive",
-        sprintf(fmt, x$estimate, x$lower, x$upper),
-        "")
+    x$label <- ifelse(x$synLabel != "None",
+                      sprintf(fmt, x$estimate, x$lower, x$upper),
+                      "")
   }
   
   x$d1 <- factor(x$d1, levels = sort(unique(x$d1)),
-      labels = sort(unique(x$d1)), ordered = TRUE)
+                 labels = sort(unique(x$d1)), ordered = TRUE)
   x$d2 <- factor(x$d2, levels = sort(unique(x$d2)),
-      labels = sort(unique(x$d2)), ordered = TRUE)
+                 labels = sort(unique(x$d2)), ordered = TRUE)
   
-  p <- ggplot(data = x, aes_string(x = "d1", y = "d2")) +
-      geom_tile(aes_string(fill = "synLabel"), color = "grey") +
-      geom_text(aes_string(label = "label"), show.legend = FALSE, size = 3) +
-      # invisible points, used only for labels
-      geom_point(aes_string(color = "synLabel"), alpha = 0) +
-      # round dose labels to digits
-      scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = digits)) +
-      scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = digits)) +
-      scale_fill_manual(values = legendColors,
-          guide = "none") +
-      scale_color_manual( # for a nicer legend
-          values = setNames(1:3, nm = synCalls),
-          limits = force,
-          guide = guide_legend(title = "call:",
-              override.aes = list(alpha = 1, shape = 22, size = 8, color = "grey",
-                  fill = legendColors))
-      ) +
-      theme_minimal() +
-      theme(
-          panel.grid.major = element_blank(),
-          legend.position = "bottom",
-          axis.text.x = element_text(angle = 45, hjust = 1)
-      )
+  p <- ggplot(data = x, aes(x = .data$d1, y = .data$d2)) +
+    geom_tile(aes(fill = .data$synLabel), color = "grey") +
+    geom_text(aes(label = .data$label), show.legend = FALSE, size = 3) +
+    # invisible points, used only for labels
+    geom_point(aes(color = .data$synLabel), alpha = 0) +
+    # round dose labels to digits
+    scale_x_discrete(labels = format(as.numeric(levels(x$d1)), digits = digits)) +
+    scale_y_discrete(labels = format(as.numeric(levels(x$d2)), digits = digits)) +
+    scale_fill_manual(values = legendColors,
+                      guide = "none") +
+    scale_color_manual( # for a nicer legend
+      values = setNames(1:3, nm = synCalls),
+      limits = force,
+      guide = guide_legend(title = "call:",
+                           override.aes = list(alpha = 1, shape = 22, size = 8, color = "grey",
+                                               fill = legendColors))
+    ) +
+    theme_minimal() +
+    xlab(xlab) + ylab(ylab) +
+    theme(
+      panel.grid.major = element_blank(),
+      legend.position = "bottom",
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    ) 
   p
 }
+
+
 #' Plot confidence intervals from BIGL object in a contour plot
 #'
 #' @param BIGLobj Output from \code{\link{fitSurface}}
 #' @param ... passed on to \code{\link{plot.BIGLconfInt}}
 #' @export
 plotConfInt <- function(BIGLobj, ...) {
-	newBIGLobj <- BIGLobj
-	class(newBIGLobj) <- ("BIGLconfInt")
-    plot(newBIGLobj, ...)
+  newBIGLobj <- BIGLobj
+  class(newBIGLobj) <- ("BIGLconfInt")
+  plot(newBIGLobj, ...)
 }

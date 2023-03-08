@@ -1,5 +1,4 @@
 library(BIGL)
-library(rgl)
 library(DT)
 set.seed(314159265)
 
@@ -165,17 +164,15 @@ shinyServer(function(input, output, session) {
   })
 
   ## Response surface plot
-  output$surface <-
-    renderRglwidget({
-      plotResponseSurface(data = dr(), fitResult = fit(), logScale = input$logScale,
-                          null_model = if (input$null == "stdloewe") "loewe" else input$null,
-                          legend = FALSE, colorBy = compE()$occupancy,
-                          breaks = c(0, 0.25, 0.5, 0.75, 1),
-                          plotfun = median,
-                          colorPalette = c("#EFF3FF", "#BDD7E7", "#6BAED6", "#2171B5"))
-      scene1 <- scene3d()
-      close3d()
-      rglwidget(scene1)
-    })
+  output$surface <- plotly::renderPlotly({
+      plotResponseSurface(
+        data = dr(), fitResult = fit(), logScale = input$logScale,
+        null_model = if (input$null == "stdloewe") "loewe" else input$null,
+        legend = FALSE, colorBy = compE()$occupancy,
+        breaks = c(0, 0.25, 0.5, 0.75, 1),
+        plotfun = median,
+        colorPalette = c("#EFF3FF", "#BDD7E7", "#6BAED6", "#2171B5")
+      )
+  })
 
 })

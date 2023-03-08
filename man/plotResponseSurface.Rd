@@ -11,42 +11,37 @@ plotResponseSurface(
   predSurface = NULL,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
   colorPalette = c("blue", "grey70", "red"),
+  colorPaletteNA = "grey70",
   colorBy = "none",
+  addPoints = TRUE,
   colorPoints = c("black", "sandybrown", "brown", "white"),
-  breaks = c(-Inf, 0, Inf),
-  radius = NULL,
+  breaks,
+  radius = 4,
   logScale = TRUE,
   colorfun = median,
   zTransform = function(x) x,
   add = FALSE,
   main = "",
-  legend = TRUE,
+  legend = FALSE,
   xat = "actual",
   yat = "actual",
   plotfun = NULL,
+  gradient = TRUE,
+  width = 800,
+  height = 800,
+  title = "",
+  digitsFunc = function(x) {
+     x
+ },
   ...
 )
 }
 \arguments{
-\item{data}{Dose-response dataframe.}
+\item{data}{Object "data" from the output of \code{\link{fitSurface}}}
 
-\item{fitResult}{Monotherapy (on-axis) model fit, e.g. produced by
-\code{\link{fitMarginals}}. It has to be a \code{"MarginalFit"} object or a
-list containing \code{df}, \code{sigma}, \code{coef},
-\code{shared_asymptote} and \code{method} elements for, respectively,
-marginal model degrees of freedom, residual standard deviation, named
-vector of coefficient estimates, logical value of whether shared asymptote
-is imposed and method for estimating marginal models during bootstrapping
-(see \code{\link{fitMarginals}}). If biological and power transformations
-were used in marginal model estimation, \code{fitResult} should contain
-\code{transforms} elements with these transformations. Alternatively, these
-can also be specified via \code{transforms} argument.}
+\item{fitResult}{Object "fitResult" from the output of \code{\link{fitSurface}}}
 
-\item{transforms}{Transformation functions. If non-null, \code{transforms} is
-a list containing 5 elements, namely biological and power transformations
-along with their inverse functions and \code{compositeArgs} which is a list
-with argument values shared across the 4 functions. See vignette for more
-information.}
+\item{transforms}{Object "transforms" from the output of \code{\link{fitSurface}}}
 
 \item{predSurface}{Vector of all predicted responses based on
 \code{expand.grid(uniqueDoses)}. If not supplied, it will be computed
@@ -58,6 +53,8 @@ one of the available null models, i.e. \code{"loewe"}, \code{"hsa"},
 
 \item{colorPalette}{Vector of color names for surface}
 
+\item{colorPaletteNA}{Color used in the matrix of colours when the combination of doses doesn't exist (NA)}
+
 \item{colorBy}{This parameter determines values on which coloring is based
 for the 3-dimensional surface. If matrix or a data frame with \code{d1} and
 {d2} columns is supplied, dose combinations from \code{colorBy} will be
@@ -67,16 +64,17 @@ plotting results for off-axis estimates only, e.g. off-axis Z-scores or
 maxR test statistics. If \code{colorBy = "colors"}, surface will be colored
 using colors in \code{colorPalette} argument.}
 
+\item{addPoints}{Boolean whether the dose points should be included}
+
 \item{colorPoints}{Colors for off-axis and on-axis points. Character vector
 of length four with colors for 1) off-axis points; 2) on-axis points of the
 first drug (i.e. second drug is dosed at zero); 3) on-axis points of the
 second drug; 4) on-axis points where both drugs are dosed at zero.}
 
 \item{breaks}{Numeric vector with numerical breaks. To be used in conjunction
-with \code{colorPalette} argument.}
+with \code{colorPalette} argument. If named, the labels will be displayed in the legend}
 
-\item{radius}{Radius of spheres. If missing, an educated guess based on
-number of digits in average effect will be made.}
+\item{radius}{Size of spheres (default is 4)}
 
 \item{logScale}{Draw doses on log-scale (setting zeroes to be finite constant)}
 
@@ -87,13 +85,13 @@ custom function returning a scalar.}
 \item{zTransform}{Optional transformation function for z-axis. By default,
 identity function is used.}
 
-\item{add}{Add the predicted response surface to an existing plot. Will not
+\item{add}{(deprecated) Add the predicted response surface to an existing plot. Will not
 draw any points, just the surface. Must be called after another call to
 \code{\link{plotResponseSurface}}.}
 
 \item{main}{Fixed non-moving title for the 3D plot}
 
-\item{legend}{Whether legend should be added}
+\item{legend}{Whether legend should be added (default FALSE)}
 
 \item{xat}{x-axis ticks: "pretty", "actual" or a numeric vector}
 
@@ -105,23 +103,27 @@ Typically, it will be \code{\link{mean}}, \code{\link[stats]{median}},
 \code{\link{min}} or \code{\link{max}} but a custom-defined function
 returning a scalar from a vector is also possible.}
 
+\item{gradient}{Boolean indicating whether colours should be interpolated between breaks (default TRUE). 
+If FALSE, \code{colorPalette} must contain length(breaks)-1 colours}
+
+\item{width}{Width in pixels (optional, defaults to 800px).}
+
+\item{height}{Height in pixels (optional, defaults to 800px).}
+
+\item{title}{String title (default "")}
+
+\item{digitsFunc}{Function to be applied to the axis values}
+
 \item{...}{Further arguments to format axis labels}
 }
 \value{
-Plot is shown on a rgl device.
+Plotly plot
 }
 \description{
 Plot the 3-dimensional response surface predicted by one of the null
 models. This plot allows for a visual comparison between the null
 model prediction and observed points. This function is mainly used
 as the workhorse of \code{\link{plot.ResponseSurface}} method.
-}
-\details{
-Title for the plot and legend are drawn as bitmaps and do not rotate with the
-rest of the plot. Since they are bitmaps, they do not scale properly, hence
-resizing window will result in unappealing visuals. For them to look
-properly, it suffices to set the appropriate RGL window size and rerun the
-plotting command.
 }
 \examples{
 \dontrun{
@@ -138,8 +140,8 @@ plotting command.
                       colorPalette = c("grey", "blue", "green"))
 
   ## Response surface based on Loewe additivity model and colored with
-  ## rainbow colors. Legend will not be displayed in any case.
-  plotResponseSurface(data, fitResult, null_model = "loewe",
+  ## rainbow colors.
+  plotResponseSurface(data, fitResult, null_model = "loewe", breaks = c(-Inf, 0, Inf),
                       colorBy = "colors", colorPalette = rainbow(6))
 }
 }

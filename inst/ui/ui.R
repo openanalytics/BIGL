@@ -1,5 +1,4 @@
 library(shiny)
-library(rgl)
 
 shinyUI(fluidPage(
   titlePanel("BIGL"),
@@ -76,7 +75,7 @@ shinyUI(fluidPage(
                br(),
                br(),
                strong("Expected response surface"),
-               rglwidgetOutput("surface", width = "1024px", height = "800px")
+               plotly::plotlyOutput("surface", width = "1024px", height = "800px")
                ),
 
       tabPanel("Table",
