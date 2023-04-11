@@ -162,7 +162,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
       ind <- match(paste(doseGrid[i,], collapse=";"),
                    apply(coloredBy[, c("d1", "d2")], 1,
                          function(x) paste(x, collapse=";")))
-      if (!is.na(ind)) colorVec[i] <- coloredBy[[pCols]][ind]
+      if (!is.na(ind)) colorVec[i] <- as.character(coloredBy[[pCols]][ind])
     }
   }
 
