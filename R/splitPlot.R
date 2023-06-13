@@ -19,7 +19,8 @@ globalVariables(c("loewe", "loewe2", "hsa", "bliss", "predicted", "d2", "effect"
 #'                      "compositeArgs" = list(N0 = 1, time.hours = 72))
 #'   fitResult <- fitMarginals(data, transforms)
 #'   nullModels <- c("loewe", "loewe2", "bliss", "hsa")
-#'   rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(data = data, fitResult = fitResult, B.CP = 50, statistic = "none"))
+#'   rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(
+#'       data = data, fitResult = fitResult, B.CP = 50, statistic = "none"))
 #'   synergy_plot_bycomp(ls = rs_list, plotBy = "Compound 1", color = TRUE)
 #'   synergy_plot_bycomp(ls = rs_list, plotBy = "Compound 2", color = TRUE)
 #' } 
@@ -44,22 +45,28 @@ synergy_plot_bycomp <- function(ls, xlab = NULL, ylab = NULL, color = FALSE, plo
 	}
 	
 	if (is.null(plotBy)) {
-		plotBy == ls[[1]]$names[1]
-	} else if (plotBy == ls[[1]]$names[2]) {
-		names(plot_df)[1:2] <- names(plot_df)[2:1]
-		if (is.null(xlab)) {
-			xlab <- paste(ls[[1]]$names[1], "Concentration")
-		}
-	}
-	
+		plotBy <- ls[[1]]$names[1]
+  } else {
+    if (!plotBy %in% ls[[1]]$names) {
+      warning("Unrecognized name in `plotBy`, ", toString(ls[[1]]$names[[1]]), " will be used.")
+      plotBy <- ls[[1]]$names[1]
+    } else if (plotBy == ls[[1]]$names[2]) {
+      names(plot_df)[1:2] <- names(plot_df)[2:1]
+      if (is.null(xlab)) {
+        xlab <- paste(ls[[1]]$names[1], "Concentration")
+      }
+    }
+  }
+
+  if (is.null(xlab)) {
+    xlab <- paste(ls[[1]]$names[2], "Concentration")
+  }
+  
+  
 	facet_d1 <- unique(plot_df$d1)
 	facet_d1 <- facet_d1[order(facet_d1)]
 	
 	plot_df$d1 <- factor(plot_df$d1, levels = facet_d1, labels = formatC(facet_d1, format = "fg", digits = 2))
-	
-	if (is.null(xlab)) {
-		xlab <- paste(ls[[1]]$names[2], "Concentration")
-	}
 	
 	allLabels <- c("Bliss" = "bliss", "HSA" = "hsa", "Generalized Loewe" = "loewe", "Alternative Loewe" = "loewe2")
 	allValues <- c("Bliss" = 1, "HSA" = 2, "Generalized Loewe" = 3, "Alternative Loewe" = 4)

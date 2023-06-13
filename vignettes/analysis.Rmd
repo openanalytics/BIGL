@@ -297,9 +297,12 @@ The user has the option to define which compound will be shown in the panels and
 
 ```{r plot_2d_cross_section, message=FALSE, comment = NA, fig.width = 8, fig.height = 6}
 nullModels <- c("loewe", "loewe2", "bliss", "hsa")
-rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(data = data, fitResult = marginalFit, B.CP = 50, statistic = "none", parallel = FALSE))
+rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(
+        data = data, fitResult = marginalFit, 
+        B.CP = 50, statistic = "none", parallel = FALSE)
+)
 
-synergy_plot_bycomp(rs_list, ylab = "Response", color = TRUE)
+synergy_plot_bycomp(rs_list, ylab = "Response", plotBy = "Drug A", color = TRUE)
 ```
 
 ## Statistical testing

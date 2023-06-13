@@ -32,7 +32,8 @@ Plot 2D cross section of response surface
                      "compositeArgs" = list(N0 = 1, time.hours = 72))
   fitResult <- fitMarginals(data, transforms)
   nullModels <- c("loewe", "loewe2", "bliss", "hsa")
-  rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(data = data, fitResult = fitResult, B.CP = 50, statistic = "none"))
+  rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(
+      data = data, fitResult = fitResult, B.CP = 50, statistic = "none"))
   synergy_plot_bycomp(ls = rs_list, plotBy = "Compound 1", color = TRUE)
   synergy_plot_bycomp(ls = rs_list, plotBy = "Compound 2", color = TRUE)
 } 

@@ -1,3 +1,8 @@
+# BIGL 1.8.0 (2023-06-13)
+
+- new function `synergy_plot_bycomp()` to create plots for 2D cross-section of response surfaces from different null models
+- fix small bugs in `plot.effect-size` and `plotResponseSurface` functions
+
 # BIGL 1.7.0 (2023-03-08)
 
 - switch from `rgl` to `plotly` for the 3D plots
