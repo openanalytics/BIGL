@@ -85,7 +85,7 @@
 plotResponseSurface <- function(data, fitResult = NULL, 
                                 transforms = fitResult$transforms, 
                                 predSurface = NULL, null_model = c("loewe", "hsa", "bliss", "loewe2"),
-                                colorPalette   = c("blue", "grey70", "red"), 
+                                colorPalette   = c("red", "grey70", "blue"), 
                                 colorPaletteNA = "grey70",
                                 colorBy = "none", 
                                 addPoints = TRUE,
@@ -162,7 +162,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
       ind <- match(paste(doseGrid[i,], collapse=";"),
                    apply(coloredBy[, c("d1", "d2")], 1,
                          function(x) paste(x, collapse=";")))
-      if (!is.na(ind)) colorVec[i] <- coloredBy[[pCols]][ind]
+      if (!is.na(ind)) colorVec[i] <- as.character(coloredBy[[pCols]][ind])
     }
   }
 
@@ -182,8 +182,8 @@ plotResponseSurface <- function(data, fitResult = NULL,
     } else if(is.factor(response)){
       response
     } else if(is.character(response)){
-      factor(response, levels = c("Syn", "None", "Ant"), 
-             labels = c("Syn", "None", "Ant"),
+      factor(response, levels = c("Ant", "None", "Syn"), 
+             labels = c("Ant", "None", "Syn"),
              ordered = TRUE)
     }
   }
@@ -296,6 +296,7 @@ plotResponseSurface <- function(data, fitResult = NULL,
   
   data$color <- colorPoints[1 + 1 * (data$d2 == 0) + 2 * (data$d1 == 0)]
   data$color <- factor(data$color, levels = colorPoints)
+  data$color <- droplevels(data$color)
 
 
   # Plot the main surface

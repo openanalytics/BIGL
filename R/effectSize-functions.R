@@ -82,7 +82,7 @@
     x2$effectCall <- "None"
     x2$estimate <- 1e-8
     x <- rbindlist(list(x, x2), fill = TRUE)
-    x <- x[!duplicated(x$d1, x$d2), ]
+    x <- x[!duplicated(x[, c("d1", "d2")]), ]
   }
   
   adjFactor <- 10

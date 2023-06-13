@@ -288,6 +288,23 @@ summary(rsl2)
 
 <!-- Occupancy estimates provided still rely on the (generalized) Loewe model. -->
 
+## Plot 2D cross section of response surface
+
+Α 2-dimensional predicted response surface plot can be generated for a group of null models. In the plot, the points refer to the observed effects whereas the colored lines are the model-predicted responses for the different null models.
+
+The panels correspond to concentration levels of one compound and the x-axis shows the concentration levels of the second compound.
+The user has the option to define which compound will be shown in the panels and in the x-axis.
+
+```{r plot_2d_cross_section, message=FALSE, comment = NA, fig.width = 8, fig.height = 6}
+nullModels <- c("loewe", "loewe2", "bliss", "hsa")
+rs_list <- Map(fitSurface, null_model = nullModels, MoreArgs = list(
+        data = data, fitResult = marginalFit, 
+        B.CP = 50, statistic = "none", parallel = FALSE)
+)
+
+synergy_plot_bycomp(rs_list, ylab = "Response", plotBy = "Drug A", color = TRUE)
+```
+
 ## Statistical testing
 
 Presence of synergistic or antagonistic effects can be formalized by means of
@@ -387,12 +404,30 @@ summary(maxR_B$confInt)
 ```
 
 In addition, a contour plot can be made with pointwise confidence intervals.
-Contour plot colouring can be defined according to the effect sizes or according
-to maxR results.
+Contour plot colouring can be defined according to the effect sizes or according to maxR results.
 
-```{r plotSingleConfInt, fig.height=5, fig.width=6}
+```{r plotSingleConfInt, fig.height=5, fig.width=8}
 plotConfInt(maxR_B, color = "effect-size")
 ```
+
+You can also customize the coloring of the contour plot and 3-dimensional predicted response surface plot based on effect sizes:
+
+```{r contour_effectsize, warning=FALSE, fig.align="center", fig.width=6, fig.height=5, message=FALSE, comment = NA}
+contour(
+    maxR_B,
+    colorPalette = c("Syn" = "blue", "None" = "white", "Ant" = "red"),
+    main = paste0(" Experiment ", i, " contour plot for effect size"),
+    color = "effect-size",
+    scientific = TRUE, digits = 3, cutoff = cutoff
+)
+```
+
+
+```{r plot3d_effectsize, warning=FALSE, fig.height=7, fig.width=7, message=FALSE, comment = NA}
+plot(maxR_B, color = "effect-size", legend = FALSE, main = "", gradient = FALSE)
+```
+
+
 
 # Analysis in case of variance heterogeneity
 
@@ -486,7 +521,7 @@ rownames(allMaxR) <- paste("Experiment", 1:nrow(allMaxR))
 kable(allMaxR, row.names = TRUE)
 ```
 
-Previous summarizing and visual analysis can be repeated on each of the newly defined experiments. For example, `Experiment 4` indicates a total of 15 combinations that were called synergistic according to the `maxR` test.
+Previous summarizing and visual analysis can be repeated on each of the newly defined experiments. For example, `Experiment 4` indicates a total of 16 combinations that were called synergistic according to the `maxR` test.
 
 ```{r tabs, echo = FALSE, results = "asis"}
 i <- 4

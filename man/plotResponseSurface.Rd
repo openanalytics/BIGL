@@ -10,7 +10,7 @@ plotResponseSurface(
   transforms = fitResult$transforms,
   predSurface = NULL,
   null_model = c("loewe", "hsa", "bliss", "loewe2"),
-  colorPalette = c("blue", "grey70", "red"),
+  colorPalette = c("red", "grey70", "blue"),
   colorPaletteNA = "grey70",
   colorBy = "none",
   addPoints = TRUE,
